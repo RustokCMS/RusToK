@@ -1,8 +1,10 @@
 use sea_orm::prelude::*;
+use sea_orm::EntityTrait;
 
 use rustok_core::generate_id;
 
-use super::_entities::tenants::{self, ActiveModel, Entity, Model};
+pub use super::_entities::tenants::Entity;
+use super::_entities::tenants::{self, ActiveModel, Model};
 
 impl Model {
     pub fn is_enabled(&self) -> bool {
@@ -26,6 +28,10 @@ impl ActiveModel {
 }
 
 impl Entity {
+    pub async fn find_by_id(db: &DatabaseConnection, id: Uuid) -> Result<Option<Model>, DbErr> {
+        <Self as EntityTrait>::find_by_id(id).one(db).await
+    }
+
     pub async fn find_by_slug(db: &DatabaseConnection, slug: &str) -> Result<Option<Model>, DbErr> {
         Self::find()
             .filter(tenants::Column::Slug.eq(slug))
