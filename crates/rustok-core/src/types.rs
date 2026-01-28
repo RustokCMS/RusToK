@@ -3,15 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize,
-    EnumIter,
-    DeriveActiveEnum,
-    Default,
+    Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumIter, DeriveActiveEnum, Default,
 )]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::N(32))")]
 pub enum UserRole {
@@ -39,15 +31,7 @@ impl fmt::Display for UserRole {
 }
 
 #[derive(
-    Clone,
-    Debug,
-    PartialEq,
-    Eq,
-    Serialize,
-    Deserialize,
-    EnumIter,
-    DeriveActiveEnum,
-    Default,
+    Clone, Debug, PartialEq, Eq, Serialize, Deserialize, EnumIter, DeriveActiveEnum, Default,
 )]
 #[sea_orm(rs_type = "String", db_type = "String(StringLen::N(32))")]
 pub enum UserStatus {
