@@ -8,11 +8,11 @@ use crate::graphql::errors::GraphQLError;
 use crate::graphql::types::{
     ModuleRegistryItem, Tenant, TenantModule, User, UserConnection, UserEdge,
 };
-use rustok_core::ModuleRegistry;
 use crate::models::_entities::tenant_modules::Column as TenantModulesColumn;
 use crate::models::_entities::tenant_modules::Entity as TenantModulesEntity;
 use crate::models::_entities::users::Column as UsersColumn;
 use crate::models::users;
+use rustok_core::ModuleRegistry;
 
 #[derive(Default)]
 pub struct RootQuery;

@@ -1,6 +1,6 @@
-use rustok_core::ModuleRegistry;
 use rustok_blog::BlogModule;
 use rustok_commerce::CommerceModule;
+use rustok_core::ModuleRegistry;
 
 pub fn build_registry() -> ModuleRegistry {
     ModuleRegistry::new()

@@ -3,8 +3,8 @@ use async_graphql::{Context, FieldError, Object, Result};
 use crate::context::{AuthContext, TenantContext};
 use crate::graphql::errors::GraphQLError;
 use crate::graphql::types::TenantModule;
-use rustok_core::{ModuleContext, ModuleRegistry};
 use crate::models::_entities::tenant_modules::Entity as TenantModulesEntity;
+use rustok_core::{ModuleContext, ModuleRegistry};
 
 #[derive(Default)]
 pub struct RootMutation;

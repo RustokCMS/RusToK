@@ -5,7 +5,7 @@ use crate::module::RusToKModule;
 
 #[derive(Clone, Default)]
 pub struct ModuleRegistry {
-    modules: Arc<HashMap<String, Box<dyn RusToKModule>>>,
+    modules: Arc<HashMap<String, Arc<dyn RusToKModule>>>,
 }
 
 impl ModuleRegistry {
@@ -16,9 +16,8 @@ impl ModuleRegistry {
     }
 
     pub fn register<M: RusToKModule + 'static>(mut self, module: M) -> Self {
-        let mut modules = (*self.modules).clone();
-        modules.insert(module.slug().to_string(), Box::new(module));
-        self.modules = Arc::new(modules);
+        let modules = Arc::make_mut(&mut self.modules);
+        modules.insert(module.slug().to_string(), Arc::new(module));
         self
     }
 

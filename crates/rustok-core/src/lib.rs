@@ -2,17 +2,17 @@ pub mod auth;
 pub mod error;
 pub mod id;
 pub mod module;
-pub mod registry;
 pub mod permissions;
 pub mod rbac;
+pub mod registry;
 pub mod types;
 pub use error::{Error, Result};
 pub use id::generate_id;
 pub use module::ModuleContext;
 pub use module::RusToKModule;
-pub use registry::ModuleRegistry;
 pub use permissions::{Action, Permission, Resource};
 pub use rbac::{PermissionScope, Rbac};
+pub use registry::ModuleRegistry;
 pub use types::{UserRole, UserStatus};
 
 pub mod prelude {

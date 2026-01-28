@@ -4,15 +4,20 @@ use axum::{
     http::{request::Parts, StatusCode},
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use std::marker::PhantomData;
 
 use crate::context::TenantContextExt;
 use crate::models::_entities::tenant_modules::{self, Entity as TenantModules};
 use loco_rs::app::AppContext;
 
-pub struct RequireModule<const SLUG: &'static str>;
+pub trait ModuleSlug {
+    const SLUG: &'static str;
+}
+
+pub struct RequireModule<M: ModuleSlug>(PhantomData<M>);
 
 #[async_trait]
-impl<S, const SLUG: &'static str> FromRequestParts<S> for RequireModule<SLUG>
+impl<S, M: ModuleSlug> FromRequestParts<S> for RequireModule<M>
 where
     S: Send + Sync,
     AppContext: FromRef<S>,
@@ -28,7 +33,7 @@ where
 
         let is_enabled = TenantModules::find()
             .filter(tenant_modules::Column::TenantId.eq(tenant_id))
-            .filter(tenant_modules::Column::ModuleSlug.eq(SLUG))
+            .filter(tenant_modules::Column::ModuleSlug.eq(M::SLUG))
             .filter(tenant_modules::Column::Enabled.eq(true))
             .one(&ctx.db)
             .await
@@ -36,7 +41,7 @@ where
             .is_some();
 
         if is_enabled {
-            Ok(Self)
+            Ok(Self(PhantomData))
         } else {
             Err((StatusCode::NOT_FOUND, "Module is disabled or not found"))
         }
