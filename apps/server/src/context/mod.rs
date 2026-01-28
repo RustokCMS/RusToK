@@ -1,4 +1,4 @@
-use crate::models::tenants;
+mod tenant;
 
 pub use tenant::{
     OptionalTenant, TenantContext, TenantContextExt, TenantContextExtension, TenantError,

@@ -1,5 +1,4 @@
-use axum::{async_trait, extract::FromRequestParts};
-use http::{request::Parts, StatusCode};
+use axum::{async_trait, extract::FromRequestParts, http::{request::Parts, StatusCode}};
 
 use crate::context::TenantContext;
 use crate::context::TenantContextExt;
