@@ -60,9 +60,9 @@ pub fn Login() -> impl IntoView {
                     <Show when=move || error.get().is_some()>
                         <div class="alert">{move || error.get().unwrap_or_default()}</div>
                     </Show>
-                    <Input value=tenant set_value=set_tenant placeholder="demo" label=Some("Tenant Slug".into()) />
-                    <Input value=email set_value=set_email placeholder="admin@rustok.io" label=Some("Email".into()) />
-                    <Input value=password set_value=set_password placeholder="••••••••" type_="password" label=Some("Пароль".into()) />
+                    <Input value=tenant set_value=set_tenant placeholder="demo" label="Tenant Slug" />
+                    <Input value=email set_value=set_email placeholder="admin@rustok.io" label="Email" />
+                    <Input value=password set_value=set_password placeholder="••••••••" type_="password" label="Пароль" />
                     <Button on_click=on_submit class="w-full">
                         "Продолжить"
                     </Button>
