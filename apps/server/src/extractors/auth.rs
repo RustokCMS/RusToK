@@ -32,11 +32,9 @@ where
         let ctx = AppContext::from_ref(state);
 
         // 2. Достаем TenantContext (он ОБЯЗАН быть, так как Auth идет ПОСЛЕ TenantMiddleware)
-        let tenant_id = parts
+        let tenant_ctx = parts
             .tenant_context()
-            .ok_or((StatusCode::INTERNAL_SERVER_ERROR, "Tenant context missing"))?
-            .id
-            .to_string();
+            .ok_or((StatusCode::INTERNAL_SERVER_ERROR, "Tenant context missing"))?;
 
         // 3. Достаем Bearer token
         let TypedHeader(Authorization(bearer)) =
@@ -58,7 +56,7 @@ where
 
         // 6. ПРОВЕРКА МУЛЬТИТЕНАНТНОСТИ
         // Если токен выдан для магазина А, а запрос пришел в магазин Б - отлуп.
-        if claims.tenant != tenant_id {
+        if claims.tenant_id != tenant_ctx.id {
             return Err((StatusCode::FORBIDDEN, "Token belongs to another tenant"));
         }
 
