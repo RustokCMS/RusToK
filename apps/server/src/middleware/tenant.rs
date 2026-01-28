@@ -8,7 +8,7 @@ use axum::{
 use loco_rs::app::AppContext;
 use uuid::Uuid;
 
-use crate::context::TenantContext;
+use crate::context::{TenantContext, TenantContextExtension};
 use crate::models::tenants;
 
 pub async fn resolve(
@@ -40,7 +40,8 @@ pub async fn resolve(
 
     match tenant {
         Some(tenant) => {
-            req.extensions_mut().insert(TenantContext::new(tenant));
+            let context = TenantContext::from_model(&tenant);
+            req.extensions_mut().insert(TenantContextExtension(context));
             Ok(next.run(req).await)
         }
         None => Err(StatusCode::NOT_FOUND),

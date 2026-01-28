@@ -5,6 +5,4 @@ pub mod extractors;
 pub mod graphql;
 pub mod middleware;
 pub mod models;
-pub mod extractors;
-pub mod middleware;
 pub mod views;

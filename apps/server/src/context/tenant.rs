@@ -64,7 +64,19 @@ impl TenantError {
 }
 
 #[derive(Clone)]
-pub struct TenantContextExt(pub TenantContext);
+pub struct TenantContextExtension(pub TenantContext);
+
+pub trait TenantContextExt {
+    fn tenant_context(&self) -> Option<&TenantContext>;
+}
+
+impl TenantContextExt for Parts {
+    fn tenant_context(&self) -> Option<&TenantContext> {
+        self.extensions
+            .get::<TenantContextExtension>()
+            .map(|ext| &ext.0)
+    }
+}
 
 #[async_trait]
 impl<S> FromRequestParts<S> for TenantContext
@@ -76,7 +88,7 @@ where
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         parts
             .extensions
-            .get::<TenantContextExt>()
+            .get::<TenantContextExtension>()
             .map(|ext| ext.0.clone())
             .ok_or((
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -98,7 +110,7 @@ where
         Ok(Self(
             parts
                 .extensions
-                .get::<TenantContextExt>()
+                .get::<TenantContextExtension>()
                 .map(|ext| ext.0.clone()),
         ))
     }
