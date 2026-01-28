@@ -1,0 +1,8 @@
+[package]
+name = "rustok-admin"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+leptos.workspace = true
+leptos_router.workspace = true

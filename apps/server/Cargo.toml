@@ -1,0 +1,29 @@
+[package]
+name = "rustok-server"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+rustok-core.workspace = true
+rustok-commerce.workspace = true
+rustok-blog.workspace = true
+
+loco-rs.workspace = true
+tokio.workspace = true
+axum.workspace = true
+sea-orm.workspace = true
+async-graphql.workspace = true
+async-graphql-axum.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+eyre = "0.6"
+
+# Loco extras
+migration = { path = "migration" }
+
+[dev-dependencies]
+loco-rs = { workspace = true, features = ["testing"] }
+serial_test = "3.1"

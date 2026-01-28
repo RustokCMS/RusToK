@@ -1,0 +1,20 @@
+logger:
+  enable: true
+  pretty_backtrace: true
+  level: debug
+  format: compact
+
+server:
+  binding: 0.0.0.0
+  port: 3000
+
+database:
+  uri: postgres://postgres:postgres@localhost:5432/rustok_dev
+  enable_logging: true
+  min_connections: 1
+  max_connections: 5
+
+auth:
+  jwt:
+    secret: change-this-in-production
+    expiration: 604800

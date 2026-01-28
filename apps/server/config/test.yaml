@@ -1,0 +1,20 @@
+logger:
+  enable: true
+  level: error
+  format: compact
+
+server:
+  binding: 0.0.0.0
+  port: 3001
+
+database:
+  uri: postgres://postgres:postgres@localhost:5432/rustok_test
+  enable_logging: false
+  min_connections: 1
+  max_connections: 2
+  auto_migrate: true
+
+auth:
+  jwt:
+    secret: test-secret
+    expiration: 3600

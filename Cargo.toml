@@ -1,0 +1,72 @@
+[workspace]
+resolver = "2"
+members = [
+    "apps/server",
+    "apps/admin",
+    "apps/storefront",
+    "crates/*",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "AGPL-3.0"
+repository = "https://github.com/RustokCMS/RusToK"
+
+[workspace.dependencies]
+# Loco Framework
+loco-rs = "0.12"
+
+# Async Runtime
+tokio = { version = "1.40", features = ["full"] }
+
+# Web
+axum = "0.7"
+tower = "0.5"
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+
+# Database (Loco uses SeaORM)
+sea-orm = { version = "1.0", features = [
+    "sqlx-postgres",
+    "runtime-tokio-rustls",
+    "macros",
+    "with-uuid",
+    "with-chrono",
+    "with-json",
+] }
+sea-orm-migration = { version = "1.0", features = ["runtime-tokio-rustls", "sqlx-postgres"] }
+
+# GraphQL
+async-graphql = { version = "7.0", features = ["uuid", "chrono"] }
+async-graphql-axum = "7.0"
+
+# IDs
+uuid = { version = "1.10", features = ["v4", "serde"] }
+ulid = "1.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error Handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Leptos
+leptos = "0.6"
+leptos_axum = "0.6"
+leptos_router = "0.6"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+async-trait = "0.1"
+
+# Internal crates
+rustok-core = { path = "crates/rustok-core" }
+rustok-commerce = { path = "crates/rustok-commerce" }
+rustok-blog = { path = "crates/rustok-blog" }

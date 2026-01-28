@@ -1,0 +1,8 @@
+[package]
+name = "rustok-blog"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+rustok-core.workspace = true
+async-trait.workspace = true

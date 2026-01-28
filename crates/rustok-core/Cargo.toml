@@ -1,0 +1,14 @@
+[package]
+name = "rustok-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+sea-orm.workspace = true
+uuid.workspace = true
+ulid.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+async-trait.workspace = true
