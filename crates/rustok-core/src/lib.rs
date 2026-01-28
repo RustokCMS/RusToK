@@ -2,7 +2,6 @@ pub mod error;
 pub mod id;
 pub mod module;
 pub mod types;
-
 pub use error::{Error, Result};
 pub use id::generate_id;
 pub use module::RusToKModule;
