@@ -61,10 +61,23 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Permissions::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Permissions::Id).uuid().not_null().primary_key())
+                    .col(
+                        ColumnDef::new(Permissions::Id)
+                            .uuid()
+                            .not_null()
+                            .primary_key(),
+                    )
                     .col(ColumnDef::new(Permissions::TenantId).uuid().not_null())
-                    .col(ColumnDef::new(Permissions::Resource).string_len(32).not_null())
-                    .col(ColumnDef::new(Permissions::Action).string_len(32).not_null())
+                    .col(
+                        ColumnDef::new(Permissions::Resource)
+                            .string_len(32)
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Permissions::Action)
+                            .string_len(32)
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Permissions::Description).text().null())
                     .col(
                         ColumnDef::new(Permissions::CreatedAt)
@@ -103,7 +116,12 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(UserRoles::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(UserRoles::Id).uuid().not_null().primary_key())
+                    .col(
+                        ColumnDef::new(UserRoles::Id)
+                            .uuid()
+                            .not_null()
+                            .primary_key(),
+                    )
                     .col(ColumnDef::new(UserRoles::UserId).uuid().not_null())
                     .col(ColumnDef::new(UserRoles::RoleId).uuid().not_null())
                     .foreign_key(
@@ -144,7 +162,11 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(RolePermissions::RoleId).uuid().not_null())
-                    .col(ColumnDef::new(RolePermissions::PermissionId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(RolePermissions::PermissionId)
+                            .uuid()
+                            .not_null(),
+                    )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_role_permissions_role_id")

@@ -27,11 +27,15 @@ impl Rbac {
     }
 
     pub fn has_any_permission(role: &UserRole, permissions: &[Permission]) -> bool {
-        permissions.iter().any(|permission| Self::has_permission(role, permission))
+        permissions
+            .iter()
+            .any(|permission| Self::has_permission(role, permission))
     }
 
     pub fn has_all_permissions(role: &UserRole, permissions: &[Permission]) -> bool {
-        permissions.iter().all(|permission| Self::has_permission(role, permission))
+        permissions
+            .iter()
+            .all(|permission| Self::has_permission(role, permission))
     }
 
     fn super_admin_permissions() -> HashSet<Permission> {
@@ -98,7 +102,13 @@ impl Rbac {
         permissions.insert(Permission::PRODUCTS_DELETE);
         permissions.insert(Permission::PRODUCTS_LIST);
 
-        for action in [Action::Create, Action::Read, Action::Update, Action::Delete, Action::List] {
+        for action in [
+            Action::Create,
+            Action::Read,
+            Action::Update,
+            Action::Delete,
+            Action::List,
+        ] {
             permissions.insert(Permission::new(Resource::Categories, action));
         }
 
@@ -119,7 +129,13 @@ impl Rbac {
         permissions.insert(Permission::POSTS_DELETE);
         permissions.insert(Permission::POSTS_LIST);
 
-        for action in [Action::Create, Action::Read, Action::Update, Action::Delete, Action::List] {
+        for action in [
+            Action::Create,
+            Action::Read,
+            Action::Update,
+            Action::Delete,
+            Action::List,
+        ] {
             permissions.insert(Permission::new(Resource::Media, action));
         }
 
@@ -161,8 +177,10 @@ pub enum PermissionScope {
 
 impl Rbac {
     pub fn get_scope(role: &UserRole, permission: &Permission) -> PermissionScope {
-        if matches!(role, UserRole::SuperAdmin | UserRole::Admin | UserRole::Manager)
-            && Self::has_permission(role, permission)
+        if matches!(
+            role,
+            UserRole::SuperAdmin | UserRole::Admin | UserRole::Manager
+        ) && Self::has_permission(role, permission)
         {
             return PermissionScope::All;
         }

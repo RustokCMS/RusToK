@@ -90,7 +90,12 @@ where
 
         let permissions = AuthService::get_user_permissions(&ctx.db, &user.id)
             .await
-            .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "Failed to load permissions"))?;
+            .map_err(|_| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Failed to load permissions",
+                )
+            })?;
 
         Ok(CurrentUser { user, permissions })
     }

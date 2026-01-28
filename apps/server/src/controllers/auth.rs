@@ -1,4 +1,9 @@
-use axum::{extract::ConnectInfo, http::header::USER_AGENT, routing::{get, post}, Json};
+use axum::{
+    extract::ConnectInfo,
+    http::header::USER_AGENT,
+    routing::{get, post},
+    Json,
+};
 use chrono::{Duration, Utc};
 use loco_rs::prelude::*;
 use sea_orm::{ActiveModelTrait, Set};
@@ -119,7 +124,8 @@ async fn register(
             .insert(&ctx.db)
             .await?;
 
-    let access_token = encode_access_token(&config, user.id, tenant.id, user_role.clone(), session.id)?;
+    let access_token =
+        encode_access_token(&config, user.id, tenant.id, user_role.clone(), session.id)?;
 
     let response = AuthResponse {
         access_token,
@@ -179,7 +185,8 @@ async fn login(
     .await?;
 
     let user_role = user.role.clone();
-    let access_token = encode_access_token(&config, user.id, tenant.id, user_role.clone(), session.id)?;
+    let access_token =
+        encode_access_token(&config, user.id, tenant.id, user_role.clone(), session.id)?;
 
     let response = AuthResponse {
         access_token,
@@ -237,7 +244,8 @@ async fn refresh(
     session_model.update(&ctx.db).await?;
 
     let user_role = user.role.clone();
-    let access_token = encode_access_token(&config, user.id, tenant.id, user_role.clone(), session_id)?;
+    let access_token =
+        encode_access_token(&config, user.id, tenant.id, user_role.clone(), session_id)?;
 
     let response = AuthResponse {
         access_token,
