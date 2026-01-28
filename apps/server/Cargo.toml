@@ -20,6 +20,7 @@ chrono.workspace = true
 tracing.workspace = true
 eyre = "0.6"
 async-trait.workspace = true
+thiserror.workspace = true
 
 # Loco extras
 migration = { path = "migration" }

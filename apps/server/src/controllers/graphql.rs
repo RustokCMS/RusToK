@@ -1,6 +1,8 @@
 use async_graphql::{EmptyMutation, EmptySubscription, Object, Schema};
-use axum::{routing::get, Extension, Json};
+use axum::{extract::State, routing::get, Extension, Json};
 use loco_rs::prelude::*;
+
+use crate::context::TenantContext;
 
 #[derive(Default)]
 pub struct Query;
@@ -23,10 +25,13 @@ fn build_schema() -> AppSchema {
 }
 
 async fn graphql_handler(
+    State(ctx): State<AppContext>,
     Extension(schema): Extension<AppSchema>,
+    tenant_ctx: TenantContext,
     Json(req): Json<async_graphql::Request>,
 ) -> Json<async_graphql::Response> {
-    Json(schema.execute(req).await)
+    let request = req.data(ctx).data(tenant_ctx);
+    Json(schema.execute(request).await)
 }
 
 async fn graphql_playground() -> impl axum::response::IntoResponse {
