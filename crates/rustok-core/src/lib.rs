@@ -1,5 +1,4 @@
 pub mod error;
-pub mod auth;
 pub mod id;
 pub mod module;
 pub mod types;
