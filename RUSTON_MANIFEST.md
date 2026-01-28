@@ -1,4 +1,4 @@
-# RUSTON — System Architecture Manifest v3.0
+# RusToK — System Architecture Manifest v3.0
 
 **Target:** AI Assistants (Cursor, Windsurf, Copilot, Claude)
 **Role:** Senior Rust Architect
@@ -10,11 +10,12 @@
 
 | Property | Value |
 |----------|-------|
-| **Name** | RUSTON |
+| **Name** | RusToK |
 | **Type** | Enterprise Modular Headless Platform |
 | **Language** | Rust 100% |
 | **License** | AGPL-3.0 (core) + MIT (modules) |
 | **Version** | 1.0 (The Tank) |
+| **Repository** | https://github.com/RustokCMS/RusToK |
 
 ---
 
@@ -49,7 +50,7 @@
 ## 4. PROJECT STRUCTURE (Monorepo)
 
 ```text
-ruston/
+rustok/
 ├── Cargo.toml                      # Workspace root
 ├── .cargo/config.toml
 ├── rust-toolchain.toml
@@ -102,7 +103,7 @@ ruston/
 │
 └── crates/
     │
-    ├── ruston-core/                # 🧠 KERNEL
+    ├── rustok-core/                # 🧠 KERNEL
     │   ├── Cargo.toml
     │   └── src/
     │       ├── lib.rs
@@ -136,7 +137,7 @@ ruston/
     │           ├── registry.rs
     │           └── widgets.rs
     │
-    ├── ruston-commerce/            # 🛒 COMMERCE MODULE
+    ├── rustok-commerce/            # 🛒 COMMERCE MODULE
     │   ├── Cargo.toml
     │   └── src/
     │       ├── lib.rs
@@ -156,7 +157,7 @@ ruston/
     │       ├── hooks.rs            # Implements HookProvider
     │       └── admin.rs            # Admin resource registration
     │
-    └── ruston-blog/                # 📝 BLOG MODULE
+    └── rustok-blog/                # 📝 BLOG MODULE
         ├── Cargo.toml
         └── src/
             ├── lib.rs
@@ -178,7 +179,7 @@ ruston/
 Application generates `ULID`, converts to `UUID`, stores in PostgreSQL.
 
 ```rust
-// crates/ruston-core/src/id.rs
+// crates/rustok-core/src/id.rs
 use ulid::Ulid;
 use uuid::Uuid;
 
@@ -397,15 +398,15 @@ CREATE TABLE blog_posts (
 
 ### 6.1 Module Definition
 
-Each module is a Cargo crate that implements `RustonModule` trait.
+Each module is a Cargo crate that implements `RusToKModule` trait.
 
 ```rust
-// crates/ruston-core/src/module.rs
+// crates/rustok-core/src/module.rs
 
 use async_trait::async_trait;
 
 #[async_trait]
-pub trait RustonModule: Send + Sync {
+pub trait RusToKModule: Send + Sync {
     /// Unique identifier (e.g., "commerce", "blog")
     fn slug(&self) -> &'static str;
     
@@ -450,11 +451,11 @@ pub trait RustonModule: Send + Sync {
 ```rust
 // apps/server/src/app.rs
 
-use ruston_core::RustonModule;
-use ruston_commerce::CommerceModule;
-use ruston_blog::BlogModule;
+use rustok_core::RusToKModule;
+use rustok_commerce::CommerceModule;
+use rustok_blog::BlogModule;
 
-pub fn register_modules() -> Vec<Box<dyn RustonModule>> {
+pub fn register_modules() -> Vec<Box<dyn RusToKModule>> {
     vec![
         Box::new(CommerceModule),
         Box::new(BlogModule),
@@ -468,7 +469,7 @@ pub fn register_modules() -> Vec<Box<dyn RustonModule>> {
 Modules are compiled into binary but can be toggled per-tenant via `tenant_modules` table.
 
 ```rust
-// crates/ruston-core/src/module.rs
+// crates/rustok-core/src/module.rs
 
 impl ModuleRegistry {
     /// Check if module is enabled for tenant
@@ -522,7 +523,7 @@ impl ModuleRegistry {
 Hooks allow modules to react to events without direct dependencies.
 
 ```rust
-// crates/ruston-core/src/hooks/traits.rs
+// crates/rustok-core/src/hooks/traits.rs
 
 use async_trait::async_trait;
 
@@ -586,7 +587,7 @@ pub trait HookProvider: Send + Sync {
 ### 7.1 Hook Registry
 
 ```rust
-// crates/ruston-core/src/hooks/registry.rs
+// crates/rustok-core/src/hooks/registry.rs
 
 pub struct HookRegistry {
     providers: Vec<Box<dyn HookProvider>>,
@@ -620,7 +621,7 @@ impl HookRegistry {
 Modules communicate via events, not direct imports.
 
 ```rust
-// crates/ruston-core/src/events/types.rs
+// crates/rustok-core/src/events/types.rs
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum DomainEvent {
@@ -640,7 +641,7 @@ pub enum DomainEvent {
 ```
 
 ```rust
-// crates/ruston-core/src/events/bus.rs
+// crates/rustok-core/src/events/bus.rs
 
 use tokio::sync::broadcast;
 
@@ -676,9 +677,9 @@ Each module provides its own Query/Mutation, merged at server level.
 // apps/server/src/graphql/schema.rs
 
 use async_graphql::{MergedObject, MergedSubscription, Schema, EmptySubscription};
-use ruston_core::graphql::{CoreQuery, CoreMutation};
-use ruston_commerce::graphql::{CommerceQuery, CommerceMutation};
-use ruston_blog::graphql::{BlogQuery, BlogMutation};
+use rustok_core::graphql::{CoreQuery, CoreMutation};
+use rustok_commerce::graphql::{CommerceQuery, CommerceMutation};
+use rustok_blog::graphql::{BlogQuery, BlogMutation};
 
 #[derive(MergedObject, Default)]
 pub struct Query(CoreQuery, CommerceQuery, BlogQuery);
@@ -698,7 +699,7 @@ pub fn build_schema(ctx: AppContext) -> AppSchema {
 ### 9.2 Example: Commerce GraphQL
 
 ```rust
-// crates/ruston-commerce/src/graphql/query.rs
+// crates/rustok-commerce/src/graphql/query.rs
 
 use async_graphql::{Context, Object, Result};
 
@@ -768,7 +769,7 @@ The schema-driven approach means:
 - **UI is swappable:** Admin can be reimplemented in another framework without touching backend crates.
 
 ```rust
-// crates/ruston-core/src/admin/registry.rs
+// crates/rustok-core/src/admin/registry.rs
 
 pub struct AdminRegistry {
     resources: HashMap<String, ResourceConfig>,
@@ -844,9 +845,9 @@ impl<'a, E: EntityTrait + AdminEntity> ResourceBuilder<'a, E> {
 ### 10.2 Module Admin Registration Example
 
 ```rust
-// crates/ruston-commerce/src/admin.rs
+// crates/rustok-commerce/src/admin.rs
 
-use ruston_core::admin::{AdminRegistry, Widget, Format};
+use rustok_core::admin::{AdminRegistry, Widget, Format};
 use crate::entities::product;
 use crate::admin_components::ProductVariantManager;
 
@@ -926,7 +927,7 @@ async fn main() {
     let addr = leptos_options.site_addr;
     
     // GraphQL client configuration
-    let graphql_url = std::env::var("RUSTON_API_URL")
+    let graphql_url = std::env::var("RUSTOK_API_URL")
         .unwrap_or_else(|_| "http://localhost:3000/graphql".to_string());
     
     let app = Router::new()
@@ -1019,12 +1020,12 @@ pub fn ProductPage(slug: String) -> impl IntoView {
 ### 12.1 Error Types
 
 ```rust
-// crates/ruston-core/src/error.rs
+// crates/rustok-core/src/error.rs
 
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum RustonError {
+pub enum RusToKError {
     #[error("Entity not found: {entity} with id {id}")]
     NotFound { entity: &'static str, id: Uuid },
     
@@ -1047,7 +1048,7 @@ pub enum RustonError {
     Internal(String),
 }
 
-impl RustonError {
+impl RusToKError {
     pub fn not_found<E: EntityTrait>(id: Uuid) -> Self {
         Self::NotFound {
             entity: E::default().table_name(),
@@ -1060,9 +1061,9 @@ impl RustonError {
 ### 12.2 Result Type
 
 ```rust
-// crates/ruston-core/src/error.rs
+// crates/rustok-core/src/error.rs
 
-pub type Result<T> = std::result::Result<T, RustonError>;
+pub type Result<T> = std::result::Result<T, RusToKError>;
 ```
 
 ---
@@ -1078,7 +1079,7 @@ pub type Result<T> = std::result::Result<T, RustonError>;
 
 ```rust
 // Standard entity structure
-// crates/ruston-commerce/src/entities/product.rs
+// crates/rustok-commerce/src/entities/product.rs
 
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -1139,7 +1140,7 @@ pub enum ProductStatus {
 ### 13.3 Service Pattern
 
 ```rust
-// crates/ruston-commerce/src/services/product_service.rs
+// crates/rustok-commerce/src/services/product_service.rs
 
 pub struct ProductService<'a> {
     db: &'a DatabaseConnection,
@@ -1214,15 +1215,15 @@ impl<'a> ProductService<'a> {
 
 ```bash
 # 1. Create crate
-cargo new crates/ruston-inventory --lib
+cargo new crates/rustok-inventory --lib
 
 # 2. Add to workspace
-# Edit Cargo.toml: members = [..., "crates/ruston-inventory"]
+# Edit Cargo.toml: members = [..., "crates/rustok-inventory"]
 
 # 3. Add dependencies
-# Edit crates/ruston-inventory/Cargo.toml
+# Edit crates/rustok-inventory/Cargo.toml
 
-# 4. Implement RustonModule trait
+# 4. Implement RusToKModule trait
 
 # 5. Register in apps/server/src/app.rs
 
@@ -1230,7 +1231,7 @@ cargo new crates/ruston-inventory --lib
 # apps/server/migration/
 
 # 7. Register admin resources
-# crates/ruston-inventory/src/admin.rs
+# crates/rustok-inventory/src/admin.rs
 ```
 
 ### 14.2 Build & Deploy
@@ -1246,7 +1247,7 @@ cd apps/admin && trunk build --release
 cp -r dist/* ../server/public/admin/
 
 cd apps/server && cargo build --release
-# Result: target/release/ruston-server (single binary with admin)
+# Result: target/release/rustok-server (single binary with admin)
 
 cd apps/storefront && cargo leptos build --release
 # Result: separate storefront binary
@@ -1259,12 +1260,12 @@ cd apps/storefront && cargo leptos build --release
 FROM rust:1.75 as builder
 WORKDIR /app
 COPY . .
-RUN cargo build --release -p ruston-server
+RUN cargo build --release -p rustok-server
 
 FROM debian:bookworm-slim
-COPY --from=builder /app/target/release/ruston-server /usr/local/bin/
+COPY --from=builder /app/target/release/rustok-server /usr/local/bin/
 COPY --from=builder /app/apps/server/public /var/www/public
-CMD ["ruston-server"]
+CMD ["rustok-server"]
 ```
 
 ---
@@ -1275,7 +1276,7 @@ Before implementing any feature, verify:
 
 - [ ] Uses `Uuid` for all IDs (generated from ULID)
 - [ ] Includes `tenant_id` for multi-tenant entities
-- [ ] Implements proper error handling with `RustonError`
+- [ ] Implements proper error handling with `RusToKError`
 - [ ] Has SeaORM entity with relations
 - [ ] Has service layer (not direct DB access in handlers)
 - [ ] GraphQL resolvers check tenant context
