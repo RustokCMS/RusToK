@@ -1175,7 +1175,7 @@ loco-rs = "0.12"
 tokio = { version = "1.40", features = ["full"] }
 
 # Web
-axum = "0.7"
+axum = "0.8"
 tower = "0.5"
 tower-http = { version = "0.5", features = ["cors", "fs"] }
 
