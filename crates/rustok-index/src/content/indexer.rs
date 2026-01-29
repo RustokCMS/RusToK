@@ -21,15 +21,17 @@ impl ContentIndexer {
     #[instrument(skip(self, ctx))]
     async fn build_index_content(
         &self,
-        _ctx: &IndexerContext,
+        ctx: &IndexerContext,
         node_id: Uuid,
         locale: &str,
     ) -> IndexResult<Option<super::model::IndexContentModel>> {
+        let _ = ctx;
         debug!(node_id = %node_id, locale = locale, "Building index content");
         Ok(None)
     }
 
-    async fn get_tenant_locales(&self, _ctx: &IndexerContext) -> IndexResult<Vec<String>> {
+    async fn get_tenant_locales(&self, ctx: &IndexerContext) -> IndexResult<Vec<String>> {
+        let _ = ctx;
         Ok(vec!["en".to_string()])
     }
 }
@@ -52,7 +54,8 @@ impl Indexer for ContentIndexer {
     }
 
     #[instrument(skip(self, ctx))]
-    async fn remove_one(&self, _ctx: &IndexerContext, entity_id: Uuid) -> IndexResult<()> {
+    async fn remove_one(&self, ctx: &IndexerContext, entity_id: Uuid) -> IndexResult<()> {
+        let _ = ctx;
         debug!(node_id = %entity_id, "Removing from content index");
         Ok(())
     }
@@ -105,20 +108,20 @@ impl EventHandler for ContentIndexer {
     }
 
     fn handles(&self, event: &DomainEvent) -> bool {
-        matches!(
-            event,
+        match event {
             DomainEvent::NodeCreated { .. }
-                | DomainEvent::NodeUpdated { .. }
-                | DomainEvent::NodeTranslationUpdated { .. }
-                | DomainEvent::NodePublished { .. }
-                | DomainEvent::NodeUnpublished { .. }
-                | DomainEvent::NodeDeleted { .. }
-                | DomainEvent::BodyUpdated { .. }
-                | DomainEvent::TagAttached { target_type, .. } if target_type == "node"
-                | DomainEvent::TagDetached { target_type, .. } if target_type == "node"
-                | DomainEvent::CategoryUpdated { .. }
-                | DomainEvent::ReindexRequested { target_type, .. } if target_type == "content"
-        )
+            | DomainEvent::NodeUpdated { .. }
+            | DomainEvent::NodeTranslationUpdated { .. }
+            | DomainEvent::NodePublished { .. }
+            | DomainEvent::NodeUnpublished { .. }
+            | DomainEvent::NodeDeleted { .. }
+            | DomainEvent::BodyUpdated { .. }
+            | DomainEvent::CategoryUpdated { .. } => true,
+            DomainEvent::TagAttached { target_type, .. }
+            | DomainEvent::TagDetached { target_type, .. } => target_type == "node",
+            DomainEvent::ReindexRequested { target_type, .. } => target_type == "content",
+            _ => false,
+        }
     }
 
     async fn handle(&self, envelope: &EventEnvelope) -> HandlerResult {
