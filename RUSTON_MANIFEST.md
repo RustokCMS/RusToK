@@ -82,14 +82,74 @@
 ```text
 rustok/
 ├── apps/
-│   ├── server/           # Loco.rs host application
-│   ├── admin/            # Leptos CSR (Unified UI)
-│   └── storefront/       # Leptos SSR (Reads from Index/Catalog)
+│   ├── server/                     # Loco.rs backend
+│   │   ├── src/
+│   │   ├── config/
+│   │   └── migration/
+│   ├── admin/                      # Leptos CSR
+│   └── storefront/                 # Leptos SSR
+│
 ├── crates/
-│   ├── rustok-core/      # Universal Entities (User, Tag, SEO, Node)
-│   ├── rustok-commerce/  # Medusa-style logic (Product, Order, Inventory)
-│   ├── rustok-community/ # Social features
-│   └── rustok-index/     # THE INDEXER (CQRS Read Model)
+│   ├── rustok-core/                # Универсальное ядро
+│   │   ├── src/
+│   │   │   ├── lib.rs
+│   │   │   ├── id.rs               # ULID → UUID
+│   │   │   ├── error.rs
+│   │   │   ├── traits.rs           # Universal traits
+│   │   │   ├── events/             # Event Bus
+│   │   │   ├── entities/
+│   │   │   │   ├── mod.rs
+│   │   │   │   ├── user.rs
+│   │   │   │   ├── tenant.rs
+│   │   │   │   ├── node.rs         # Универсальный контент
+│   │   │   │   ├── body.rs         # Тяжёлый текст
+│   │   │   │   ├── category.rs     # Контентные категории
+│   │   │   │   ├── tag.rs          # Универсальные теги
+│   │   │   │   ├── taggable.rs     # Полиморфная связь
+│   │   │   │   ├── meta.rs         # SEO
+│   │   │   │   └── media.rs        # Файлы
+│   │   │   └── services/
+│   │   └── Cargo.toml
+│   │
+│   ├── rustok-commerce/            # E-commerce модуль
+│   │   ├── src/
+│   │   │   ├── entities/
+│   │   │   │   ├── product.rs
+│   │   │   │   ├── variant.rs
+│   │   │   │   ├── option.rs
+│   │   │   │   ├── price.rs
+│   │   │   │   ├── category.rs     # СВОИ категории
+│   │   │   │   ├── inventory.rs
+│   │   │   │   ├── order.rs
+│   │   │   │   └── order_item.rs
+│   │   │   ├── services/
+│   │   │   └── graphql/
+│   │   └── Cargo.toml
+│   │
+│   ├── rustok-community/           # Социальные фичи
+│   │   ├── src/
+│   │   │   ├── entities/
+│   │   │   │   ├── reaction.rs
+│   │   │   │   ├── reputation.rs
+│   │   │   │   └── follow.rs
+│   │   │   └── services/
+│   │   └── Cargo.toml
+│   │
+│   └── rustok-index/               # CQRS Read Models
+│       ├── src/
+│       │   ├── lib.rs
+│       │   ├── config.rs
+│       │   ├── indexers/
+│       │   │   ├── product_indexer.rs
+│       │   │   └── content_indexer.rs
+│       │   └── entities/
+│       │       ├── search_product.rs
+│       │       └── search_content.rs
+│       └── Cargo.toml
+│
+├── Cargo.toml
+├── rust-toolchain.toml
+└── docker-compose.yml
 ```
 
 ---
@@ -118,7 +178,9 @@ pub fn parse_id(s: &str) -> Result<Uuid, IdError> {
 ### 5.2 RusToK Core (Unified Foundation)
 
 ```sql
--- Tenants
+-- =============================================
+-- CORE: Tenants
+-- =============================================
 CREATE TABLE tenants (
     id              UUID PRIMARY KEY,
     name            VARCHAR(255) NOT NULL,
@@ -128,7 +190,9 @@ CREATE TABLE tenants (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Users
+-- =============================================
+-- CORE: Users
+-- =============================================
 CREATE TABLE users (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -141,7 +205,10 @@ CREATE TABLE users (
     UNIQUE (tenant_id, email)
 );
 
--- Nodes (универсальный контент)
+-- =============================================
+-- CORE: Nodes (универсальный контент)
+-- Страницы, посты, комментарии — всё здесь
+-- =============================================
 CREATE TABLE nodes (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -163,7 +230,16 @@ CREATE TABLE nodes (
     UNIQUE (tenant_id, kind, slug) WHERE slug IS NOT NULL
 );
 
--- Bodies (тяжёлый контент отдельно)
+CREATE INDEX idx_nodes_tenant_kind ON nodes(tenant_id, kind, status);
+CREATE INDEX idx_nodes_parent ON nodes(parent_id);
+CREATE INDEX idx_nodes_category ON nodes(category_id);
+CREATE INDEX idx_nodes_author ON nodes(author_id);
+CREATE INDEX idx_nodes_published ON nodes(tenant_id, kind, published_at DESC)
+    WHERE status = 'published';
+
+-- =============================================
+-- CORE: Bodies (тяжёлый контент отдельно)
+-- =============================================
 CREATE TABLE bodies (
     node_id         UUID PRIMARY KEY REFERENCES nodes(id) ON DELETE CASCADE,
     body            TEXT,
@@ -172,7 +248,11 @@ CREATE TABLE bodies (
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Categories (контентные)
+CREATE INDEX idx_bodies_search ON bodies USING GIN(search_vector);
+
+-- =============================================
+-- CORE: Categories (контентные)
+-- =============================================
 CREATE TABLE categories (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -188,7 +268,12 @@ CREATE TABLE categories (
     UNIQUE (tenant_id, slug)
 );
 
--- Tags (универсальные ярлыки)
+CREATE INDEX idx_categories_tenant ON categories(tenant_id, position);
+CREATE INDEX idx_categories_parent ON categories(parent_id);
+
+-- =============================================
+-- CORE: Tags (универсальные ярлыки)
+-- =============================================
 CREATE TABLE tags (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -199,7 +284,12 @@ CREATE TABLE tags (
     UNIQUE (tenant_id, slug)
 );
 
--- Taggables (полиморфная связь)
+CREATE INDEX idx_tags_tenant ON tags(tenant_id);
+CREATE INDEX idx_tags_popular ON tags(tenant_id, use_count DESC);
+
+-- =============================================
+-- CORE: Taggables (полиморфная связь)
+-- =============================================
 CREATE TABLE taggables (
     tag_id          UUID NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
     target_type     VARCHAR(32) NOT NULL,       -- 'node', 'product'
@@ -208,7 +298,11 @@ CREATE TABLE taggables (
     PRIMARY KEY (tag_id, target_type, target_id)
 );
 
--- Meta (SEO, универсальное)
+CREATE INDEX idx_taggables_target ON taggables(target_type, target_id);
+
+-- =============================================
+-- CORE: Meta (SEO, универсальное)
+-- =============================================
 CREATE TABLE meta (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -229,7 +323,11 @@ CREATE TABLE meta (
     UNIQUE (target_type, target_id)
 );
 
--- Media (файлы)
+CREATE INDEX idx_meta_target ON meta(target_type, target_id);
+
+-- =============================================
+-- CORE: Media (файлы)
+-- =============================================
 CREATE TABLE media (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -247,7 +345,11 @@ CREATE TABLE media (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Module Toggles
+CREATE INDEX idx_media_tenant ON media(tenant_id);
+
+-- =============================================
+-- CORE: Module Toggles
+-- =============================================
 CREATE TABLE tenant_modules (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -262,6 +364,9 @@ CREATE TABLE tenant_modules (
 ### 5.3 RusToK Commerce (Module)
 
 ```sql
+-- =============================================
+-- COMMERCE: Products
+-- =============================================
 CREATE TABLE commerce_products (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -277,6 +382,11 @@ CREATE TABLE commerce_products (
     UNIQUE (tenant_id, handle)
 );
 
+CREATE INDEX idx_commerce_products_tenant ON commerce_products(tenant_id, status);
+
+-- =============================================
+-- COMMERCE: Variants
+-- =============================================
 CREATE TABLE commerce_variants (
     id              UUID PRIMARY KEY,
     product_id      UUID NOT NULL REFERENCES commerce_products(id) ON DELETE CASCADE,
@@ -294,6 +404,51 @@ CREATE TABLE commerce_variants (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE INDEX idx_commerce_variants_product ON commerce_variants(product_id);
+CREATE UNIQUE INDEX idx_commerce_variants_sku ON commerce_variants(sku) WHERE sku IS NOT NULL;
+
+-- =============================================
+-- COMMERCE: Options (Size, Color, etc.)
+-- =============================================
+CREATE TABLE commerce_options (
+    id              UUID PRIMARY KEY,
+    product_id      UUID NOT NULL REFERENCES commerce_products(id) ON DELETE CASCADE,
+    title           VARCHAR(255) NOT NULL,
+    position        INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE commerce_option_values (
+    id              UUID PRIMARY KEY,
+    option_id       UUID NOT NULL REFERENCES commerce_options(id) ON DELETE CASCADE,
+    value           VARCHAR(255) NOT NULL,
+    position        INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE commerce_variant_options (
+    variant_id      UUID NOT NULL REFERENCES commerce_variants(id) ON DELETE CASCADE,
+    option_value_id UUID NOT NULL REFERENCES commerce_option_values(id) ON DELETE CASCADE,
+    PRIMARY KEY (variant_id, option_value_id)
+);
+
+-- =============================================
+-- COMMERCE: Prices (мультивалютность)
+-- =============================================
+CREATE TABLE commerce_prices (
+    id              UUID PRIMARY KEY,
+    variant_id      UUID NOT NULL REFERENCES commerce_variants(id) ON DELETE CASCADE,
+    amount          BIGINT NOT NULL,
+    currency_code   CHAR(3) NOT NULL,
+    price_list_id   UUID,
+    min_quantity    INT NOT NULL DEFAULT 1,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (variant_id, currency_code, price_list_id, min_quantity)
+);
+
+CREATE INDEX idx_commerce_prices_variant ON commerce_prices(variant_id);
+
+-- =============================================
+-- COMMERCE: Categories (своя иерархия)
+-- =============================================
 CREATE TABLE commerce_categories (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -307,11 +462,95 @@ CREATE TABLE commerce_categories (
     metadata        JSONB NOT NULL DEFAULT '{}',
     UNIQUE (tenant_id, handle)
 );
+
+CREATE TABLE commerce_product_categories (
+    product_id      UUID NOT NULL REFERENCES commerce_products(id) ON DELETE CASCADE,
+    category_id     UUID NOT NULL REFERENCES commerce_categories(id) ON DELETE CASCADE,
+    PRIMARY KEY (product_id, category_id)
+);
+
+-- =============================================
+-- COMMERCE: Inventory
+-- =============================================
+CREATE TABLE commerce_inventory_items (
+    id              UUID PRIMARY KEY,
+    sku             VARCHAR(64),
+    requires_shipping BOOLEAN NOT NULL DEFAULT true,
+    metadata        JSONB NOT NULL DEFAULT '{}'
+);
+
+CREATE TABLE commerce_stock_locations (
+    id              UUID PRIMARY KEY,
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name            VARCHAR(255) NOT NULL,
+    address         JSONB,
+    metadata        JSONB NOT NULL DEFAULT '{}'
+);
+
+CREATE TABLE commerce_inventory_levels (
+    id              UUID PRIMARY KEY,
+    inventory_item_id UUID NOT NULL REFERENCES commerce_inventory_items(id) ON DELETE CASCADE,
+    location_id     UUID NOT NULL REFERENCES commerce_stock_locations(id) ON DELETE CASCADE,
+    stocked_quantity  INT NOT NULL DEFAULT 0,
+    reserved_quantity INT NOT NULL DEFAULT 0,
+    incoming_quantity INT NOT NULL DEFAULT 0,
+    UNIQUE (inventory_item_id, location_id)
+);
+
+CREATE TABLE commerce_variant_inventory (
+    variant_id        UUID NOT NULL REFERENCES commerce_variants(id) ON DELETE CASCADE,
+    inventory_item_id UUID NOT NULL REFERENCES commerce_inventory_items(id) ON DELETE CASCADE,
+    PRIMARY KEY (variant_id, inventory_item_id)
+);
+
+-- =============================================
+-- COMMERCE: Orders
+-- =============================================
+CREATE TABLE commerce_orders (
+    id              UUID PRIMARY KEY,
+    tenant_id       UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    customer_id     UUID REFERENCES users(id) ON DELETE SET NULL,
+    display_id      SERIAL,
+    status          VARCHAR(32) NOT NULL DEFAULT 'pending',
+    email           VARCHAR(255),
+    currency_code   CHAR(3) NOT NULL,
+    subtotal        BIGINT NOT NULL,
+    tax_total       BIGINT NOT NULL DEFAULT 0,
+    shipping_total  BIGINT NOT NULL DEFAULT 0,
+    discount_total  BIGINT NOT NULL DEFAULT 0,
+    total           BIGINT NOT NULL,
+    shipping_address JSONB,
+    billing_address  JSONB,
+    metadata        JSONB NOT NULL DEFAULT '{}',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_commerce_orders_tenant ON commerce_orders(tenant_id, created_at DESC);
+CREATE INDEX idx_commerce_orders_customer ON commerce_orders(customer_id);
+CREATE INDEX idx_commerce_orders_status ON commerce_orders(tenant_id, status);
+
+CREATE TABLE commerce_order_items (
+    id              UUID PRIMARY KEY,
+    order_id        UUID NOT NULL REFERENCES commerce_orders(id) ON DELETE CASCADE,
+    variant_id      UUID REFERENCES commerce_variants(id) ON DELETE SET NULL,
+    title           VARCHAR(255) NOT NULL,
+    sku             VARCHAR(64),
+    quantity        INT NOT NULL,
+    unit_price      BIGINT NOT NULL,
+    total           BIGINT NOT NULL,
+    metadata        JSONB NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX idx_commerce_order_items_order ON commerce_order_items(order_id);
 ```
 
 ### 5.4 RusToK Index/Catalog (CQRS Read Model)
 
 ```sql
+-- =============================================
+-- INDEX: Денормализованные продукты для поиска
+-- =============================================
 CREATE TABLE index_products (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL,
@@ -335,6 +574,14 @@ CREATE TABLE index_products (
     UNIQUE (product_id)
 );
 
+CREATE INDEX idx_index_products_tenant ON index_products(tenant_id);
+CREATE INDEX idx_index_products_search ON index_products USING GIN(search_vector);
+CREATE INDEX idx_index_products_price ON index_products(tenant_id, min_price);
+CREATE INDEX idx_index_products_stock ON index_products(tenant_id, has_stock);
+
+-- =============================================
+-- INDEX: Денормализованный контент для поиска
+-- =============================================
 CREATE TABLE index_content (
     id              UUID PRIMARY KEY,
     tenant_id       UUID NOT NULL,
@@ -360,12 +607,19 @@ CREATE TABLE index_content (
     indexed_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (node_id)
 );
+
+CREATE INDEX idx_index_content_tenant ON index_content(tenant_id, kind, status);
+CREATE INDEX idx_index_content_search ON index_content USING GIN(search_vector);
+CREATE INDEX idx_index_content_published ON index_content(tenant_id, kind, published_at DESC);
+CREATE INDEX idx_index_content_category ON index_content(category_id);
 ```
 
 ### 5.5 Partitioning Strategy (Highload)
 
 ```sql
--- Orders by date
+-- =============================================
+-- PARTITIONING: Orders по дате (highload)
+-- =============================================
 CREATE TABLE commerce_orders_partitioned (
     id              UUID NOT NULL,
     tenant_id       UUID NOT NULL,
@@ -373,20 +627,35 @@ CREATE TABLE commerce_orders_partitioned (
     PRIMARY KEY (id, created_at)
 ) PARTITION BY RANGE (created_at);
 
-CREATE TABLE commerce_orders_2025_q1 
+CREATE TABLE commerce_orders_2025_q1
     PARTITION OF commerce_orders_partitioned
     FOR VALUES FROM ('2025-01-01') TO ('2025-04-01');
 
-CREATE TABLE commerce_orders_future 
+CREATE TABLE commerce_orders_2025_q2
+    PARTITION OF commerce_orders_partitioned
+    FOR VALUES FROM ('2025-04-01') TO ('2025-07-01');
+
+CREATE TABLE commerce_orders_future
     PARTITION OF commerce_orders_partitioned
     DEFAULT;
 
--- Nodes by tenant
+-- =============================================
+-- PARTITIONING: Nodes по tenant (multi-tenant highload)
+-- =============================================
 CREATE TABLE nodes_partitioned (
     id              UUID NOT NULL,
     tenant_id       UUID NOT NULL,
     PRIMARY KEY (id, tenant_id)
 ) PARTITION BY HASH (tenant_id);
+
+CREATE TABLE nodes_p0 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 0);
+CREATE TABLE nodes_p1 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 1);
+CREATE TABLE nodes_p2 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 2);
+CREATE TABLE nodes_p3 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 3);
+CREATE TABLE nodes_p4 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 4);
+CREATE TABLE nodes_p5 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 5);
+CREATE TABLE nodes_p6 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 6);
+CREATE TABLE nodes_p7 PARTITION OF nodes_partitioned FOR VALUES WITH (MODULUS 8, REMAINDER 7);
 ```
 
 ---
@@ -422,7 +691,7 @@ pub trait Taggable: RusToKEntity {
 
 ---
 
-## 7. EVENT BUS & INDEXING FLOW (CQRS)
+## 7. EVENT SYSTEM
 
 ### 7.1 Domain Events
 
@@ -444,13 +713,13 @@ pub struct EventEnvelope {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum DomainEvent {
-    // Content Events
+    // ============ Content Events ============
     NodeCreated { node_id: Uuid, kind: String, author_id: Option<Uuid> },
     NodeUpdated { node_id: Uuid },
     NodePublished { node_id: Uuid, kind: String },
     NodeDeleted { node_id: Uuid, kind: String },
 
-    // Commerce Events
+    // ============ Commerce Events ============
     ProductCreated { product_id: Uuid },
     ProductUpdated { product_id: Uuid },
     ProductPublished { product_id: Uuid },
@@ -465,21 +734,22 @@ pub enum DomainEvent {
         old_quantity: i32,
         new_quantity: i32,
     },
+    InventoryLow { variant_id: Uuid, product_id: Uuid, remaining: i32, threshold: i32 },
 
     OrderPlaced { order_id: Uuid, customer_id: Option<Uuid>, total: i64 },
     OrderStatusChanged { order_id: Uuid, old_status: String, new_status: String },
     OrderCompleted { order_id: Uuid },
     OrderCancelled { order_id: Uuid, reason: Option<String> },
 
-    // User Events
+    // ============ User Events ============
     UserRegistered { user_id: Uuid, email: String },
     UserLoggedIn { user_id: Uuid },
 
-    // Tag Events
+    // ============ Tag Events ============
     TagAttached { tag_id: Uuid, target_type: String, target_id: Uuid },
     TagDetached { tag_id: Uuid, target_type: String, target_id: Uuid },
 
-    // Index Events
+    // ============ Index Events ============
     ReindexRequested { target_type: String, target_id: Option<Uuid> },
 }
 ```
@@ -503,6 +773,7 @@ impl EventBus {
         Self { sender, capacity }
     }
 
+    /// Publish event to all subscribers
     pub fn publish(&self, tenant_id: Uuid, event: DomainEvent) {
         let envelope = EventEnvelope {
             id: generate_id(),
@@ -518,6 +789,7 @@ impl EventBus {
         let _ = self.sender.send(envelope);
     }
 
+    /// Subscribe to events
     pub fn subscribe(&self) -> broadcast::Receiver<EventEnvelope> {
         self.sender.subscribe()
     }
@@ -533,38 +805,389 @@ impl Clone for EventBus {
 }
 ```
 
-### 7.3 Indexer Flow (CQRS)
+### 7.3 Event Handlers
 
 ```rust
-// crates/rustok-index/src/indexers/product_indexer.rs
+// crates/rustok-core/src/events/handler.rs
 
-pub async fn handle_event(event: DomainEvent, db: &DatabaseConnection) -> Result<()> {
-    match event {
-        DomainEvent::ProductUpdated { product_id } => {
-            let product = commerce::find_product(product_id).await?;
-            let seo = core::find_meta(product_id).await?;
-            let tags = core::find_tags(product_id).await?;
+use async_trait::async_trait;
 
-            let catalog_item = CatalogItem {
-                id: product_id,
-                kind: "product".to_string(),
-                title: product.title,
-                price: product.variants[0].price,
-                seo_title: seo.title.unwrap_or(product.title),
-                tags,
-            };
+#[async_trait]
+pub trait EventHandler: Send + Sync {
+    /// Filter: какие события обрабатываем
+    fn handles(&self, event: &DomainEvent) -> bool;
 
-            catalog::upsert(catalog_item).await?;
+    /// Handle event
+    async fn handle(&self, envelope: &EventEnvelope) -> Result<()>;
+}
+
+pub struct EventDispatcher {
+    bus: EventBus,
+    handlers: Vec<Arc<dyn EventHandler>>,
+}
+
+impl EventDispatcher {
+    pub fn new(bus: EventBus) -> Self {
+        Self {
+            bus,
+            handlers: vec![],
         }
-        _ => {}
     }
-    Ok(())
+
+    pub fn register(&mut self, handler: Arc<dyn EventHandler>) {
+        self.handlers.push(handler);
+    }
+
+    /// Start listening (spawn background task)
+    pub fn start(self) -> tokio::task::JoinHandle<()> {
+        tokio::spawn(async move {
+            let mut receiver = self.bus.subscribe();
+
+            while let Ok(envelope) = receiver.recv().await {
+                for handler in &self.handlers {
+                    if handler.handles(&envelope.event) {
+                        if let Err(e) = handler.handle(&envelope).await {
+                            tracing::error!(
+                                "Event handler error: {:?}, event: {:?}",
+                                e,
+                                envelope.event
+                            );
+                        }
+                    }
+                }
+            }
+        })
+    }
 }
 ```
 
 ---
 
-## 8. MODULE REGISTRATION
+## 8. INDEX MODULE (CQRS)
+
+### 8.1 Index Configuration
+
+```rust
+// crates/rustok-index/src/config.rs
+
+pub struct IndexConfig {
+    /// Reindex batch size
+    pub batch_size: usize,
+
+    /// Parallel workers for reindexing
+    pub workers: usize,
+
+    /// Enable real-time sync via events
+    pub realtime_sync: bool,
+
+    /// Full reindex schedule (cron)
+    pub reindex_schedule: Option<String>,
+}
+
+impl Default for IndexConfig {
+    fn default() -> Self {
+        Self {
+            batch_size: 100,
+            workers: 4,
+            realtime_sync: true,
+            reindex_schedule: Some("0 3 * * *".to_string()), // 3 AM daily
+        }
+    }
+}
+```
+
+### 8.2 Product Indexer
+
+```rust
+// crates/rustok-index/src/indexers/product_indexer.rs
+
+use async_trait::async_trait;
+
+pub struct ProductIndexer {
+    db: DatabaseConnection,
+}
+
+impl ProductIndexer {
+    pub fn new(db: DatabaseConnection) -> Self {
+        Self { db }
+    }
+
+    /// Index single product
+    pub async fn index_product(&self, product_id: Uuid) -> Result<()> {
+        // Fetch product with all relations
+        let product = commerce_products::Entity::find_by_id(product_id)
+            .one(&self.db)
+            .await?
+            .ok_or(RusToKError::not_found::<commerce_products::Entity>(product_id))?;
+
+        // Fetch variants with prices
+        let variants = commerce_variants::Entity::find()
+            .filter(commerce_variants::Column::ProductId.eq(product_id))
+            .all(&self.db)
+            .await?;
+
+        let prices: Vec<i64> = commerce_prices::Entity::find()
+            .filter(commerce_prices::Column::VariantId.is_in(
+                variants.iter().map(|v| v.id).collect::<Vec<_>>()
+            ))
+            .all(&self.db)
+            .await?
+            .iter()
+            .map(|p| p.amount)
+            .collect();
+
+        // Fetch categories
+        let categories = commerce_product_categories::Entity::find()
+            .filter(commerce_product_categories::Column::ProductId.eq(product_id))
+            .find_also_related(commerce_categories::Entity)
+            .all(&self.db)
+            .await?;
+
+        // Fetch tags
+        let tags = taggables::Entity::find()
+            .filter(taggables::Column::TargetType.eq("product"))
+            .filter(taggables::Column::TargetId.eq(product_id))
+            .find_also_related(tags::Entity)
+            .all(&self.db)
+            .await?;
+
+        // Fetch meta
+        let meta = meta::Entity::find()
+            .filter(meta::Column::TargetType.eq("product"))
+            .filter(meta::Column::TargetId.eq(product_id))
+            .one(&self.db)
+            .await?;
+
+        // Calculate stock
+        let total_stock: i32 = /* sum inventory levels */;
+
+        // Build search vector
+        let search_text = format!(
+            "{} {} {}",
+            product.title,
+            product.subtitle.unwrap_or_default(),
+            product.description.unwrap_or_default()
+        );
+
+        // Upsert index record
+        let index_record = index_products::ActiveModel {
+            id: Set(generate_id()),
+            tenant_id: Set(product.tenant_id),
+            product_id: Set(product_id),
+
+            title: Set(product.title),
+            subtitle: Set(product.subtitle),
+            handle: Set(product.handle),
+            description: Set(product.description),
+            status: Set(product.status),
+
+            min_price: Set(prices.iter().min().copied()),
+            max_price: Set(prices.iter().max().copied()),
+            currencies: Set(/* unique currencies */),
+            total_stock: Set(total_stock),
+            has_stock: Set(total_stock > 0),
+
+            categories: Set(json!(categories)),
+            tags: Set(tags.iter().map(|t| t.name.clone()).collect()),
+
+            meta_title: Set(meta.as_ref().and_then(|m| m.title.clone())),
+            meta_description: Set(meta.as_ref().and_then(|m| m.description.clone())),
+
+            search_vector: Set(/* tsvector */),
+            indexed_at: Set(Utc::now().into()),
+        };
+
+        index_products::Entity::insert(index_record)
+            .on_conflict(
+                OnConflict::column(index_products::Column::ProductId)
+                    .update_columns([
+                        index_products::Column::Title,
+                        index_products::Column::MinPrice,
+                        // ... all fields
+                        index_products::Column::IndexedAt,
+                    ])
+                    .to_owned()
+            )
+            .exec(&self.db)
+            .await?;
+
+        Ok(())
+    }
+
+    /// Full reindex for tenant
+    pub async fn reindex_tenant(&self, tenant_id: Uuid) -> Result<IndexStats> {
+        let mut stats = IndexStats::default();
+
+        let products = commerce_products::Entity::find()
+            .filter(commerce_products::Column::TenantId.eq(tenant_id))
+            .all(&self.db)
+            .await?;
+
+        for product in products {
+            match self.index_product(product.id).await {
+                Ok(_) => stats.success += 1,
+                Err(e) => {
+                    tracing::error!("Failed to index product {}: {:?}", product.id, e);
+                    stats.failed += 1;
+                }
+            }
+        }
+
+        stats.total = stats.success + stats.failed;
+        Ok(stats)
+    }
+}
+
+#[async_trait]
+impl EventHandler for ProductIndexer {
+    fn handles(&self, event: &DomainEvent) -> bool {
+        matches!(
+            event,
+            DomainEvent::ProductCreated { .. }
+                | DomainEvent::ProductUpdated { .. }
+                | DomainEvent::ProductPublished { .. }
+                | DomainEvent::VariantUpdated { .. }
+                | DomainEvent::InventoryUpdated { .. }
+        )
+    }
+
+    async fn handle(&self, envelope: &EventEnvelope) -> Result<()> {
+        let product_id = match &envelope.event {
+            DomainEvent::ProductCreated { product_id } => *product_id,
+            DomainEvent::ProductUpdated { product_id } => *product_id,
+            DomainEvent::ProductPublished { product_id } => *product_id,
+            DomainEvent::VariantUpdated { product_id, .. } => *product_id,
+            DomainEvent::InventoryUpdated { variant_id, .. } => {
+                // Lookup product_id from variant
+                self.get_product_id_by_variant(*variant_id).await?
+            }
+            _ => return Ok(()),
+        };
+
+        self.index_product(product_id).await
+    }
+}
+```
+
+### 8.3 Content Indexer
+
+```rust
+// crates/rustok-index/src/indexers/content_indexer.rs
+
+pub struct ContentIndexer {
+    db: DatabaseConnection,
+}
+
+impl ContentIndexer {
+    pub async fn index_node(&self, node_id: Uuid) -> Result<()> {
+        let node = nodes::Entity::find_by_id(node_id)
+            .one(&self.db)
+            .await?
+            .ok_or(RusToKError::not_found::<nodes::Entity>(node_id))?;
+
+        // Fetch body
+        let body = bodies::Entity::find_by_id(node_id)
+            .one(&self.db)
+            .await?;
+
+        // Fetch category
+        let category = if let Some(cat_id) = node.category_id {
+            categories::Entity::find_by_id(cat_id).one(&self.db).await?
+        } else {
+            None
+        };
+
+        // Fetch author
+        let author = if let Some(author_id) = node.author_id {
+            users::Entity::find_by_id(author_id).one(&self.db).await?
+        } else {
+            None
+        };
+
+        // Fetch tags
+        let tags = taggables::Entity::find()
+            .filter(taggables::Column::TargetType.eq("node"))
+            .filter(taggables::Column::TargetId.eq(node_id))
+            .find_also_related(tags::Entity)
+            .all(&self.db)
+            .await?;
+
+        // Fetch meta
+        let meta = meta::Entity::find()
+            .filter(meta::Column::TargetType.eq("node"))
+            .filter(meta::Column::TargetId.eq(node_id))
+            .one(&self.db)
+            .await?;
+
+        // Build index record
+        let index_record = index_content::ActiveModel {
+            id: Set(generate_id()),
+            tenant_id: Set(node.tenant_id),
+            node_id: Set(node_id),
+
+            kind: Set(node.kind),
+            title: Set(node.title),
+            slug: Set(node.slug),
+            excerpt: Set(node.excerpt),
+            body_preview: Set(body.as_ref().map(|b| truncate(&b.body, 500))),
+            status: Set(node.status),
+
+            author_id: Set(node.author_id),
+            author_name: Set(author.map(|a| a.email)), // или name если есть
+
+            category_id: Set(node.category_id),
+            category_name: Set(category.as_ref().map(|c| c.name.clone())),
+            category_slug: Set(category.as_ref().map(|c| c.slug.clone())),
+
+            tags: Set(tags.iter().filter_map(|(_, t)| t.as_ref().map(|t| t.name.clone())).collect()),
+            parent_id: Set(node.parent_id),
+            reply_count: Set(node.reply_count),
+
+            meta_title: Set(meta.as_ref().and_then(|m| m.title.clone())),
+            meta_description: Set(meta.as_ref().and_then(|m| m.description.clone())),
+
+            search_vector: Set(/* tsvector */),
+            published_at: Set(node.published_at),
+            indexed_at: Set(Utc::now().into()),
+        };
+
+        // Upsert
+        index_content::Entity::insert(index_record)
+            .on_conflict(/* ... */)
+            .exec(&self.db)
+            .await?;
+
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl EventHandler for ContentIndexer {
+    fn handles(&self, event: &DomainEvent) -> bool {
+        matches!(
+            event,
+            DomainEvent::NodeCreated { .. }
+                | DomainEvent::NodeUpdated { .. }
+                | DomainEvent::NodePublished { .. }
+        )
+    }
+
+    async fn handle(&self, envelope: &EventEnvelope) -> Result<()> {
+        let node_id = match &envelope.event {
+            DomainEvent::NodeCreated { node_id, .. } => *node_id,
+            DomainEvent::NodeUpdated { node_id } => *node_id,
+            DomainEvent::NodePublished { node_id, .. } => *node_id,
+            _ => return Ok(()),
+        };
+
+        self.index_node(node_id).await
+    }
+}
+```
+
+---
+
+## 9. MODULE REGISTRATION
 
 ```rust
 pub trait RusToKModule {
@@ -576,11 +1199,12 @@ pub trait RusToKModule {
 
 ---
 
-## 9. DEPLOYMENT ARCHITECTURE
+## 10. DEPLOYMENT ARCHITECTURE
 
-### 9.1 Monolith (Default)
+### 10.1 Monolith (Default)
 
 ```yaml
+# docker-compose.yml
 services:
   rustok:
     build: .
@@ -612,10 +1236,12 @@ volumes:
   redis_data:
 ```
 
-### 9.2 Microservices (Scale)
+### 10.2 Microservices (Scale)
 
 ```yaml
+# docker-compose.scale.yml
 services:
+  # API Gateway
   api:
     build:
       context: .
@@ -628,6 +1254,7 @@ services:
     deploy:
       replicas: 3
 
+  # Index Service (отдельный)
   index:
     build:
       context: .
@@ -638,12 +1265,22 @@ services:
     deploy:
       replicas: 2
 
+  # Primary DB (writes)
   db-primary:
     image: postgres:16
+    environment:
+      - POSTGRES_USER=rustok
+      - POSTGRES_PASSWORD=rustok
 
+  # Replica DB (reads for index)
   db-replica:
     image: postgres:16
+    environment:
+      - POSTGRES_USER=rustok
+      - POSTGRES_PASSWORD=rustok
+    # Настроить streaming replication
 
+  # Full-text search
   meilisearch:
     image: getmeili/meilisearch:v1.6
     volumes:
@@ -653,9 +1290,105 @@ volumes:
   meilisearch_data:
 ```
 
+### 10.3 Architecture Diagram
+
+```text
+                         ┌─────────────────┐
+                         │   Load Balancer │
+                         └────────┬────────┘
+                                  │
+              ┌───────────────────┼───────────────────┐
+              │                   │                   │
+              ▼                   ▼                   ▼
+       ┌────────────┐      ┌────────────┐      ┌────────────┐
+       │  API Pod 1 │      │  API Pod 2 │      │  API Pod 3 │
+       └─────┬──────┘      └─────┬──────┘      └─────┬──────┘
+             │                   │                   │
+             └───────────────────┼───────────────────┘
+                                 │
+              ┌──────────────────┼──────────────────┐
+              │                  │                  │
+              ▼                  ▼                  ▼
+       ┌────────────┐     ┌────────────┐    ┌─────────────┐
+       │ PostgreSQL │     │   Redis    │    │ Event Bus   │
+       │  Primary   │     │  (Cache)   │    │ (In-memory) │
+       └─────┬──────┘     └────────────┘    └──────┬──────┘
+             │                                     │
+             │ Replication                         │ Events
+             ▼                                     ▼
+       ┌────────────┐                      ┌─────────────┐
+       │ PostgreSQL │◄─────────────────────│Index Service│
+       │  Replica   │                      └──────┬──────┘
+       └────────────┘                             │
+                                                  ▼
+                                          ┌─────────────┐
+                                          │ Meilisearch │
+                                          └─────────────┘
+```
+
 ---
 
-## 10. SUMMARY: WHY THIS ROCKS
+## 11. SUMMARY: What Lives Where
+
+| Layer | Tables/Entities | Purpose |
+|-------|----------------|---------|
+| **Core** | users, tenants, nodes, bodies, categories, tags, taggables, meta, media, tenant_modules | Universal foundation |
+| **Commerce** | products, variants, options, prices, inventory, orders, commerce_categories | E-commerce domain |
+| **Community** | reactions, reputation, follows | Social features (extends nodes) |
+| **Index** | index_products, index_content | CQRS read models |
+
+---
+
+## 12. DATA FLOW
+
+```text
+┌──────────────────────────────────────────────────────────────────┐
+│                         WRITE PATH                               │
+│                                                                  │
+│  User Request                                                    │
+│       │                                                          │
+│       ▼                                                          │
+│  ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌──────────────┐   │
+│  │ GraphQL │───▶│ Service │───▶│   ORM   │───▶│ PostgreSQL   │   │
+│  │  API    │    │  Layer  │    │(SeaORM) │    │ (normalized) │   │
+│  └─────────┘    └────┬────┘    └─────────┘    └──────────────┘   │
+│                      │                                           │
+│                      ▼                                           │
+│                 ┌─────────┐                                      │
+│                 │  Event  │                                      │
+│                 │   Bus   │                                      │
+│                 └────┬────┘                                      │
+└──────────────────────┼───────────────────────────────────────────┘
+                       │
+                       ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                         READ PATH                                │
+│                                                                  │
+│                 ┌─────────────┐                                  │
+│                 │   Index     │                                  │
+│                 │  Handlers   │                                  │
+│                 └──────┬──────┘                                  │
+│                        │                                         │
+│                        ▼                                         │
+│  ┌────────────────────────────────────────────────────────────┐  │
+│  │                   INDEX TABLES                             │  │
+│  │  ┌─────────────────┐    ┌─────────────────┐               │  │
+│  │  │ index_products  │    │  index_content  │               │  │
+│  │  │ (denormalized)  │    │ (denormalized)  │               │  │
+│  │  └─────────────────┘    └─────────────────┘               │  │
+│  └────────────────────────────────────────────────────────────┘  │
+│                        │                                         │
+│                        ▼                                         │
+│                 ┌─────────────┐                                  │
+│                 │   Search    │    (Optional: Meilisearch)       │
+│                 │   Queries   │                                  │
+│                 └─────────────┘                                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 13. SUMMARY: WHY THIS ROCKS
 
 1. **Independent Scaling:** Index tables можно вынести отдельно или заменить Elasticsearch.
 2. **Zero-Bloat Core:** Нет ненужных таблиц, если модуль не используется.
@@ -664,7 +1397,7 @@ volumes:
 
 ---
 
-## 11. CHECKLIST (Updated)
+## 14. CHECKLIST (Updated)
 
 Before implementing any feature, verify:
 
