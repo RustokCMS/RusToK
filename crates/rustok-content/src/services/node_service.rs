@@ -33,8 +33,6 @@ impl NodeService {
         let now = Utc::now().into();
         let node_id = rustok_core::generate_id();
         let status = input.status.unwrap_or_else(|| "draft".to_string());
-        let metadata = input.metadata;
-
         if input.translations.is_empty() {
             return Err(ContentError::Validation(
                 "At least one translation is required".to_string(),
@@ -54,7 +52,7 @@ impl NodeService {
             position: Set(input.position.unwrap_or(0)),
             depth: Set(input.depth.unwrap_or(0)),
             reply_count: Set(input.reply_count.unwrap_or(0)),
-            metadata: Set(metadata),
+            metadata: Set(input.metadata),
             created_at: Set(now),
             updated_at: Set(now),
             published_at: if status == "published" {
