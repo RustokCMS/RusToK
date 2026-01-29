@@ -197,32 +197,34 @@ fn StorefrontShell(locale: String) -> impl IntoView {
     let products = featured_products(locale.as_str());
     view! {
         <div class="min-h-screen bg-base-200 text-base-content">
-            <header class="navbar bg-base-100 px-6 shadow">
-                <div class="navbar-start">
-                    <a class="btn btn-ghost text-xl" href="/">{ "RusToK" }</a>
-                </div>
-                <div class="navbar-center hidden lg:flex">
-                    <ul class="menu menu-horizontal gap-2">
-                        <li><a href="#home">{strings.nav_home}</a></li>
-                        <li><a href="#catalog">{strings.nav_catalog}</a></li>
-                        <li><a href="#about">{strings.nav_about}</a></li>
-                        <li><a href="#contact">{strings.nav_contact}</a></li>
-                    </ul>
-                </div>
-                <div class="navbar-end">
-                    <details class="dropdown dropdown-end">
-                        <summary class="btn btn-ghost btn-sm">{strings.nav_language}</summary>
-                        <ul class="menu dropdown-content z-[1] w-32 rounded-box bg-base-100 p-2 shadow">
-                            <li><a href="/?lang=en">"English"</a></li>
-                            <li><a href="/?lang=ru">"Русский"</a></li>
+            <header class="navbar bg-base-100 shadow">
+                <div class="container-app flex w-full items-center">
+                    <div class="navbar-start">
+                        <a class="btn btn-ghost text-xl" href="/">{ "RusToK" }</a>
+                    </div>
+                    <div class="navbar-center hidden lg:flex">
+                        <ul class="menu menu-horizontal gap-2">
+                            <li><a href="#home">{strings.nav_home}</a></li>
+                            <li><a href="#catalog">{strings.nav_catalog}</a></li>
+                            <li><a href="#about">{strings.nav_about}</a></li>
+                            <li><a href="#contact">{strings.nav_contact}</a></li>
                         </ul>
-                    </details>
-                    <a class="btn btn-primary btn-sm ml-2" href="#catalog">{strings.cta_primary}</a>
+                    </div>
+                    <div class="navbar-end">
+                        <details class="dropdown dropdown-end">
+                            <summary class="btn btn-ghost btn-sm">{strings.nav_language}</summary>
+                            <ul class="menu dropdown-content z-[1] w-32 rounded-box bg-base-100 p-2 shadow">
+                                <li><a href="/?lang=en">"English"</a></li>
+                                <li><a href="/?lang=ru">"Русский"</a></li>
+                            </ul>
+                        </details>
+                        <a class="btn btn-primary btn-sm ml-2" href="#catalog">{strings.cta_primary}</a>
+                    </div>
                 </div>
             </header>
             <main class="space-y-20">
                 <section id="home" class="hero bg-base-100">
-                    <div class="hero-content flex-col gap-10 px-6 py-16 lg:flex-row lg:justify-between">
+                    <div class="container-app hero-content flex-col gap-10 py-16 lg:flex-row lg:justify-between">
                         <div class="max-w-xl space-y-6">
                             <h1 class="text-4xl font-bold lg:text-5xl">{strings.hero_title}</h1>
                             <p class="text-lg opacity-80">{strings.hero_subtitle}</p>
@@ -251,7 +253,7 @@ fn StorefrontShell(locale: String) -> impl IntoView {
                     </div>
                 </section>
 
-                <section id="catalog" class="px-6">
+                <section id="catalog" class="container-app">
                     <div class="mx-auto max-w-6xl space-y-6">
                         <div>
                             <h2 class="text-3xl font-bold">{strings.featured_title}</h2>
@@ -274,7 +276,7 @@ fn StorefrontShell(locale: String) -> impl IntoView {
                     </div>
                 </section>
 
-                <section id="about" class="px-6">
+                <section id="about" class="container-app">
                     <div class="mx-auto grid max-w-6xl gap-6 lg:grid-cols-2">
                         <div class="card bg-base-100 shadow">
                             <div class="card-body space-y-3">
@@ -326,7 +328,7 @@ fn render_shell(locale: &str) -> String {
     });
     format!(
         r#"<!DOCTYPE html>
-<html lang="{locale}">
+<html lang="{locale}" data-theme="rustok">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />

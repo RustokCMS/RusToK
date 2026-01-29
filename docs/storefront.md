@@ -15,7 +15,9 @@ The server listens on `http://localhost:3100`.
 ## Tailwind + DaisyUI styles
 
 By default the storefront uses Tailwind CDN plus the DaisyUI stylesheet for quick
-local previews. For offline or customized themes, build the CSS bundle:
+local previews. The SSR template sets `data-theme="rustok"` so built bundles can
+pick up the custom DaisyUI theme below. For offline or customized themes, build
+the CSS bundle:
 
 ```bash
 cd apps/storefront

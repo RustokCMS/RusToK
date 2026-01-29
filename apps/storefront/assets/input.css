@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply antialiased font-sans;
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-icon {
+    @apply btn btn-ghost btn-circle;
+  }
+}
