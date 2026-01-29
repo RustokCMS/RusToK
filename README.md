@@ -11,12 +11,17 @@
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Features](#-features) •
-[Why Rust?](#-why-rust) •
-[Comparison](#-comparison) •
-[Quick Start](#-quick-start) •
-[Architecture](#-architecture) •
-[Roadmap](#-roadmap)
+[What is rustok?](#what-is-rustok) •
+[Features](#features) •
+[Why Rust?](#why-rust) •
+[Comparison](#comparison) •
+[Quick Start](#quick-start) •
+[Architecture](#architecture) •
+[Roadmap](#roadmap) •
+[Development](#development) •
+[Contributing](#contributing) •
+[License](#license) •
+[Acknowledgments](#acknowledgments)
 
 </div>
 
@@ -230,6 +235,9 @@ cargo loco generate controller products --api
 ---
 
 ## 🏗️ Architecture
+
+For the full system design, data models, and deployment layouts, see the
+[System Architecture Manifest v4.0](RUSTOK_MANIFEST.md).
 
 ### Project Structure
 
