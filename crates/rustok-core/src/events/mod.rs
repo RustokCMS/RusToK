@@ -2,8 +2,12 @@ use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
 mod bus;
+mod dispatcher;
 
-pub use bus::EventBus;
+pub use bus::{EventBus, EventBusStats};
+pub use dispatcher::{
+    DispatcherConfig, EventDispatcher, HandlerBuilder, HandlerResult, RunningDispatcher,
+};
 
 #[derive(Debug, Clone)]
 pub struct EventEnvelope {
