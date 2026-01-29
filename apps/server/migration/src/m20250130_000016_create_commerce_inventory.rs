@@ -77,7 +77,7 @@ impl MigrationTrait for Migration {
                         ColumnDef::new(InventoryItems::VariantId)
                             .uuid()
                             .not_null()
-                            .unique(),
+                            .unique_key(),
                     )
                     .col(ColumnDef::new(InventoryItems::Sku).string_len(100))
                     .col(
