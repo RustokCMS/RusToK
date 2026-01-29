@@ -1,12 +1,12 @@
 <div align="center">
 
-# 🦀 rustok
+# 🦀 RusToK
 
-**Enterprise-Grade Modular CMS Built with Rust**
+**Event-Driven Enterprise Headless Platform Built with Rust**
 
 *The stability of a tank. The speed of compiled code. The flexibility of modules.*
 
-[![CI](https://github.com/yourname/rustok/actions/workflows/ci.yml/badge.svg)](https://github.com/yourname/rustok/actions/workflows/ci.yml)
+[![CI](https://github.com/RustokCMS/RusToK/actions/workflows/ci.yml/badge.svg)](https://github.com/RustokCMS/RusToK/actions/workflows/ci.yml)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL%203.0-blue.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -22,26 +22,26 @@
 
 ---
 
-## 🎯 What is rustok?
+## 🎯 What is RusToK?
 
-**rustok** is a headless, modular content management system written entirely in Rust. It combines the developer experience of Laravel/Rails with the performance and reliability of compiled languages.
+**RusToK** is an event-driven, modular monolith for enterprise content and commerce. It combines the developer experience of Laravel/Rails with the performance and reliability of compiled languages, while keeping read paths fast and write paths safe via CQRS-lite.
 
-Unlike traditional CMS platforms that suffer from plugin conflicts, security vulnerabilities, and performance degradation, rustok takes a different approach: **modules are compiled into a single binary**, eliminating runtime plugin hell while maintaining flexibility.
+Unlike traditional CMS platforms that suffer from plugin conflicts, security vulnerabilities, and performance degradation, RusToK takes a different approach: **modules are compiled into a single binary**, while indexing and search can be scaled out as a dedicated service.
 
 ┌─────────────────────────────────────────────────────────────┐
-│                      rustok Platform                        │
+│                      RusToK Platform                        │
 ├─────────────────────────────────────────────────────────────┤
 │  🛍️ Storefront (SSR)  │  ⚙️ Admin Panel  │  📱 Mobile App   │
 │      Leptos SSR       │    Leptos CSR    │   Your Choice    │
 ├─────────────────────────────────────────────────────────────┤
 │                    🔌 GraphQL API                           │
 ├─────────────────────────────────────────────────────────────┤
-│  📦 Commerce  │  📝 Blog  │  📄 Pages  │  🎫 Tickets  │ ... │
+│  📦 Commerce  │  📝 Content  │  👥 Community  │ ...       │
 ├─────────────────────────────────────────────────────────────┤
 │                    🧠 Core (Loco.rs)                        │
-│            Auth • Tenants • Events • Hooks                  │
+│          Auth • Tenants • Nodes • Tags • Events             │
 ├─────────────────────────────────────────────────────────────┤
-│                    🐘 PostgreSQL                            │
+│     🐘 PostgreSQL (write)  |  🔎 Index Module (read)         │
 └─────────────────────────────────────────────────────────────┘
 
 ---
@@ -52,7 +52,8 @@ Unlike traditional CMS platforms that suffer from plugin conflicts, security vul
 - 🔐 **Multi-tenant Architecture** — One deployment, multiple isolated stores/sites
 - 🔑 **Built-in Authentication** — JWT-based auth with role-based permissions
 - 📊 **GraphQL API** — Federated schema, each module extends the API
-- 🎣 **Hook System** — React to events without tight coupling
+- 🧠 **Unified Core** — Users, nodes, tags, meta, media shared by all modules
+- 🎣 **Event-Driven** — Modules publish events, indexers react asynchronously
 - 🌍 **i18n Ready** — Internationalization at the core level
 
 ### Developer Experience
@@ -67,6 +68,7 @@ Unlike traditional CMS platforms that suffer from plugin conflicts, security vul
 - 🛡️ **Memory Safe** — Rust's ownership model prevents entire classes of bugs
 - 📦 **Single Binary** — Deploy one file, no dependency management
 - 🔄 **Zero-Downtime Deploys** — Graceful shutdown and health checks
+- 🔎 **CQRS-lite Read Models** — Denormalized index tables for fast storefront queries
 
 ---
 
@@ -74,7 +76,7 @@ Unlike traditional CMS platforms that suffer from plugin conflicts, security vul
 
 ### The Problem with Current CMS Solutions
 
-| Issue | WordPress | Node.js CMS | rustok |
+| Issue | WordPress | Node.js CMS | RusToK |
 |-------|-----------|-------------|--------|
 | **Runtime Errors** | Fatal errors crash site | Uncaught exceptions | Compile-time guarantees |
 | **Memory Leaks** | Common with plugins | GC pauses, memory bloat | Ownership model prevents |
@@ -107,7 +109,7 @@ Real-world impact:
 
 ### vs. WordPress + WooCommerce
 
-| Aspect | WordPress | rustok |
+| Aspect | WordPress | RusToK |
 |--------|-----------|--------|
 | Language | PHP 7.4+ | Rust |
 | Typical Response Time | 200-500ms | 5-20ms |
@@ -124,7 +126,7 @@ Best for: Teams tired of WordPress security patches and plugin conflicts.
 
 ### vs. Strapi (Node.js)
 
-| Aspect | Strapi | rustok |
+| Aspect | Strapi | RusToK |
 |--------|--------|--------|
 | Language | JavaScript/TypeScript | Rust |
 | Response Time | 50-150ms | 5-20ms |
@@ -139,7 +141,7 @@ Best for: Teams wanting type safety without sacrificing DX.
 
 ### vs. Medusa.js (E-commerce)
 
-| Aspect | Medusa | rustok |
+| Aspect | Medusa | RusToK |
 |--------|--------|--------|
 | Focus | E-commerce only | Modular (commerce optional) |
 | Language | TypeScript | Rust |
@@ -153,7 +155,7 @@ Best for: Teams wanting commerce + content in one platform.
 
 ### vs. Directus / PayloadCMS
 
-| Aspect | Directus/Payload | rustok |
+| Aspect | Directus/Payload | RusToK |
 |--------|------------------|--------|
 | Approach | Database-first | Schema-first |
 | Type Generation | Build step | Native |
@@ -192,8 +194,8 @@ docker run -d --name rustok-db \
 
 ```bash
 # Clone
-git clone https://github.com/yourname/rustok.git
-cd rustok
+git clone https://github.com/RustokCMS/RusToK.git
+cd RusToK
 
 # Setup database
 cd apps/server
@@ -234,7 +236,7 @@ cargo loco generate controller products --api
 ### Project Structure
 
 ```text
-rustok/
+RusToK/
 ├── apps/
 │   ├── server/                 # 🚀 Backend API (Loco.rs)
 │   │   ├── src/
@@ -256,22 +258,28 @@ rustok/
 │           └── components/     # Store UI components
 │
 ├── crates/
-│   ├── rustok-core/            # 🧠 Shared kernel
+│   ├── rustok-core/            # 🧠 Unified core
 │   │   └── src/
-│   │       ├── id.rs           # ULID generation
-│   │       ├── error.rs        # Error types
-│   │       └── auth/           # Auth utilities
+│   │       ├── id.rs           # ULID → UUID
+│   │       ├── entities/       # Users, nodes, tags, meta, media
+│   │       ├── events/         # Event bus
+│   │       └── services/       # Shared services
 │   │
 │   ├── rustok-commerce/        # 🛒 Commerce module
 │   │   └── src/
-│   │       ├── entities/       # Product, Order, Cart
+│   │       ├── entities/       # Products, variants, orders
 │   │       ├── services/       # Business logic
 │   │       └── graphql/        # Commerce API
 │   │
-│   └── rustok-blog/            # 📝 Blog module
+│   ├── rustok-community/       # 👥 Community module
+│   │   └── src/
+│   │       ├── entities/       # Reactions, reputations, follows
+│   │       └── services/       # Social services
+│   │
+│   └── rustok-index/           # 🔎 CQRS read models
 │       └── src/
-│           ├── entities/       # Post, Category
-│           └── graphql/        # Blog API
+│           ├── indexers/       # Product/content indexers
+│           └── entities/       # Denormalized search tables
 │
 └── Cargo.toml                  # Workspace configuration
 ```
@@ -290,7 +298,7 @@ rustok-commerce = { path = "../crates/rustok-commerce" }
 fn routes(ctx: &AppContext) -> AppRoutes {
     AppRoutes::new()
         .add_route(rustok_commerce::routes())
-        .add_route(rustok_blog::routes())
+        .add_route(rustok_community::routes())
 }
 
 // 3. Compile — module is now part of your binary
@@ -299,7 +307,7 @@ cargo build --release
 
 ### Why compile-time modules?
 
-| Runtime Plugins (WordPress) | Compile-time Modules (rustok) |
+| Runtime Plugins (WordPress) | Compile-time Modules (RusToK) |
 |-----------------------------|-------------------------------|
 | Can crash your site | Errors caught before deploy |
 | Security vulnerabilities | Audited at build time |
@@ -324,6 +332,16 @@ VALUES ('uuid-here', 'commerce', true);
 if modules.is_enabled(tenant_id, "commerce").await? {
     // Show commerce features
 }
+```
+
+### CQRS-lite Read Models
+
+Write models live in normalized module tables. Read models are denormalized
+index tables that are kept in sync via events. This keeps storefront queries
+fast and avoids heavy joins in the hot path.
+
+```text
+Write → Event Bus → Indexers → Read Models
 ```
 
 ---
@@ -486,4 +504,4 @@ Built with amazing open-source projects:
 ---
 
 ⬆ Back to Top  
-Made with 🦀 by the rustok community
+Made with 🦀 by the RusToK community
