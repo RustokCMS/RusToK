@@ -89,6 +89,7 @@ pub enum Tenants {
     Slug,
     Domain,
     Settings,
+    Metadata,
     IsActive,
     CreatedAt,
     UpdatedAt,

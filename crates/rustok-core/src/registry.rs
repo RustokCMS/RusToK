@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::module::RusToKModule;
+use crate::migrations::ModuleMigration;
+use crate::module::{EventListener, RusToKModule};
 
 #[derive(Clone, Default)]
 pub struct ModuleRegistry {
@@ -29,6 +30,23 @@ impl ModuleRegistry {
         self.modules
             .values()
             .map(|module| module.as_ref())
+            .collect()
+    }
+
+    pub fn migrations(&self) -> Vec<ModuleMigration> {
+        self.modules
+            .values()
+            .map(|module| ModuleMigration {
+                module_slug: module.slug(),
+                migrations: module.migrations(),
+            })
+            .collect()
+    }
+
+    pub fn event_listeners(&self) -> Vec<Box<dyn EventListener>> {
+        self.modules
+            .values()
+            .flat_map(|module| module.event_listeners())
             .collect()
     }
 

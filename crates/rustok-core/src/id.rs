@@ -4,13 +4,13 @@ use uuid::Uuid;
 use crate::error::{Error, Result};
 
 pub fn generate_id() -> Uuid {
-    Uuid::from_bytes(Ulid::new().to_bytes())
+    Uuid::from(Ulid::new())
 }
 
 pub fn parse_id(value: &str) -> Result<Uuid> {
     value
         .parse::<Ulid>()
-        .map(|ulid| Uuid::from_bytes(ulid.to_bytes()))
+        .map(Uuid::from)
         .or_else(|_| value.parse::<Uuid>())
         .map_err(|_| Error::InvalidIdFormat(value.to_string()))
 }

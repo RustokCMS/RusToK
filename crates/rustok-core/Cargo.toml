@@ -14,3 +14,4 @@ chrono.workspace = true
 tracing.workspace = true
 async-trait.workspace = true
 jsonwebtoken = "9"
+sea-orm-migration.workspace = true
