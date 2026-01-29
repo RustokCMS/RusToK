@@ -32,6 +32,12 @@ impl MigrationTrait for Migration {
                             .default("{}"),
                     )
                     .col(
+                        ColumnDef::new(Tenants::DefaultLocale)
+                            .string_len(5)
+                            .not_null()
+                            .default("en"),
+                    )
+                    .col(
                         ColumnDef::new(Tenants::IsActive)
                             .boolean()
                             .not_null()
@@ -89,6 +95,7 @@ pub enum Tenants {
     Slug,
     Domain,
     Settings,
+    DefaultLocale,
     Metadata,
     IsActive,
     CreatedAt,
