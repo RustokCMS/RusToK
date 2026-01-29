@@ -70,3 +70,4 @@ async-trait = "0.1"
 rustok-core = { path = "crates/rustok-core" }
 rustok-commerce = { path = "crates/rustok-commerce" }
 rustok-blog = { path = "crates/rustok-blog" }
+rustok-index = { path = "crates/rustok-index" }
