@@ -37,7 +37,9 @@ impl PricingService {
             .ok_or(CommerceError::VariantNotFound(variant_id))?;
 
         if amount < Decimal::ZERO {
-            return Err(CommerceError::InvalidPrice("Amount cannot be negative".into()));
+            return Err(CommerceError::InvalidPrice(
+                "Amount cannot be negative".into(),
+            ));
         }
         if let Some(compare_at) = compare_at_amount {
             if compare_at < amount {

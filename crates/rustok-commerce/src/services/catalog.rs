@@ -3,14 +3,14 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,
     TransactionTrait,
 };
+use std::collections::HashSet;
 use tracing::{info, instrument};
 use uuid::Uuid;
-use std::collections::HashSet;
 
 use rustok_core::{generate_id, DomainEvent, EventBus};
 
 use crate::dto::*;
-use crate::entities::{self, *};
+use crate::entities;
 use crate::error::{CommerceError, CommerceResult};
 
 pub struct CatalogService {
@@ -47,13 +47,21 @@ impl CatalogService {
         let product = entities::product::ActiveModel {
             id: Set(product_id),
             tenant_id: Set(tenant_id),
-            status: Set(if input.publish { "active".into() } else { "draft".into() }),
+            status: Set(if input.publish {
+                "active".into()
+            } else {
+                "draft".into()
+            }),
             vendor: Set(input.vendor.clone()),
             product_type: Set(input.product_type.clone()),
-            metadata: Set(input.metadata.clone().into()),
+            metadata: Set(input.metadata.clone()),
             created_at: Set(now.into()),
             updated_at: Set(now.into()),
-            published_at: Set(if input.publish { Some(now.into()) } else { None }),
+            published_at: Set(if input.publish {
+                Some(now.into())
+            } else {
+                None
+            }),
         };
         product.insert(&txn).await?;
 
@@ -103,11 +111,8 @@ impl CatalogService {
                 product_id: Set(product_id),
                 position: Set(position as i32),
                 name: Set(opt_input.name.clone()),
-                values: Set(
-                    serde_json::to_value(&opt_input.values)
-                        .map_err(|error| CommerceError::Validation(error.to_string()))?
-                        .into(),
-                ),
+                values: Set(serde_json::to_value(&opt_input.values)
+                    .map_err(|error| CommerceError::Validation(error.to_string()))?),
             };
             option.insert(&txn).await?;
         }
@@ -213,7 +218,10 @@ impl CatalogService {
                     currency_code: price.currency_code,
                     amount: price.amount,
                     compare_at_amount: price.compare_at_amount,
-                    on_sale: price.compare_at_amount.map(|c| c > price.amount).unwrap_or(false),
+                    on_sale: price
+                        .compare_at_amount
+                        .map(|c| c > price.amount)
+                        .unwrap_or(false),
                 })
                 .collect();
 
@@ -230,7 +238,7 @@ impl CatalogService {
                 option3: variant.option3,
                 prices: price_responses,
                 inventory_quantity: variant.inventory_quantity,
-                inventory_policy: variant.inventory_policy,
+                inventory_policy: variant.inventory_policy.clone(),
                 in_stock: variant.inventory_quantity > 0 || variant.inventory_policy == "continue",
                 weight: variant.weight,
                 weight_unit: variant.weight_unit,
@@ -249,7 +257,7 @@ impl CatalogService {
             status: product.status,
             vendor: product.vendor,
             product_type: product.product_type,
-            metadata: product.metadata.into(),
+            metadata: product.metadata,
             created_at: product.created_at.into(),
             updated_at: product.updated_at.into(),
             published_at: product.published_at.map(Into::into),
@@ -269,7 +277,7 @@ impl CatalogService {
                 .map(|option| ProductOptionResponse {
                     id: option.id,
                     name: option.name,
-                    values: serde_json::from_value(option.values.into()).unwrap_or_default(),
+                    values: serde_json::from_value(option.values).unwrap_or_default(),
                     position: option.position,
                 })
                 .collect(),
@@ -313,7 +321,7 @@ impl CatalogService {
             product_active.product_type = Set(Some(product_type));
         }
         if let Some(metadata) = input.metadata {
-            product_active.metadata = Set(metadata.into());
+            product_active.metadata = Set(metadata);
         }
         if let Some(status) = input.status {
             product_active.status = Set(status);
@@ -337,14 +345,13 @@ impl CatalogService {
                 let locale = translation_input.locale.clone();
                 let key = format!("{}::{}", locale, handle.clone());
                 if !seen.insert(key) {
-                    return Err(CommerceError::DuplicateHandle {
-                        handle,
-                        locale,
-                    });
+                    return Err(CommerceError::DuplicateHandle { handle, locale });
                 }
 
                 let existing = entities::product_translation::Entity::find()
-                    .filter(entities::product_translation::Column::Locale.eq(&translation_input.locale))
+                    .filter(
+                        entities::product_translation::Column::Locale.eq(&translation_input.locale),
+                    )
                     .filter(entities::product_translation::Column::Handle.eq(&handle))
                     .filter(entities::product_translation::Column::ProductId.ne(product_id))
                     .one(&txn)
