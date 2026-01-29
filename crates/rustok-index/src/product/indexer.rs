@@ -74,7 +74,9 @@ impl EventHandler for ProductIndexer {
                 | DomainEvent::VariantDeleted { .. }
                 | DomainEvent::InventoryUpdated { .. }
                 | DomainEvent::PriceUpdated { .. }
-                | DomainEvent::ReindexRequested { target_type, .. } if target_type == "product"
+        ) || matches!(
+            event,
+            DomainEvent::ReindexRequested { target_type, .. } if target_type == "product"
         )
     }
 
