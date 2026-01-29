@@ -34,7 +34,6 @@ impl NodeService {
         let node_id = rustok_core::generate_id();
         let status = input.status.unwrap_or_else(|| "draft".to_string());
         let metadata = input.metadata;
-
         if input.translations.is_empty() {
             return Err(ContentError::Validation(
                 "At least one translation is required".to_string(),
@@ -54,7 +53,7 @@ impl NodeService {
             position: Set(input.position.unwrap_or(0)),
             depth: Set(input.depth.unwrap_or(0)),
             reply_count: Set(input.reply_count.unwrap_or(0)),
-            metadata: Set(metadata.into()),
+            metadata: Set(metadata),
             created_at: Set(now),
             updated_at: Set(now),
             published_at: if status == "published" {
@@ -136,7 +135,7 @@ impl NodeService {
             active.reply_count = Set(reply_count);
         }
         if let Some(metadata) = update.metadata {
-            active.metadata = Set(metadata.into());
+            active.metadata = Set(metadata);
         }
         if let Some(published_at) = update.published_at {
             active.published_at = Set(published_at);
@@ -449,7 +448,7 @@ impl NodeService {
             position: node.position,
             depth: node.depth,
             reply_count: node.reply_count,
-            metadata: node.metadata.into(),
+            metadata: node.metadata,
             created_at: node.created_at.to_rfc3339(),
             updated_at: node.updated_at.to_rfc3339(),
             published_at: node.published_at.map(|date| date.to_rfc3339()),
