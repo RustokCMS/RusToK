@@ -243,6 +243,8 @@ cargo loco generate controller products --api
 
 ## 🏗️ Architecture
 
+For a detailed breakdown of the system logic, event flow, and CQRS-lite implementation, see [Detailed Architecture Documentation](docs/architecture.md).
+
 ### Project Structure
 
 ```text
