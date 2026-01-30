@@ -2,9 +2,9 @@ use async_graphql::{Context, Object, Result};
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
+use crate::context::AuthContext;
 use rustok_content::NodeService;
 use rustok_core::{EventBus, SecurityContext, UserRole};
-use crate::context::AuthContext;
 
 use super::types::*;
 
@@ -13,12 +13,7 @@ pub struct ContentQuery;
 
 #[Object]
 impl ContentQuery {
-    async fn node(
-        &self,
-        ctx: &Context<'_>,
-        _tenant_id: Uuid,
-        id: Uuid,
-    ) -> Result<Option<GqlNode>> {
+    async fn node(&self, ctx: &Context<'_>, _tenant_id: Uuid, id: Uuid) -> Result<Option<GqlNode>> {
         let db = ctx.data::<DatabaseConnection>()?;
         let event_bus = ctx.data::<EventBus>()?;
 
@@ -60,11 +55,14 @@ impl ContentQuery {
             per_page: filter.per_page.unwrap_or(20),
         };
 
-        let security = ctx.data::<AuthContext>()
+        let security = ctx
+            .data::<AuthContext>()
             .map(|auth| SecurityContext::new(auth.role.clone(), Some(auth.user_id)))
             .unwrap_or_else(|_| SecurityContext::new(UserRole::Customer, None));
 
-        let (items, total) = service.list_nodes(tenant_id, security, domain_filter).await?;
+        let (items, total) = service
+            .list_nodes(tenant_id, security, domain_filter)
+            .await?;
 
         Ok(GqlNodeList {
             items: items.into_iter().map(Into::into).collect(),

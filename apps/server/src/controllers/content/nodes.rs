@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, Query, State},
-    routing::{get, post, put, delete}, // Added routing
+    routing::{delete, get, post, put}, // Added routing
     Json,
 };
 use loco_rs::prelude::*;
@@ -81,9 +81,7 @@ pub async fn create_node(
 ) -> Result<Json<rustok_content::dto::NodeResponse>> {
     let security = SecurityContext::new(user.user.role, Some(user.user.id));
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    let node = service
-        .create_node(tenant.id, security, input)
-        .await?;
+    let node = service.create_node(tenant.id, security, input).await?;
     Ok(Json(node))
 }
 
@@ -111,9 +109,7 @@ pub async fn update_node(
 ) -> Result<Json<rustok_content::dto::NodeResponse>> {
     let security = SecurityContext::new(user.user.role, Some(user.user.id));
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    let node = service
-        .update_node(id, security, input)
-        .await?;
+    let node = service.update_node(id, security, input).await?;
     Ok(Json(node))
 }
 

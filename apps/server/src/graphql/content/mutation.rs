@@ -2,9 +2,9 @@ use async_graphql::{Context, Object, Result};
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
+use crate::context::AuthContext;
 use rustok_content::NodeService;
 use rustok_core::{EventBus, SecurityContext};
-use crate::context::AuthContext;
 
 use super::types::*;
 
@@ -108,9 +108,7 @@ impl ContentMutation {
             }),
         };
 
-        let node = service
-            .update_node(id, security, domain_input)
-            .await?;
+        let node = service.update_node(id, security, domain_input).await?;
 
         Ok(node.into())
     }

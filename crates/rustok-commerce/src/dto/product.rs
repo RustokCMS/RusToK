@@ -1,7 +1,7 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use super::{CreateVariantInput, VariantResponse};
 use crate::entities::product::ProductStatus;

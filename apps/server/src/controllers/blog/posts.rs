@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, Query, State},
-    routing::{get, post, put, delete},
+    routing::{delete, get, post, put},
     Json,
 };
 use loco_rs::prelude::*;

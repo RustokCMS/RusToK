@@ -12,12 +12,7 @@ pub struct BlogQuery;
 
 #[Object]
 impl BlogQuery {
-    async fn post(
-        &self,
-        ctx: &Context<'_>,
-        _tenant_id: Uuid,
-        id: Uuid,
-    ) -> Result<Option<GqlPost>> {
+    async fn post(&self, ctx: &Context<'_>, _tenant_id: Uuid, id: Uuid) -> Result<Option<GqlPost>> {
         let db = ctx.data::<DatabaseConnection>()?;
         let event_bus = ctx.data::<EventBus>()?;
 
@@ -63,7 +58,14 @@ impl BlogQuery {
             per_page: filter.per_page.unwrap_or(20),
         };
 
-        let (items, total) = service.list_nodes(tenant_id, domain_filter).await?;
+        let security = ctx
+            .data::<crate::context::AuthContext>()
+            .map(|a| a.security_context())
+            .unwrap_or_else(rustok_core::SecurityContext::system);
+
+        let (items, total) = service
+            .list_nodes(tenant_id, security, domain_filter)
+            .await?;
 
         Ok(GqlPostList {
             items: items.into_iter().map(Into::into).collect(),

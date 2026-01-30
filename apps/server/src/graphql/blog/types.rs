@@ -75,7 +75,7 @@ impl From<NodeResponse> for GqlPost {
         // Extract tags from metadata
         let tags = if let Some(serde_json::Value::Object(map)) = &node.metadata {
             if let Some(tags_val) = map.get("tags") {
-                 serde_json::from_value(tags_val.clone()).unwrap_or_default()
+                serde_json::from_value(tags_val.clone()).unwrap_or_default()
             } else {
                 vec![]
             }
@@ -85,7 +85,9 @@ impl From<NodeResponse> for GqlPost {
 
         Self {
             id: node.id,
-            title: translation.and_then(|t| t.title.clone()).unwrap_or_default(),
+            title: translation
+                .and_then(|t| t.title.clone())
+                .unwrap_or_default(),
             slug: translation.and_then(|t| t.slug.clone()),
             excerpt: translation.and_then(|t| t.excerpt.clone()),
             body: body.and_then(|b| b.body.clone()),

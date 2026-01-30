@@ -55,11 +55,11 @@ use utoipa::OpenApi;
             crate::controllers::auth::AuthResponse,
             crate::controllers::auth::UserInfo,
             crate::controllers::auth::LogoutResponse,
-            
+
             // Common
             crate::common::PaginationMeta,
             crate::common::ApiError,
-            
+
             // Content
             rustok_content::dto::NodeListItem,
             rustok_content::dto::NodeResponse,

@@ -1,7 +1,7 @@
-pub mod commerce;
-pub mod content;
 pub mod blog;
+pub mod commerce;
 pub mod common;
+pub mod content;
 pub mod errors;
 pub mod mutations;
 pub mod queries;

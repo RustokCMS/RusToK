@@ -10,10 +10,10 @@ use loco_rs::{
     task::Tasks,
     Result,
 };
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 use sea_orm::DatabaseConnection;
 use std::path::Path;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::controllers;
 use crate::middleware;
@@ -57,7 +57,10 @@ impl Hooks for App {
         let registry = modules::build_registry();
 
         Ok(router
-            .merge(SwaggerUi::new("/swagger").url("/api-docs/openapi.json", controllers::swagger::ApiDoc::openapi()))
+            .merge(SwaggerUi::new("/swagger").url(
+                "/api-docs/openapi.json",
+                controllers::swagger::ApiDoc::openapi(),
+            ))
             .layer(Extension(registry))
             .layer(axum_middleware::from_fn_with_state(
                 ctx.clone(),

@@ -27,7 +27,9 @@ impl BlogMutation {
             .unwrap_or_else(SecurityContext::system);
 
         let service = PostService::new(db.clone(), event_bus.clone());
-        let post_id = service.create_post(tenant_id, security, input.into()).await?;
+        let post_id = service
+            .create_post(tenant_id, security, input.into())
+            .await?;
 
         Ok(post_id)
     }

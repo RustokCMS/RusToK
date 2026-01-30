@@ -1,7 +1,7 @@
 pub mod auth;
+pub mod blog;
 pub mod commerce;
+pub mod content;
 pub mod graphql;
 pub mod health;
-pub mod content;
-pub mod blog;
 pub mod swagger;

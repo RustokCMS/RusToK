@@ -84,7 +84,11 @@ impl PostService {
         Ok(())
     }
 
-    pub async fn publish_post(&self, post_id: Uuid, security: SecurityContext) -> ContentResult<()> {
+    pub async fn publish_post(
+        &self,
+        post_id: Uuid,
+        security: SecurityContext,
+    ) -> ContentResult<()> {
         self.node_service.publish_node(post_id, security).await?;
         Ok(())
     }

@@ -4,10 +4,7 @@ pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/content")
         .add("/health", super::health::routes())
-        .add(
-            "/nodes",
-            get(nodes::list_nodes).post(nodes::create_node),
-        )
+        .add("/nodes", get(nodes::list_nodes).post(nodes::create_node))
         .add(
             "/nodes/:id",
             get(nodes::get_node)

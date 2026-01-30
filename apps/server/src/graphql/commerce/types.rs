@@ -15,7 +15,9 @@ impl From<rustok_commerce::entities::product::ProductStatus> for GqlProductStatu
         match status {
             rustok_commerce::entities::product::ProductStatus::Draft => GqlProductStatus::Draft,
             rustok_commerce::entities::product::ProductStatus::Active => GqlProductStatus::Active,
-            rustok_commerce::entities::product::ProductStatus::Archived => GqlProductStatus::Archived,
+            rustok_commerce::entities::product::ProductStatus::Archived => {
+                GqlProductStatus::Archived
+            }
         }
     }
 }
@@ -25,7 +27,9 @@ impl From<GqlProductStatus> for rustok_commerce::entities::product::ProductStatu
         match status {
             GqlProductStatus::Draft => rustok_commerce::entities::product::ProductStatus::Draft,
             GqlProductStatus::Active => rustok_commerce::entities::product::ProductStatus::Active,
-            GqlProductStatus::Archived => rustok_commerce::entities::product::ProductStatus::Archived,
+            GqlProductStatus::Archived => {
+                rustok_commerce::entities::product::ProductStatus::Archived
+            }
         }
     }
 }
