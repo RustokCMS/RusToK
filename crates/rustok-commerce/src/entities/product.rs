@@ -1,31 +1,16 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "product_status_enum")]
+#[serde(rename_all = "lowercase")]
 pub enum ProductStatus {
+    #[sea_orm(string_value = "draft")]
     Draft,
+    #[sea_orm(string_value = "active")]
     Active,
+    #[sea_orm(string_value = "archived")]
     Archived,
-}
-
-impl From<ProductStatus> for String {
-    fn from(status: ProductStatus) -> Self {
-        match status {
-            ProductStatus::Draft => "draft".to_string(),
-            ProductStatus::Active => "active".to_string(),
-            ProductStatus::Archived => "archived".to_string(),
-        }
-    }
-}
-
-impl From<String> for ProductStatus {
-    fn from(value: String) -> Self {
-        match value.as_str() {
-            "active" => ProductStatus::Active,
-            "archived" => ProductStatus::Archived,
-            _ => ProductStatus::Draft,
-        }
-    }
 }
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
@@ -34,7 +19,7 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
     pub tenant_id: Uuid,
-    pub status: String,
+    pub status: ProductStatus,
     pub vendor: Option<String>,
     pub product_type: Option<String>,
     pub metadata: Json,

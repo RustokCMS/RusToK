@@ -1,6 +1,18 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "content_status_enum")]
+#[serde(rename_all = "lowercase")]
+pub enum ContentStatus {
+    #[sea_orm(string_value = "draft")]
+    Draft,
+    #[sea_orm(string_value = "published")]
+    Published,
+    #[sea_orm(string_value = "archived")]
+    Archived,
+}
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "nodes")]
 pub struct Model {
@@ -11,7 +23,7 @@ pub struct Model {
     pub author_id: Option<Uuid>,
     pub kind: String,
     pub category_id: Option<Uuid>,
-    pub status: String,
+    pub status: ContentStatus,
     pub position: i32,
     pub depth: i32,
     pub reply_count: i32,

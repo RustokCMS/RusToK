@@ -70,6 +70,7 @@ impl CommerceQuery {
         let mut query = product::Entity::find().filter(product::Column::TenantId.eq(tenant_id));
 
         if let Some(status) = &filter.status {
+            let status: rustok_commerce::entities::product::ProductStatus = (*status).into();
             query = query.filter(product::Column::Status.eq(status));
         }
         if let Some(vendor) = &filter.vendor {
@@ -125,7 +126,7 @@ impl CommerceQuery {
                 let translation = translation_map.get(&product.id);
                 GqlProductListItem {
                     id: product.id,
-                    status: product.status,
+                    status: product.status.into(),
                     title: translation
                         .map(|value| value.title.clone())
                         .unwrap_or_default(),

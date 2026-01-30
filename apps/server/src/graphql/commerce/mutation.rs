@@ -64,7 +64,7 @@ impl CommerceMutation {
             vendor: input.vendor,
             product_type: input.product_type,
             metadata: None,
-            status: input.status,
+            status: input.status.map(Into::into),
         };
 
         let product = catalog

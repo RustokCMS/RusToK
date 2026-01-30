@@ -56,9 +56,9 @@ impl PostService {
                 CreateNodeInput {
                     kind: "post".to_string(),
                     status: Some(if input.publish {
-                        "published".to_string()
+                        rustok_content::entities::node::ContentStatus::Published
                     } else {
-                        "draft".to_string()
+                        rustok_content::entities::node::ContentStatus::Draft
                     }),
                     parent_id: None,
                     author_id,

@@ -2,11 +2,12 @@ use sea_orm::prelude::DateTimeWithTimeZone;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
+use crate::entities::node::ContentStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CreateNodeInput {
     pub kind: String,
-    pub status: Option<String>,
+    pub status: Option<ContentStatus>,
     pub parent_id: Option<Uuid>,
     pub author_id: Option<Uuid>,
     pub category_id: Option<Uuid>,
@@ -36,7 +37,7 @@ pub struct BodyInput {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct UpdateNodeInput {
-    pub status: Option<String>,
+    pub status: Option<ContentStatus>,
     pub parent_id: Option<Option<Uuid>>,
     pub author_id: Option<Option<Uuid>>,
     pub category_id: Option<Option<Uuid>>,
@@ -52,7 +53,7 @@ pub struct UpdateNodeInput {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ListNodesFilter {
     pub kind: Option<String>,
-    pub status: Option<String>,
+    pub status: Option<ContentStatus>,
     pub parent_id: Option<Uuid>,
     pub author_id: Option<Uuid>,
     pub locale: Option<String>,
@@ -75,7 +76,7 @@ pub struct NodeResponse {
     pub id: Uuid,
     pub tenant_id: Uuid,
     pub kind: String,
-    pub status: String,
+    pub status: ContentStatus,
     pub parent_id: Option<Uuid>,
     pub author_id: Option<Uuid>,
     pub category_id: Option<Uuid>,
@@ -110,7 +111,7 @@ pub struct BodyResponse {
 pub struct NodeListItem {
     pub id: Uuid,
     pub kind: String,
-    pub status: String,
+    pub status: ContentStatus,
     pub title: Option<String>,
     pub slug: Option<String>,
     pub excerpt: Option<String>,

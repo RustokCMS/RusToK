@@ -1,12 +1,39 @@
-use async_graphql::{InputObject, SimpleObject};
+use async_graphql::{Enum, InputObject, SimpleObject};
 use uuid::Uuid;
 
 use rustok_commerce::dto;
 
+#[derive(Enum, Copy, Clone, Eq, PartialEq)]
+pub enum GqlProductStatus {
+    Draft,
+    Active,
+    Archived,
+}
+
+impl From<rustok_commerce::entities::product::ProductStatus> for GqlProductStatus {
+    fn from(status: rustok_commerce::entities::product::ProductStatus) -> Self {
+        match status {
+            rustok_commerce::entities::product::ProductStatus::Draft => GqlProductStatus::Draft,
+            rustok_commerce::entities::product::ProductStatus::Active => GqlProductStatus::Active,
+            rustok_commerce::entities::product::ProductStatus::Archived => GqlProductStatus::Archived,
+        }
+    }
+}
+
+impl From<GqlProductStatus> for rustok_commerce::entities::product::ProductStatus {
+    fn from(status: GqlProductStatus) -> Self {
+        match status {
+            GqlProductStatus::Draft => rustok_commerce::entities::product::ProductStatus::Draft,
+            GqlProductStatus::Active => rustok_commerce::entities::product::ProductStatus::Active,
+            GqlProductStatus::Archived => rustok_commerce::entities::product::ProductStatus::Archived,
+        }
+    }
+}
+
 #[derive(SimpleObject)]
 pub struct GqlProduct {
     pub id: Uuid,
-    pub status: String,
+    pub status: GqlProductStatus,
     pub vendor: Option<String>,
     pub product_type: Option<String>,
     pub created_at: String,
@@ -70,7 +97,7 @@ pub struct GqlProductList {
 #[derive(SimpleObject)]
 pub struct GqlProductListItem {
     pub id: Uuid,
-    pub status: String,
+    pub status: GqlProductStatus,
     pub title: String,
     pub handle: String,
     pub vendor: Option<String>,
@@ -127,12 +154,12 @@ pub struct UpdateProductInput {
     pub translations: Option<Vec<ProductTranslationInput>>,
     pub vendor: Option<String>,
     pub product_type: Option<String>,
-    pub status: Option<String>,
+    pub status: Option<GqlProductStatus>,
 }
 
 #[derive(InputObject)]
 pub struct ProductsFilter {
-    pub status: Option<String>,
+    pub status: Option<GqlProductStatus>,
     pub vendor: Option<String>,
     pub search: Option<String>,
     pub page: Option<u64>,
@@ -143,7 +170,7 @@ impl From<dto::ProductResponse> for GqlProduct {
     fn from(product: dto::ProductResponse) -> Self {
         Self {
             id: product.id,
-            status: product.status,
+            status: product.status.into(),
             vendor: product.vendor,
             product_type: product.product_type,
             created_at: product.created_at.to_rfc3339(),

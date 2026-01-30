@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::{CreateVariantInput, VariantResponse};
+use crate::entities::product::ProductStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct CreateProductInput {
@@ -40,14 +41,14 @@ pub struct UpdateProductInput {
     pub vendor: Option<String>,
     pub product_type: Option<String>,
     pub metadata: Option<serde_json::Value>,
-    pub status: Option<String>,
+    pub status: Option<ProductStatus>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProductResponse {
     pub id: Uuid,
     pub tenant_id: Uuid,
-    pub status: String,
+    pub status: ProductStatus,
     pub vendor: Option<String>,
     pub product_type: Option<String>,
     pub metadata: serde_json::Value,

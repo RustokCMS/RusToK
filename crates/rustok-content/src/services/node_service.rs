@@ -32,7 +32,9 @@ impl NodeService {
     ) -> ContentResult<NodeResponse> {
         let now = Utc::now().into();
         let node_id = rustok_core::generate_id();
-        let status = input.status.unwrap_or_else(|| "draft".to_string());
+        let status = input
+            .status
+            .unwrap_or(crate::entities::node::ContentStatus::Draft);
         let metadata = input.metadata;
         if input.translations.is_empty() {
             return Err(ContentError::Validation(
@@ -56,7 +58,7 @@ impl NodeService {
             metadata: Set(metadata),
             created_at: Set(now),
             updated_at: Set(now),
-            published_at: if status == "published" {
+            published_at: if status == crate::entities::node::ContentStatus::Published {
                 Set(Some(now))
             } else {
                 Set(None)
@@ -213,7 +215,7 @@ impl NodeService {
     ) -> ContentResult<NodeResponse> {
         let now = Utc::now().into();
         let update = UpdateNodeInput {
-            status: Some("published".to_string()),
+            status: Some(crate::entities::node::ContentStatus::Published),
             published_at: Some(Some(now)),
             ..UpdateNodeInput::default()
         };
@@ -237,7 +239,7 @@ impl NodeService {
         actor_id: Option<Uuid>,
     ) -> ContentResult<NodeResponse> {
         let update = UpdateNodeInput {
-            status: Some("draft".to_string()),
+            status: Some(crate::entities::node::ContentStatus::Draft),
             published_at: Some(None),
             ..UpdateNodeInput::default()
         };

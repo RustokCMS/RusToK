@@ -48,9 +48,9 @@ impl CatalogService {
             id: Set(product_id),
             tenant_id: Set(tenant_id),
             status: Set(if input.publish {
-                "active".into()
+                entities::product::ProductStatus::Active
             } else {
-                "draft".into()
+                entities::product::ProductStatus::Draft
             }),
             vendor: Set(input.vendor.clone()),
             product_type: Set(input.product_type.clone()),
@@ -422,7 +422,7 @@ impl CatalogService {
             .ok_or(CommerceError::ProductNotFound(product_id))?;
 
         let mut product_active: entities::product::ActiveModel = product.into();
-        product_active.status = Set("active".into());
+        product_active.status = Set(entities::product::ProductStatus::Active);
         product_active.published_at = Set(Some(Utc::now().into()));
         product_active.updated_at = Set(Utc::now().into());
         product_active.update(&self.db).await?;
@@ -450,7 +450,7 @@ impl CatalogService {
             .ok_or(CommerceError::ProductNotFound(product_id))?;
 
         let mut product_active: entities::product::ActiveModel = product.into();
-        product_active.status = Set("draft".into());
+        product_active.status = Set(entities::product::ProductStatus::Draft);
         product_active.updated_at = Set(Utc::now().into());
         product_active.update(&self.db).await?;
 
@@ -476,7 +476,7 @@ impl CatalogService {
             .await?
             .ok_or(CommerceError::ProductNotFound(product_id))?;
 
-        if product.status == "active" {
+        if product.status == entities::product::ProductStatus::Active {
             return Err(CommerceError::CannotDeletePublished);
         }
 
