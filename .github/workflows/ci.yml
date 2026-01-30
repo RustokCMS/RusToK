@@ -121,6 +121,7 @@ jobs:
         run: |
           if [[ "${{ needs.fmt.result }}" != "success" ]] || \
              [[ "${{ needs.clippy.result }}" != "success" ]] || \
+             [[ "${{ needs.check.result }}" != "success" ]] || \
              [[ "${{ needs.build-server.result }}" != "success" ]] || \
              [[ "${{ needs.build-admin.result }}" != "success" ]] || \
              [[ "${{ needs.build-storefront.result }}" != "success" ]] || \
