@@ -101,7 +101,7 @@ use utoipa::OpenApi;
             crate::controllers::commerce::inventory::AvailabilityResult,
         )
     ),
-    modifiers(&crate::controllers::swagger::SecurityAddon),
+    modifiers(&SecurityAddon),
     tags(
         (name = "auth", description = "Authentication endpoints"),
         (name = "content", description = "Content Management endpoints"),

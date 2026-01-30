@@ -57,7 +57,7 @@ impl ContentMutation {
                 .collect(),
         };
 
-        let node = service
+        let node: rustok_content::dto::NodeResponse = service
             .create_node(tenant_id, security, domain_input)
             .await?;
 
@@ -108,7 +108,8 @@ impl ContentMutation {
             }),
         };
 
-        let node = service.update_node(id, security, domain_input).await?;
+        let node: rustok_content::dto::NodeResponse =
+            service.update_node(id, security, domain_input).await?;
 
         Ok(node.into())
     }

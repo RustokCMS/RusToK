@@ -121,7 +121,7 @@ pub(super) async fn list_products(
             let translation = translation_map.get(&product.id);
             ProductListItem {
                 id: product.id,
-                status: product.status,
+                status: product.status.to_string(),
                 title: translation
                     .map(|value| value.title.clone())
                     .unwrap_or_default(),
@@ -320,7 +320,7 @@ pub(super) async fn unpublish_product(
     Ok(Json(ApiResponse::success(product)))
 }
 
-#[derive(Debug, serde::Deserialize, ToSchema)]
+#[derive(Debug, serde::Deserialize, ToSchema, utoipa::IntoParams)]
 pub struct ListProductsParams {
     #[serde(flatten)]
     pub pagination: Option<PaginationParams>,

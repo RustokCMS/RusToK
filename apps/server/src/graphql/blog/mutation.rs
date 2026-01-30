@@ -24,7 +24,7 @@ impl BlogMutation {
         let security = ctx
             .data::<AuthContext>()
             .map(|a| a.security_context())
-            .unwrap_or_else(SecurityContext::system);
+            .unwrap_or_else(|_| SecurityContext::system());
 
         let service = PostService::new(db.clone(), event_bus.clone());
         let post_id = service
@@ -45,7 +45,7 @@ impl BlogMutation {
         let security = ctx
             .data::<AuthContext>()
             .map(|a| a.security_context())
-            .unwrap_or_else(SecurityContext::system);
+            .unwrap_or_else(|_| SecurityContext::system());
 
         let service = PostService::new(db.clone(), event_bus.clone());
 
@@ -66,7 +66,7 @@ impl BlogMutation {
         let security = ctx
             .data::<AuthContext>()
             .map(|a| a.security_context())
-            .unwrap_or_else(SecurityContext::system);
+            .unwrap_or_else(|_| SecurityContext::system());
 
         let service = PostService::new(db.clone(), event_bus.clone());
         service.delete_post(id, security).await?;

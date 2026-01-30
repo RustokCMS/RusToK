@@ -20,7 +20,7 @@ impl BlogQuery {
         let node = match service.get_node(id).await {
             Ok(node) => node,
             Err(rustok_content::ContentError::NodeNotFound(_)) => return Ok(None),
-            Err(err) => return Err(err.to_string().into()),
+            Err(err) => return Err(async_graphql::Error::new(err.to_string())),
         };
 
         if node.kind != "post" {
@@ -61,9 +61,9 @@ impl BlogQuery {
         let security = ctx
             .data::<crate::context::AuthContext>()
             .map(|a| a.security_context())
-            .unwrap_or_else(rustok_core::SecurityContext::system);
+            .unwrap_or_else(|_| rustok_core::SecurityContext::system());
 
-        let (items, total) = service
+        let (items, total): (Vec<rustok_content::dto::NodeListItem>, u64) = service
             .list_nodes(tenant_id, security, domain_filter)
             .await?;
 

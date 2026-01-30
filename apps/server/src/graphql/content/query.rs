@@ -19,9 +19,9 @@ impl ContentQuery {
 
         let service = NodeService::new(db.clone(), event_bus.clone());
         match service.get_node(id).await {
-            Ok(node) => Ok(Some(node.into())),
+            Ok(node) => Ok(Some(node.into())), // GqlNode implements From<NodeResponse>
             Err(rustok_content::ContentError::NodeNotFound(_)) => Ok(None),
-            Err(err) => Err(err.to_string().into()),
+            Err(err) => Err(async_graphql::Error::new(err.to_string())),
         }
     }
 
@@ -60,7 +60,7 @@ impl ContentQuery {
             .map(|auth| SecurityContext::new(auth.role.clone(), Some(auth.user_id)))
             .unwrap_or_else(|_| SecurityContext::new(UserRole::Customer, None));
 
-        let (items, total) = service
+        let (items, total): (Vec<rustok_content::dto::NodeListItem>, u64) = service
             .list_nodes(tenant_id, security, domain_filter)
             .await?;
 

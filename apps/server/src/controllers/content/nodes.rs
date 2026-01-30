@@ -1,6 +1,4 @@
-use axum::{
     extract::{Path, Query, State},
-    routing::{delete, get, post, put}, // Added routing
     Json,
 };
 use loco_rs::prelude::*;
@@ -27,12 +25,14 @@ use crate::extractors::auth::CurrentUser;
 pub async fn list_nodes(
     State(ctx): State<AppContext>,
     tenant: TenantContext,
-    _user: CurrentUser,
+    user: CurrentUser,
     Query(filter): Query<ListNodesFilter>,
 ) -> Result<Json<Vec<rustok_content::dto::NodeListItem>>> {
-    let security = SecurityContext::new(user.user.role, Some(user.user.id));
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    let (items, _) = service.list_nodes(tenant.id, security, filter).await?;
+    let (items, _) = service
+        .list_nodes(tenant.id, user.security_context(), filter)
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(Json(items))
 }
 
@@ -57,7 +57,10 @@ pub async fn get_node(
     Path(id): Path<Uuid>,
 ) -> Result<Json<rustok_content::dto::NodeResponse>> {
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    let node = service.get_node(id).await?;
+    let node = service
+        .get_node(id)
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(Json(node))
 }
 
@@ -79,9 +82,11 @@ pub async fn create_node(
     user: CurrentUser,
     Json(input): Json<CreateNodeInput>,
 ) -> Result<Json<rustok_content::dto::NodeResponse>> {
-    let security = SecurityContext::new(user.user.role, Some(user.user.id));
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    let node = service.create_node(tenant.id, security, input).await?;
+    let node = service
+        .create_node(tenant.id, user.security_context(), input)
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(Json(node))
 }
 
@@ -107,9 +112,11 @@ pub async fn update_node(
     Path(id): Path<Uuid>,
     Json(input): Json<UpdateNodeInput>,
 ) -> Result<Json<rustok_content::dto::NodeResponse>> {
-    let security = SecurityContext::new(user.user.role, Some(user.user.id));
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    let node = service.update_node(id, security, input).await?;
+    let node = service
+        .update_node(id, user.security_context(), input)
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(Json(node))
 }
 
@@ -133,8 +140,10 @@ pub async fn delete_node(
     user: CurrentUser,
     Path(id): Path<Uuid>,
 ) -> Result<()> {
-    let security = SecurityContext::new(user.user.role, Some(user.user.id));
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    service.delete_node(id, security).await?;
+    service
+        .delete_node(id, user.security_context())
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(())
 }

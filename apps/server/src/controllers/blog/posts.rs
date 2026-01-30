@@ -1,6 +1,4 @@
-use axum::{
     extract::{Path, Query, State},
-    routing::{delete, get, post, put},
     Json,
 };
 use loco_rs::prelude::*;
@@ -33,7 +31,8 @@ pub async fn list_posts(
     filter.kind = Some("post".to_string());
     let (items, _) = service
         .list_nodes(tenant.id, user.security_context(), filter)
-        .await?;
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(Json(items))
 }
 
@@ -58,7 +57,10 @@ pub async fn get_post(
     Path(id): Path<Uuid>,
 ) -> Result<Json<rustok_content::dto::NodeResponse>> {
     let service = NodeService::new(ctx.db.clone(), EventBus::default());
-    let node = service.get_node(id).await?;
+    let node = service
+        .get_node(id)
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     // Optional: check if node.kind == "post"
     if node.kind != "post" {
         return Err(loco_rs::Error::NotFound);
@@ -87,7 +89,8 @@ pub async fn create_post(
     let service = PostService::new(ctx.db.clone(), EventBus::default());
     let post_id = service
         .create_post(tenant.id, user.security_context(), input)
-        .await?;
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(Json(post_id))
 }
 
@@ -116,7 +119,8 @@ pub async fn update_post(
     let service = PostService::new(ctx.db.clone(), EventBus::default());
     service
         .update_post(id, user.security_context(), input)
-        .await?;
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(())
 }
 
@@ -141,6 +145,9 @@ pub async fn delete_post(
     Path(id): Path<Uuid>,
 ) -> Result<()> {
     let service = PostService::new(ctx.db.clone(), EventBus::default());
-    service.delete_post(id, user.security_context()).await?;
+    service
+        .delete_post(id, user.security_context())
+        .await
+        .map_err(|e| Error::BadRequest(e.to_string()))?;
     Ok(())
 }

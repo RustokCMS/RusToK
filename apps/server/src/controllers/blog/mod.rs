@@ -1,3 +1,5 @@
+use loco_rs::prelude::*;
+
 pub mod posts;
 
 pub fn routes() -> Routes {
