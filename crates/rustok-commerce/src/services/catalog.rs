@@ -228,9 +228,7 @@ impl CatalogService {
         let variant_responses: Vec<VariantResponse> = variants
             .into_iter()
             .map(|variant| {
-                let prices = prices_by_variant
-                    .remove(&variant.id)
-                    .unwrap_or_default();
+                let prices = prices_by_variant.remove(&variant.id).unwrap_or_default();
 
                 let price_responses: Vec<PriceResponse> = prices
                     .into_iter()
@@ -259,7 +257,8 @@ impl CatalogService {
                     prices: price_responses,
                     inventory_quantity: variant.inventory_quantity,
                     inventory_policy: variant.inventory_policy.clone(),
-                    in_stock: variant.inventory_quantity > 0 || variant.inventory_policy == "continue",
+                    in_stock: variant.inventory_quantity > 0
+                        || variant.inventory_policy == "continue",
                     weight: variant.weight,
                     weight_unit: variant.weight_unit,
                     position: variant.position,

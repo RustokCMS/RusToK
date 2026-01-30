@@ -74,4 +74,3 @@ pub async fn resolve(
 pub async fn invalidate_tenant_cache(identifier: &str) {
     TENANT_CACHE.invalidate(identifier).await;
 }
-
