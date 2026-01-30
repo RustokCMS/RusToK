@@ -4,6 +4,7 @@ use axum::{
     Json,
 };
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use rustok_commerce::InventoryService;
@@ -12,6 +13,20 @@ use rustok_core::EventBus;
 use crate::common::{ApiErrorResponse, ApiResponse, RequestContext};
 use loco_rs::app::AppContext;
 
+/// Get variant inventory info
+#[utoipa::path(
+    get,
+    path = "/api/commerce/variants/{id}/inventory",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Variant ID")
+    ),
+    responses(
+        (status = 200, description = "Inventory details", body = InventoryResponse),
+        (status = 404, description = "Variant not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn get_inventory(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -48,6 +63,22 @@ pub(super) async fn get_inventory(
     })))
 }
 
+/// Adjust variant inventory quantity
+#[utoipa::path(
+    post,
+    path = "/api/commerce/variants/{id}/inventory/adjust",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Variant ID")
+    ),
+    request_body = AdjustInput,
+    responses(
+        (status = 200, description = "Inventory adjusted successfully", body = InventoryResponse),
+        (status = 400, description = "Insufficient inventory or invalid input"),
+        (status = 404, description = "Variant not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn adjust_inventory(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -84,6 +115,21 @@ pub(super) async fn adjust_inventory(
     get_inventory(State(ctx), request, Path(variant_id)).await
 }
 
+/// Set absolute inventory quantity
+#[utoipa::path(
+    post,
+    path = "/api/commerce/variants/{id}/inventory/set",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Variant ID")
+    ),
+    request_body = SetInventoryInput,
+    responses(
+        (status = 200, description = "Inventory set successfully", body = InventoryResponse),
+        (status = 404, description = "Variant not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn set_inventory(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -106,6 +152,17 @@ pub(super) async fn set_inventory(
     get_inventory(State(ctx), request, Path(variant_id)).await
 }
 
+/// Batch check inventory availability
+#[utoipa::path(
+    post,
+    path = "/api/commerce/inventory/check",
+    tag = "commerce",
+    request_body = CheckAvailabilityInput,
+    responses(
+        (status = 200, description = "Availability results", body = Vec<AvailabilityResult>),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn check_availability(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -130,7 +187,7 @@ pub(super) async fn check_availability(
     Ok(Json(ApiResponse::success(results)))
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct InventoryResponse {
     pub variant_id: Uuid,
     pub quantity: i32,
@@ -138,29 +195,29 @@ pub struct InventoryResponse {
     pub in_stock: bool,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct AdjustInput {
     pub adjustment: i32,
     pub reason: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct SetInventoryInput {
     pub quantity: i32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CheckAvailabilityInput {
     pub items: Vec<CheckItem>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct CheckItem {
     pub variant_id: Uuid,
     pub quantity: i32,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct AvailabilityResult {
     pub variant_id: Uuid,
     pub requested: i32,

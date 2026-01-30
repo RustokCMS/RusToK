@@ -21,11 +21,30 @@ use utoipa::OpenApi;
         crate::controllers::content::nodes::update_node,
         crate::controllers::content::nodes::delete_node,
         // Blog
+        // Blog
         crate::controllers::blog::posts::list_posts,
         crate::controllers::blog::posts::get_post,
         crate::controllers::blog::posts::create_post,
         crate::controllers::blog::posts::update_post,
         crate::controllers::blog::posts::delete_post,
+        // Commerce
+        crate::controllers::commerce::products::list_products,
+        crate::controllers::commerce::products::create_product,
+        crate::controllers::commerce::products::show_product,
+        crate::controllers::commerce::products::update_product,
+        crate::controllers::commerce::products::delete_product,
+        crate::controllers::commerce::products::publish_product,
+        crate::controllers::commerce::products::unpublish_product,
+        crate::controllers::commerce::variants::list_variants,
+        crate::controllers::commerce::variants::create_variant,
+        crate::controllers::commerce::variants::show_variant,
+        crate::controllers::commerce::variants::update_variant,
+        crate::controllers::commerce::variants::delete_variant,
+        crate::controllers::commerce::variants::update_prices,
+        crate::controllers::commerce::inventory::get_inventory,
+        crate::controllers::commerce::inventory::adjust_inventory,
+        crate::controllers::commerce::inventory::set_inventory,
+        crate::controllers::commerce::inventory::check_availability,
     ),
     components(
         schemas(
@@ -37,6 +56,10 @@ use utoipa::OpenApi;
             crate::controllers::auth::UserInfo,
             crate::controllers::auth::LogoutResponse,
             
+            // Common
+            crate::common::PaginationMeta,
+            crate::common::ApiError,
+            
             // Content
             rustok_content::dto::NodeListItem,
             rustok_content::dto::NodeResponse,
@@ -44,17 +67,46 @@ use utoipa::OpenApi;
             rustok_content::dto::UpdateNodeInput,
             rustok_content::dto::NodeTranslationInput,
             rustok_content::dto::BodyInput,
+            rustok_content::dto::ListNodesFilter,
+            rustok_content::dto::NodeTranslationResponse,
+            rustok_content::dto::BodyResponse,
             rustok_content::entities::node::ContentStatus,
 
             // Blog
-            rustok_blog::services::post::CreatePostInput,
+            rustok_blog::dto::CreatePostInput,
+
+            // Commerce
+            rustok_commerce::dto::CreateProductInput,
+            rustok_commerce::dto::UpdateProductInput,
+            rustok_commerce::dto::ProductResponse,
+            rustok_commerce::dto::ProductTranslationInput,
+            rustok_commerce::dto::ProductOptionInput,
+            rustok_commerce::dto::ProductTranslationResponse,
+            rustok_commerce::dto::ProductOptionResponse,
+            rustok_commerce::dto::ProductImageResponse,
+            rustok_commerce::dto::PriceResponse,
+            rustok_commerce::dto::CreateVariantInput,
+            rustok_commerce::dto::UpdateVariantInput,
+            rustok_commerce::dto::VariantResponse,
+            rustok_commerce::dto::PriceInput,
+            rustok_commerce::dto::AdjustInventoryInput,
+            rustok_commerce::entities::product::ProductStatus,
+            crate::controllers::commerce::products::ListProductsParams,
+            crate::controllers::commerce::products::ProductListItem,
+            crate::controllers::commerce::inventory::InventoryResponse,
+            crate::controllers::commerce::inventory::AdjustInput,
+            crate::controllers::commerce::inventory::SetInventoryInput,
+            crate::controllers::commerce::inventory::CheckAvailabilityInput,
+            crate::controllers::commerce::inventory::CheckItem,
+            crate::controllers::commerce::inventory::AvailabilityResult,
         )
     ),
     modifiers(&crate::controllers::swagger::SecurityAddon),
     tags(
         (name = "auth", description = "Authentication endpoints"),
         (name = "content", description = "Content Management endpoints"),
-        (name = "blog", description = "Blog endpoints")
+        (name = "blog", description = "Blog endpoints"),
+        (name = "commerce", description = "Ecommerce endpoints")
     )
 )]
 pub struct ApiDoc;

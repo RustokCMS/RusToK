@@ -4,6 +4,7 @@ use axum::{
     Json,
 };
 use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
 use rustok_commerce::dto::{CreateProductInput, ProductResponse, UpdateProductInput};
@@ -16,6 +17,19 @@ use crate::common::{
 };
 use loco_rs::app::AppContext;
 
+/// List commerce products
+#[utoipa::path(
+    get,
+    path = "/api/commerce/products",
+    tag = "commerce",
+    params(
+        ListProductsParams
+    ),
+    responses(
+        (status = 200, description = "List of products", body = PaginatedResponse<ProductListItem>),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn list_products(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -128,6 +142,18 @@ pub(super) async fn list_products(
     }))
 }
 
+/// Create a new commerce product
+#[utoipa::path(
+    post,
+    path = "/api/commerce/products",
+    tag = "commerce",
+    request_body = CreateProductInput,
+    responses(
+        (status = 201, description = "Product created successfully", body = ProductResponse),
+        (status = 400, description = "Invalid input"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn create_product(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -144,6 +170,20 @@ pub(super) async fn create_product(
     Ok((StatusCode::CREATED, Json(ApiResponse::success(product))))
 }
 
+/// Get product details
+#[utoipa::path(
+    get,
+    path = "/api/commerce/products/{id}",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Product ID")
+    ),
+    responses(
+        (status = 200, description = "Product details", body = ProductResponse),
+        (status = 404, description = "Product not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn show_product(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -158,6 +198,21 @@ pub(super) async fn show_product(
     Ok(Json(ApiResponse::success(product)))
 }
 
+/// Update an existing product
+#[utoipa::path(
+    put,
+    path = "/api/commerce/products/{id}",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Product ID")
+    ),
+    request_body = UpdateProductInput,
+    responses(
+        (status = 200, description = "Product updated successfully", body = ProductResponse),
+        (status = 404, description = "Product not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn update_product(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -175,6 +230,20 @@ pub(super) async fn update_product(
     Ok(Json(ApiResponse::success(product)))
 }
 
+/// Delete a product
+#[utoipa::path(
+    delete,
+    path = "/api/commerce/products/{id}",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Product ID")
+    ),
+    responses(
+        (status = 204, description = "Product deleted successfully"),
+        (status = 404, description = "Product not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn delete_product(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -191,6 +260,20 @@ pub(super) async fn delete_product(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/// Publish a product
+#[utoipa::path(
+    post,
+    path = "/api/commerce/products/{id}/publish",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Product ID")
+    ),
+    responses(
+        (status = 200, description = "Product published successfully", body = ProductResponse),
+        (status = 404, description = "Product not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn publish_product(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -207,6 +290,20 @@ pub(super) async fn publish_product(
     Ok(Json(ApiResponse::success(product)))
 }
 
+/// Unpublish a product
+#[utoipa::path(
+    post,
+    path = "/api/commerce/products/{id}/unpublish",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Product ID")
+    ),
+    responses(
+        (status = 200, description = "Product unpublished successfully", body = ProductResponse),
+        (status = 404, description = "Product not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn unpublish_product(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -223,7 +320,7 @@ pub(super) async fn unpublish_product(
     Ok(Json(ApiResponse::success(product)))
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, serde::Deserialize, ToSchema)]
 pub struct ListProductsParams {
     #[serde(flatten)]
     pub pagination: Option<PaginationParams>,
@@ -233,7 +330,7 @@ pub struct ListProductsParams {
     pub search: Option<String>,
 }
 
-#[derive(Debug, serde::Serialize)]
+#[derive(Debug, serde::Serialize, ToSchema)]
 pub struct ProductListItem {
     pub id: Uuid,
     pub status: String,

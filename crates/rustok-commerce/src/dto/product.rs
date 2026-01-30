@@ -1,11 +1,12 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
 
 use super::{CreateVariantInput, VariantResponse};
 use crate::entities::product::ProductStatus;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, ToSchema)]
 pub struct CreateProductInput {
     pub translations: Vec<ProductTranslationInput>,
     #[serde(default)]
@@ -19,7 +20,7 @@ pub struct CreateProductInput {
     pub publish: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ProductTranslationInput {
     pub locale: String,
     pub title: String,
@@ -29,13 +30,13 @@ pub struct ProductTranslationInput {
     pub meta_description: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ProductOptionInput {
     pub name: String,
     pub values: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, ToSchema)]
 pub struct UpdateProductInput {
     pub translations: Option<Vec<ProductTranslationInput>>,
     pub vendor: Option<String>,
@@ -44,7 +45,7 @@ pub struct UpdateProductInput {
     pub status: Option<ProductStatus>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ProductResponse {
     pub id: Uuid,
     pub tenant_id: Uuid,
@@ -61,7 +62,7 @@ pub struct ProductResponse {
     pub images: Vec<ProductImageResponse>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ProductTranslationResponse {
     pub locale: String,
     pub title: String,
@@ -71,7 +72,7 @@ pub struct ProductTranslationResponse {
     pub meta_description: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ProductOptionResponse {
     pub id: Uuid,
     pub name: String,
@@ -79,7 +80,7 @@ pub struct ProductOptionResponse {
     pub position: i32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ProductImageResponse {
     pub id: Uuid,
     pub media_id: Uuid,
@@ -88,7 +89,7 @@ pub struct ProductImageResponse {
     pub position: i32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct PriceResponse {
     pub currency_code: String,
     pub amount: Decimal,

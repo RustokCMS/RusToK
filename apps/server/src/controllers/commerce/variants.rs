@@ -12,6 +12,20 @@ use rustok_core::{generate_id, DomainEvent, EventBus};
 use crate::common::{ApiErrorResponse, ApiResponse, RequestContext};
 use loco_rs::app::AppContext;
 
+/// List product variants
+#[utoipa::path(
+    get,
+    path = "/api/commerce/products/{product_id}/variants",
+    tag = "commerce",
+    params(
+        ("product_id" = Uuid, Path, description = "Product ID")
+    ),
+    responses(
+        (status = 200, description = "List of variants", body = Vec<VariantResponse>),
+        (status = 404, description = "Product not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn list_variants(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -80,6 +94,21 @@ pub(super) async fn list_variants(
     Ok(Json(ApiResponse::success(response)))
 }
 
+/// Create a new product variant
+#[utoipa::path(
+    post,
+    path = "/api/commerce/products/{product_id}/variants",
+    tag = "commerce",
+    params(
+        ("product_id" = Uuid, Path, description = "Product ID")
+    ),
+    request_body = CreateVariantInput,
+    responses(
+        (status = 201, description = "Variant created successfully", body = VariantResponse),
+        (status = 404, description = "Product not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn create_variant(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -207,6 +236,20 @@ pub(super) async fn create_variant(
     ))
 }
 
+/// Get variant details
+#[utoipa::path(
+    get,
+    path = "/api/commerce/variants/{id}",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Variant ID")
+    ),
+    responses(
+        (status = 200, description = "Variant details", body = VariantResponse),
+        (status = 404, description = "Variant not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn show_variant(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -251,6 +294,21 @@ pub(super) async fn show_variant(
     ))))
 }
 
+/// Update an existing variant
+#[utoipa::path(
+    put,
+    path = "/api/commerce/variants/{id}",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Variant ID")
+    ),
+    request_body = UpdateVariantInput,
+    responses(
+        (status = 200, description = "Variant updated successfully", body = VariantResponse),
+        (status = 404, description = "Variant not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn update_variant(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -338,6 +396,20 @@ pub(super) async fn update_variant(
     ))))
 }
 
+/// Delete a variant
+#[utoipa::path(
+    delete,
+    path = "/api/commerce/variants/{id}",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Variant ID")
+    ),
+    responses(
+        (status = 204, description = "Variant deleted successfully"),
+        (status = 404, description = "Variant not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn delete_variant(
     State(ctx): State<AppContext>,
     request: RequestContext,
@@ -388,6 +460,21 @@ pub(super) async fn delete_variant(
     Ok(StatusCode::NO_CONTENT)
 }
 
+/// Update variant prices
+#[utoipa::path(
+    put,
+    path = "/api/commerce/variants/{id}/prices",
+    tag = "commerce",
+    params(
+        ("id" = Uuid, Path, description = "Variant ID")
+    ),
+    request_body = Vec<PriceInput>,
+    responses(
+        (status = 200, description = "Prices updated successfully", body = VariantResponse),
+        (status = 404, description = "Variant not found"),
+        (status = 401, description = "Unauthorized")
+    )
+)]
 pub(super) async fn update_prices(
     State(ctx): State<AppContext>,
     request: RequestContext,

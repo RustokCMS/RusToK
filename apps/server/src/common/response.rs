@@ -4,8 +4,9 @@ use axum::{
     Json,
 };
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ApiResponse<T: Serialize> {
     pub success: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -14,7 +15,7 @@ pub struct ApiResponse<T: Serialize> {
     pub error: Option<ApiError>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct ApiError {
     pub code: String,
     pub message: String,

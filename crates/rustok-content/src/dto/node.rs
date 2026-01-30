@@ -52,7 +52,7 @@ pub struct UpdateNodeInput {
     pub published_at: Option<Option<DateTimeWithTimeZone>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, ToSchema)]
 pub struct ListNodesFilter {
     pub kind: Option<String>,
     pub status: Option<ContentStatus>,

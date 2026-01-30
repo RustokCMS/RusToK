@@ -1,10 +1,11 @@
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use utoipa::ToSchema;
 
 use super::PriceResponse;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct CreateVariantInput {
     pub sku: Option<String>,
     pub barcode: Option<String>,
@@ -24,14 +25,14 @@ fn default_inventory_policy() -> String {
     "deny".to_string()
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct PriceInput {
     pub currency_code: String,
     pub amount: Decimal,
     pub compare_at_amount: Option<Decimal>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct UpdateVariantInput {
     pub sku: Option<String>,
     pub barcode: Option<String>,
@@ -42,7 +43,7 @@ pub struct UpdateVariantInput {
     pub weight_unit: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct VariantResponse {
     pub id: Uuid,
     pub product_id: Uuid,
@@ -61,7 +62,7 @@ pub struct VariantResponse {
     pub position: i32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct AdjustInventoryInput {
     pub variant_id: Uuid,
     pub adjustment: i32,
