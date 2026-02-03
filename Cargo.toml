@@ -81,8 +81,8 @@ hex = "0.4"
 iggy = "0.4"
 metrics = "0.23"
 metrics-exporter-prometheus = "0.15"
-opentelemetry = "0.23"
-opentelemetry_sdk = "0.23"
+opentelemetry = "0.22"
+opentelemetry_sdk = "0.22"
 
 # Internal crates
 rustok-core = { path = "crates/rustok-core" }

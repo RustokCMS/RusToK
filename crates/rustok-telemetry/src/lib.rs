@@ -1,7 +1,8 @@
-use metrics_exporter_prometheus::{PrometheusBuilder, PrometheusHandle};
+use metrics_exporter_prometheus::{BuildError, PrometheusBuilder, PrometheusHandle};
 use once_cell::sync::OnceCell;
+use opentelemetry::trace::TraceContextExt;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
-use tracing_subscriber::{fmt, layer::SubscriberExt, EnvFilter, Registry};
+use tracing_subscriber::{fmt, layer::SubscriberExt, EnvFilter, Layer, Registry};
 
 static PROMETHEUS_HANDLE: OnceCell<PrometheusHandle> = OnceCell::new();
 
@@ -18,9 +19,17 @@ pub struct TelemetryConfig {
     pub metrics: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct TelemetryHandles {
     pub metrics: Option<PrometheusHandle>,
+}
+
+impl std::fmt::Debug for TelemetryHandles {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TelemetryHandles")
+            .field("metrics", &self.metrics.is_some())
+            .finish()
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -32,16 +41,17 @@ pub enum TelemetryError {
 }
 
 pub fn init(config: TelemetryConfig) -> Result<TelemetryHandles, TelemetryError> {
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
-    let fmt_layer = match config.log_format {
+    let env_filter =
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let fmt_layer: Box<dyn Layer<_> + Send + Sync> = match config.log_format {
         LogFormat::Json => fmt::layer()
+            .with_span_events(fmt::format::FmtSpan::CLOSE)
             .json()
-            .with_current_span(true)
-            .with_span_events(fmt::format::FmtSpan::CLOSE),
+            .boxed(),
         LogFormat::Pretty => fmt::layer()
+            .with_span_events(fmt::format::FmtSpan::CLOSE)
             .pretty()
-            .with_current_span(true)
-            .with_span_events(fmt::format::FmtSpan::CLOSE),
+            .boxed(),
     };
 
     let subscriber = Registry::default().with(env_filter).with(fmt_layer);
@@ -50,9 +60,8 @@ pub fn init(config: TelemetryConfig) -> Result<TelemetryHandles, TelemetryError>
 
     let metrics_handle = if config.metrics {
         let handle = PrometheusBuilder::new()
-            .with_prefix(config.service_name)
             .install_recorder()
-            .map_err(|error| TelemetryError::MetricsRecorder(error.to_string()))?;
+            .map_err(|error: BuildError| TelemetryError::MetricsRecorder(error.to_string()))?;
         let _ = PROMETHEUS_HANDLE.set(handle.clone());
         Some(handle)
     } else {
@@ -71,7 +80,8 @@ pub fn metrics_handle() -> Option<PrometheusHandle> {
 pub fn current_trace_id() -> Option<String> {
     let span = tracing::Span::current();
     let context = span.context();
-    let span_context = context.span().span_context();
+    let span_ref = context.span();
+    let span_context = span_ref.span_context();
     if span_context.is_valid() {
         Some(span_context.trace_id().to_string())
     } else {
