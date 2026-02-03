@@ -26,9 +26,22 @@ settings:
   rustok:
     tenant:
       enabled: true
-      resolution: host
+      resolution: header
       header_name: X-Tenant-ID
       default_id: 00000000-0000-0000-0000-000000000001
+    search:
+      enabled: true
+      driver: meilisearch
+      url: http://localhost:7700
+      api_key: masterKey
+      index_prefix: rustok_dev_
     features:
-      registration: true
+      registration_enabled: true
+      email_verification: false
+      multi_tenant: true
       search_indexing: true
+      oauth_enabled: false
+    rate_limit:
+      enabled: true
+      requests_per_minute: 60
+      burst: 10

@@ -74,7 +74,9 @@
 
 **RusToK settings (Loco `settings.rustok`):**
 - `tenant.enabled` / `tenant.resolution` / `tenant.header_name` / `tenant.default_id`
-- `features.registration` / `features.search_indexing`
+- `search.enabled` / `search.driver` / `search.url` / `search.api_key` / `search.index_prefix`
+- `features.registration_enabled` / `features.email_verification` / `features.multi_tenant` / `features.search_indexing` / `features.oauth_enabled`
+- `rate_limit.enabled` / `rate_limit.requests_per_minute` / `rate_limit.burst`
 
 ---
 
