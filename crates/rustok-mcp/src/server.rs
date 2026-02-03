@@ -19,11 +19,11 @@ pub async fn serve_stdio(config: McpServerConfig) -> Result<()> {
         registry: config.registry,
     };
 
-    rmcp::McpServer::new()
+    rmcp::server::McpServer::new()
         .register_tool(list_modules)
         .register_tool(module_exists)
         .with_state(state)
-        .serve(rmcp::transport::stdio::StdioTransport::default())
+        .serve(rmcp::transport::stdio())
         .await?;
 
     Ok(())
