@@ -67,7 +67,7 @@ leptos_router = "0.6"
 
 # Logging
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 async-trait = "0.1"
 rust_decimal = "1.36"
 utoipa = "4.2"

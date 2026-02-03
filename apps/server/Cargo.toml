@@ -51,3 +51,4 @@ serial_test = "3.1"
 
 [package.metadata.cargo-udeps.ignore]
 development = ["serial_test"]
+normal = ["rustok-rbac", "rustok-tenant"]

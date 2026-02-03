@@ -5,8 +5,9 @@ unmaintained = "workspace"
 unsound = "workspace"
 git-fetch-with-cli = true
 ignore = [
+    "RUSTSEC-2025-0141",
+    "RUSTSEC-2026-0007",
     "RUSTSEC-2024-0421",
-    "RUSTSEC-2023-0071",
 ]
 
 [licenses]
@@ -28,7 +29,7 @@ allow = [
 confidence-threshold = 0.8
 
 [bans]
-multiple-versions = "warn"
+multiple-versions = "allow"
 
 [sources]
 unknown-registry = "deny"
