@@ -17,5 +17,11 @@
 - `handlers/` — обработчики событий.
 - `services/` — пересборка и обновление индексов.
 
+## События, которые триггерят пересборку
+- `ProductCreated`, `ProductUpdated`, `ProductPublished`, `ProductDeleted`.
+- `VariantCreated`, `VariantUpdated`, `VariantDeleted`.
+- `InventoryUpdated`, `PriceUpdated` (ожидается `product_id` в payload для быстрого реиндекса).
+- `ReindexRequested` (массовая пересборка или точечный реиндекс).
+
 ## Кому нужен
 Поиску, витрине, любым read-heavy запросам.

@@ -30,7 +30,7 @@ impl PricingService {
         amount: Decimal,
         compare_at_amount: Option<Decimal>,
     ) -> CommerceResult<()> {
-        let _variant = entities::product_variant::Entity::find_by_id(variant_id)
+        let variant = entities::product_variant::Entity::find_by_id(variant_id)
             .filter(entities::product_variant::Column::TenantId.eq(tenant_id))
             .one(&self.db)
             .await?
@@ -84,6 +84,7 @@ impl PricingService {
             Some(actor_id),
             DomainEvent::PriceUpdated {
                 variant_id,
+                product_id: variant.product_id,
                 currency: currency_code.to_string(),
                 old_amount: old_cents,
                 new_amount: new_cents,

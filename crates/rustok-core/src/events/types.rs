@@ -154,6 +154,7 @@ pub enum DomainEvent {
     },
     InventoryUpdated {
         variant_id: Uuid,
+        product_id: Uuid,
         location_id: Uuid,
         old_quantity: i32,
         new_quantity: i32,
@@ -166,6 +167,7 @@ pub enum DomainEvent {
     },
     PriceUpdated {
         variant_id: Uuid,
+        product_id: Uuid,
         currency: String,
         old_amount: Option<i64>,
         new_amount: i64,
