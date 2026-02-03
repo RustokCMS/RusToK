@@ -13,3 +13,8 @@ serde.workspace = true
 schemars = "0.8"
 tokio.workspace = true
 rustok-core.workspace = true
+
+[dev-dependencies]
+async-trait.workspace = true
+sea-orm-migration.workspace = true
+tokio.workspace = true

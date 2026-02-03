@@ -142,7 +142,8 @@ rustok/
 │   ├── rustok-tenant          # Multi-tenancy helpers
 │   ├── rustok-rbac            # Roles & permissions
 │   ├── rustok-outbox          # Outbox transport
-│   └── rustok-iggy            # Streaming (optional)
+│   ├── rustok-iggy            # Streaming (optional)
+│   └── rustok-mcp             # MCP adapter (rmcp SDK)
 │
 └── apps/
     ├── server/                # Loco RS backend
@@ -152,7 +153,8 @@ rustok/
     │       ├── app.rs         # Loco hooks & routes
     │       └── main.rs
     ├── admin/                 # Admin UI (Next.js)
-    └── storefront/            # Storefront UI (Next.js)
+    ├── storefront/            # Storefront UI (Next.js)
+    └── mcp/                   # MCP server (stdio)
 ```
 
 ---

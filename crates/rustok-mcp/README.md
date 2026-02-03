@@ -1,0 +1,26 @@
+# rustok-mcp
+
+`rustok-mcp` is the MCP adapter crate for RusToK. It uses the official Rust SDK (`rmcp`) and
+exposes RusToK tools/resources by wiring them to platform services.
+
+## Goals
+
+- Keep MCP support as a thin adapter layer.
+- Reuse the `rmcp` SDK for protocol, schema, and transport handling.
+- Expose domain operations via typed tools with generated JSON Schemas.
+
+## Quick start
+
+```rust
+use rustok_core::registry::ModuleRegistry;
+use rustok_mcp::McpServerConfig;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let registry = ModuleRegistry::new();
+    let config = McpServerConfig::new(registry);
+    rustok_mcp::serve_stdio(config).await
+}
+```
+
+For more details see `docs/mcp.md`.

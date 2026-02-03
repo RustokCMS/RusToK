@@ -297,6 +297,7 @@ cargo loco generate controller products --api
 ## 🏗️ Architecture
 
 For a detailed breakdown of the system logic, event flow, and CQRS-lite implementation, see [Detailed Architecture Documentation](docs/architecture.md).
+MCP adapter details live in [docs/mcp.md](docs/mcp.md).
 
 ### Project Structure
 
@@ -317,10 +318,12 @@ RusToK/
 │   │       ├── pages/          # Admin views
 │   │       └── components/     # Reusable UI
 │   │
-│   └── storefront/             # 🛍️ Public Store (Leptos SSR)
-│       └── src/
-│           ├── pages/          # SEO-optimized pages
-│           └── components/     # Store UI components
+│   ├── storefront/             # 🛍️ Public Store (Leptos SSR)
+│   │   └── src/
+│   │       ├── pages/          # SEO-optimized pages
+│   │       └── components/     # Store UI components
+│   │
+│   └── mcp/                     # 🤖 MCP adapter server (stdio)
 │
 ├── crates/
 │   ├── rustok-core/            # 🧠 Infrastructure (Auth, Events, RBAC)
@@ -328,6 +331,7 @@ RusToK/
 │   ├── rustok-blog/            # 📰 Blogging (Wraps Content)
 │   ├── rustok-commerce/        # 🛒 Shop (Products, Orders, Inventory)
 │   ├── rustok-index/           # 🔎 CQRS Read Models & Search
+│   ├── rustok-mcp/             # 🤖 MCP adapter (rmcp SDK)
 │   └── ...
 └── Cargo.toml                  # Workspace configuration
 ```
