@@ -100,12 +100,12 @@ impl EventHandler for ProductIndexer {
                 self.index_one(&ctx, *product_id).await?;
             }
 
-            DomainEvent::InventoryUpdated { .. } => {
-                // TODO: resolve product_id from variant_id
+            DomainEvent::InventoryUpdated { product_id, .. } => {
+                self.index_one(&ctx, *product_id).await?;
             }
 
-            DomainEvent::PriceUpdated { .. } => {
-                // TODO: resolve product_id from variant_id
+            DomainEvent::PriceUpdated { product_id, .. } => {
+                self.index_one(&ctx, *product_id).await?;
             }
 
             DomainEvent::ReindexRequested { target_id, .. } => {

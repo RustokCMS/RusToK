@@ -71,7 +71,7 @@ To ensure maximum Performance on read paths (Storefront) without sacrificing dat
 
 ### 3. Event-Driven Decoupling
 Modules do not call each other directly. 
-- If `rustok-commerce` updates a product price, it emits a `ProductUpdated` event.
+- If `rustok-commerce` updates inventory or pricing, it emits `InventoryUpdated`/`PriceUpdated` events (with `product_id` for index refreshes).
 - The `rustok-index` module reacts and updates the search index.
 - A notification module (if present) might react and send an email.
 

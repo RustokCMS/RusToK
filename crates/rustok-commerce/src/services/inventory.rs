@@ -62,6 +62,7 @@ impl InventoryService {
             Some(actor_id),
             DomainEvent::InventoryUpdated {
                 variant_id: input.variant_id,
+                product_id: variant.product_id,
                 location_id: Uuid::nil(),
                 old_quantity,
                 new_quantity,
@@ -110,6 +111,7 @@ impl InventoryService {
             Some(actor_id),
             DomainEvent::InventoryUpdated {
                 variant_id,
+                product_id: variant.product_id,
                 location_id: Uuid::nil(),
                 old_quantity,
                 new_quantity: quantity,
