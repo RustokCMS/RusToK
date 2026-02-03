@@ -2,10 +2,9 @@ use axum::{extract::Query, Json, State};
 use loco_rs::prelude::*;
 use serde::Deserialize;
 use utoipa::{IntoParams, ToSchema};
-use uuid::Uuid;
 
 use rustok_core::EventBus;
-use rustok_pages::{CreatePageInput, PageError, PageResponse, PageService};
+use rustok_pages::{CreatePageInput, PageResponse, PageService};
 
 use crate::context::TenantContext;
 use crate::extractors::auth::CurrentUser;
@@ -39,17 +38,14 @@ pub async fn get_page(
 
     let service = PageService::new(ctx.db.clone(), EventBus::default());
     let page = service
-        .get_page_by_slug(tenant.id, &locale, &slug)
+        .get_by_slug(tenant.id, user.security_context(), &locale, &slug)
         .await
-        .map_err(|err| match err {
-            PageError::PageNotFound { .. } => Error::NotFound,
-            PageError::BodyNotFound { .. } => Error::NotFound,
-            _ => Error::BadRequest(err.to_string()),
-        })?;
+        .map_err(|err| Error::BadRequest(err.to_string()))?;
 
-    let _ = user;
-
-    Ok(Json(page))
+    match page {
+        Some(page) => Ok(Json(page)),
+        None => Err(Error::NotFound),
+    }
 }
 
 /// Create a new page
@@ -59,7 +55,7 @@ pub async fn get_page(
     tag = "pages",
     request_body = CreatePageInput,
     responses(
-        (status = 201, description = "Page created", body = Uuid),
+        (status = 201, description = "Page created", body = PageResponse),
         (status = 400, description = "Invalid input"),
         (status = 401, description = "Unauthorized")
     )
@@ -69,13 +65,13 @@ pub async fn create_page(
     tenant: TenantContext,
     user: CurrentUser,
     Json(input): Json<CreatePageInput>,
-) -> Result<Json<Uuid>> {
+) -> Result<Json<PageResponse>> {
     let service = PageService::new(ctx.db.clone(), EventBus::default());
-    let page_id = service
-        .create_page(tenant.id, user.security_context(), input)
+    let page = service
+        .create(tenant.id, user.security_context(), input)
         .await
         .map_err(|err| Error::BadRequest(err.to_string()))?;
-    Ok(Json(page_id))
+    Ok(Json(page))
 }
 
 pub fn routes() -> Routes {

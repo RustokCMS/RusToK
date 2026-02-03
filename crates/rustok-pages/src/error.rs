@@ -1,21 +1,19 @@
-use rustok_content::ContentError;
-use sea_orm::DbErr;
 use thiserror::Error;
 use uuid::Uuid;
 
-#[derive(Debug, Error)]
-pub enum PageError {
+#[derive(Error, Debug)]
+pub enum PagesError {
     #[error("Content error: {0}")]
-    Content(#[from] ContentError),
+    Content(#[from] rustok_content::ContentError),
 
-    #[error("Database error: {0}")]
-    Database(#[from] DbErr),
+    #[error("Page not found: {0}")]
+    PageNotFound(Uuid),
 
-    #[error("Page not found for slug '{slug}' and locale '{locale}'")]
-    PageNotFound { slug: String, locale: String },
+    #[error("Block not found: {0}")]
+    BlockNotFound(Uuid),
 
-    #[error("Missing body for page {node_id} and locale {locale}")]
-    BodyNotFound { node_id: Uuid, locale: String },
+    #[error("Menu not found: {0}")]
+    MenuNotFound(Uuid),
 }
 
-pub type PageResult<T> = Result<T, PageError>;
+pub type PagesResult<T> = Result<T, PagesError>;

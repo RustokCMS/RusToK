@@ -1,3 +1,7 @@
+//! RusToK Pages Module
+//!
+//! Page management, builder blocks, and navigation menus.
+
 use async_trait::async_trait;
 use rustok_core::{MigrationSource, RusToKModule};
 use sea_orm_migration::MigrationTrait;
@@ -6,9 +10,9 @@ pub mod dto;
 pub mod error;
 pub mod services;
 
-pub use dto::{CreatePageInput, PageResponse};
-pub use error::{PageError, PageResult};
-pub use services::PageService;
+pub use dto::*;
+pub use error::{PagesError, PagesResult};
+pub use services::{BlockService, MenuService, PageService};
 
 pub struct PagesModule;
 
@@ -23,7 +27,7 @@ impl RusToKModule for PagesModule {
     }
 
     fn description(&self) -> &'static str {
-        "Static pages module (About, Contacts, Privacy Policy, Landing Pages)"
+        "Static pages, blocks, and menus"
     }
 
     fn version(&self) -> &'static str {

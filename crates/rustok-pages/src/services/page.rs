@@ -1,0 +1,378 @@
+use sea_orm::DatabaseConnection;
+use tracing::instrument;
+use uuid::Uuid;
+
+use rustok_content::{
+    BodyInput, CreateNodeInput, ListNodesFilter, NodeService, NodeTranslationInput, UpdateNodeInput,
+};
+use rustok_core::{EventBus, SecurityContext};
+
+use crate::dto::*;
+use crate::error::{PagesError, PagesResult};
+use crate::services::BlockService;
+
+const PAGE_KIND: &str = "page";
+
+pub struct PageService {
+    nodes: NodeService,
+    blocks: BlockService,
+}
+
+impl PageService {
+    pub fn new(db: DatabaseConnection, event_bus: EventBus) -> Self {
+        Self {
+            nodes: NodeService::new(db.clone(), event_bus.clone()),
+            blocks: BlockService::new(db, event_bus),
+        }
+    }
+
+    #[instrument(skip(self, input))]
+    pub async fn create(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        input: CreatePageInput,
+    ) -> PagesResult<PageResponse> {
+        let template = input.template.clone().unwrap_or_else(|| "default".to_string());
+
+        let metadata = build_page_metadata(&template, &input.translations, None);
+
+        let bodies = input
+            .body
+            .map(|body| {
+                vec![BodyInput {
+                    locale: body.locale,
+                    body: Some(body.content),
+                    format: body.format,
+                }]
+            })
+            .unwrap_or_default();
+
+        let node = self
+            .nodes
+            .create_node(
+                tenant_id,
+                security.clone(),
+                CreateNodeInput {
+                    kind: PAGE_KIND.to_string(),
+                    status: Some(if input.publish {
+                        rustok_content::entities::node::ContentStatus::Published
+                    } else {
+                        rustok_content::entities::node::ContentStatus::Draft
+                    }),
+                    parent_id: None,
+                    author_id: security.user_id,
+                    category_id: None,
+                    position: None,
+                    depth: None,
+                    reply_count: None,
+                    metadata,
+                    translations: input
+                        .translations
+                        .into_iter()
+                        .map(|translation| NodeTranslationInput {
+                            locale: translation.locale,
+                            title: Some(translation.title),
+                            slug: translation.slug,
+                            excerpt: None,
+                        })
+                        .collect(),
+                    bodies,
+                },
+            )
+            .await?;
+
+        if let Some(blocks) = input.blocks {
+            for block in blocks {
+                self.blocks
+                    .create(tenant_id, security.clone(), node.id, block)
+                    .await?;
+            }
+        }
+
+        self.get(tenant_id, security, node.id).await
+    }
+
+    #[instrument(skip(self))]
+    pub async fn get(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        page_id: Uuid,
+    ) -> PagesResult<PageResponse> {
+        let node = self.nodes.get_node(page_id).await?;
+        if node.kind != PAGE_KIND {
+            return Err(PagesError::PageNotFound(page_id));
+        }
+
+        let blocks = self.blocks.list_for_page(tenant_id, security, page_id).await?;
+        Ok(node_to_page(node, blocks))
+    }
+
+    #[instrument(skip(self))]
+    pub async fn get_by_slug(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        locale: &str,
+        slug: &str,
+    ) -> PagesResult<Option<PageResponse>> {
+        let node = self
+            .nodes
+            .get_by_slug(tenant_id, PAGE_KIND, locale, slug)
+            .await?;
+
+        match node {
+            Some(node) if node.status == rustok_content::entities::node::ContentStatus::Published => {
+                let blocks = self
+                    .blocks
+                    .list_for_page(tenant_id, security, node.id)
+                    .await?;
+                Ok(Some(node_to_page(node, blocks)))
+            }
+            _ => Ok(None),
+        }
+    }
+
+    #[instrument(skip(self))]
+    pub async fn list(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        filter: ListPagesFilter,
+    ) -> PagesResult<(Vec<PageListItem>, u64)> {
+        let (nodes, total) = self
+            .nodes
+            .list_nodes(
+                tenant_id,
+                security.clone(),
+                ListNodesFilter {
+                    kind: Some(PAGE_KIND.to_string()),
+                    status: filter.status,
+                    parent_id: None,
+                    author_id: None,
+                    locale: filter.locale,
+                    page: filter.page,
+                    per_page: filter.per_page,
+                },
+            )
+            .await?;
+
+        let mut pages = Vec::with_capacity(nodes.len());
+        for node in nodes {
+            let full_node = self.nodes.get_node(node.id).await?;
+            let template = full_node
+                .metadata
+                .get("template")
+                .and_then(|value| value.as_str())
+                .unwrap_or("default")
+                .to_string();
+
+            pages.push(PageListItem {
+                id: full_node.id,
+                status: full_node.status,
+                template,
+                title: node.title,
+                slug: node.slug,
+                updated_at: full_node.updated_at,
+            });
+        }
+
+        Ok((pages, total))
+    }
+
+    #[instrument(skip(self, input))]
+    pub async fn update(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        page_id: Uuid,
+        input: UpdatePageInput,
+    ) -> PagesResult<PageResponse> {
+        let existing = self.nodes.get_node(page_id).await?;
+        if existing.kind != PAGE_KIND {
+            return Err(PagesError::PageNotFound(page_id));
+        }
+
+        let template = input.template.clone().unwrap_or_else(|| {
+            existing
+                .metadata
+                .get("template")
+                .and_then(|value| value.as_str())
+                .unwrap_or("default")
+                .to_string()
+        });
+
+        let metadata = build_page_metadata(
+            &template,
+            input.translations.as_deref().unwrap_or(&[]),
+            Some(&existing.metadata),
+        );
+
+        let bodies = input.body.map(|body| {
+            vec![BodyInput {
+                locale: body.locale,
+                body: Some(body.content),
+                format: body.format,
+            }]
+        });
+
+        self.nodes
+            .update_node(
+                page_id,
+                security.clone(),
+                UpdateNodeInput {
+                    status: input.status,
+                    parent_id: None,
+                    author_id: None,
+                    category_id: None,
+                    position: None,
+                    depth: None,
+                    reply_count: None,
+                    metadata: Some(metadata),
+                    translations: input.translations.map(|translations| {
+                        translations
+                            .into_iter()
+                            .map(|translation| NodeTranslationInput {
+                                locale: translation.locale,
+                                title: Some(translation.title),
+                                slug: translation.slug,
+                                excerpt: None,
+                            })
+                            .collect()
+                    }),
+                    bodies,
+                    published_at: None,
+                },
+            )
+            .await?;
+
+        self.get(tenant_id, security, page_id).await
+    }
+
+    #[instrument(skip(self))]
+    pub async fn publish(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        page_id: Uuid,
+    ) -> PagesResult<PageResponse> {
+        self.nodes.publish_node(page_id, security.clone()).await?;
+        self.get(tenant_id, security, page_id).await
+    }
+
+    #[instrument(skip(self))]
+    pub async fn unpublish(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        page_id: Uuid,
+    ) -> PagesResult<PageResponse> {
+        self.nodes.unpublish_node(page_id, security.clone()).await?;
+        self.get(tenant_id, security, page_id).await
+    }
+
+    pub async fn delete(
+        &self,
+        tenant_id: Uuid,
+        security: SecurityContext,
+        page_id: Uuid,
+    ) -> PagesResult<()> {
+        self.blocks
+            .delete_all_for_page(tenant_id, security.clone(), page_id)
+            .await?;
+        self.nodes.delete_node(page_id, security).await?;
+        Ok(())
+    }
+}
+
+fn build_page_metadata(
+    template: &str,
+    translations: &[PageTranslationInput],
+    existing: Option<&serde_json::Value>,
+) -> serde_json::Value {
+    let mut metadata = existing
+        .cloned()
+        .filter(|value| value.is_object())
+        .unwrap_or_else(|| serde_json::json!({}));
+
+    metadata["template"] = serde_json::json!(template);
+
+    let mut seo = serde_json::Map::new();
+    for translation in translations {
+        let meta_title = translation.meta_title.clone();
+        let meta_description = translation.meta_description.clone();
+
+        if meta_title.is_some() || meta_description.is_some() {
+            seo.insert(
+                translation.locale.clone(),
+                serde_json::json!({
+                    "meta_title": meta_title,
+                    "meta_description": meta_description,
+                }),
+            );
+        }
+    }
+
+    if !seo.is_empty() {
+        metadata["seo"] = serde_json::Value::Object(seo);
+    } else if let Some(existing) = existing {
+        if let Some(existing_seo) = existing.get("seo") {
+            metadata["seo"] = existing_seo.clone();
+        }
+    }
+
+    metadata
+}
+
+fn node_to_page(node: rustok_content::dto::NodeResponse, blocks: Vec<BlockResponse>) -> PageResponse {
+    let template = node
+        .metadata
+        .get("template")
+        .and_then(|value| value.as_str())
+        .unwrap_or("default")
+        .to_string();
+
+    let seo = node.metadata.get("seo").and_then(|value| value.as_object());
+
+    let translations = node
+        .translations
+        .into_iter()
+        .map(|translation| {
+            let meta = seo
+                .and_then(|map| map.get(&translation.locale))
+                .and_then(|value| value.as_object());
+
+            PageTranslationResponse {
+                locale: translation.locale,
+                title: translation.title,
+                slug: translation.slug,
+                meta_title: meta.and_then(|value| value.get("meta_title")).and_then(|value| value.as_str()).map(String::from),
+                meta_description: meta
+                    .and_then(|value| value.get("meta_description"))
+                    .and_then(|value| value.as_str())
+                    .map(String::from),
+            }
+        })
+        .collect();
+
+    let body = node.bodies.into_iter().next().map(|body| PageBodyResponse {
+        locale: body.locale,
+        content: body.body.unwrap_or_default(),
+        format: body.format,
+        updated_at: body.updated_at,
+    });
+
+    PageResponse {
+        id: node.id,
+        status: node.status,
+        template,
+        created_at: node.created_at,
+        updated_at: node.updated_at,
+        published_at: node.published_at,
+        translations,
+        body,
+        blocks,
+        metadata: node.metadata,
+    }
+}
