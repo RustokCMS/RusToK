@@ -770,4 +770,159 @@ PHASE 5: Business Modules (Week 5+)
 □ 5.2 rustok-content (example module)
 ```
 
+---
+
+## 23. CHANGE PLAN (Consensus-Driven)
+
+### 23.1 Overview by Stage
+
+| Stage | Area | Change Type |
+|-------|------|-------------|
+| 1 | Event System | Expansion + new crate |
+| 2 | Iggy Integration | New crate |
+| 3 | Platform Foundation | Refactor + improvements |
+
+### 23.2 Stage 1: Event System — Detailed Changes
+
+**1.1 Extend `EventEnvelope` (P0)**  
+**File:** `crates/rustok-core/src/events/envelope.rs` (or current location)  
+Add fields:
+- `correlation_id: Uuid` — link events in a chain
+- `causation_id: Option<Uuid>` — source event ID
+- `tenant_id: Uuid` — multi-tenant context
+- `retry_count: u32` — retry counter
+- `timestamp: DateTime<Utc>` — if not already present
+
+**1.2 Extend `EventTransport` trait (P0)**  
+**File:** `crates/rustok-core/src/events/transport.rs` (or current location)  
+Add methods:
+- `async fn publish_batch(&self, events: Vec<EventEnvelope>) -> Result<()>`
+- `async fn acknowledge(&self, event_id: Uuid) -> Result<()>` (Outbox/Iggy)
+- `fn reliability_level(&self) -> ReliabilityLevel` (L0/L1/L2)
+
+**1.3 New crate `rustok-outbox` (P0)**  
+**Path:** `crates/rustok-outbox/`  
+Structure:
+```
+crates/rustok-outbox/
+├── Cargo.toml
+└── src/
+    ├── lib.rs
+    ├── transport.rs      # OutboxTransport impl EventTransport
+    ├── entity.rs         # sys_events SeaORM entity
+    ├── relay.rs          # background relay worker
+    └── migration.rs      # SQL migration for sys_events
+```
+Key components:
+- `sys_events` table (`id`, `payload`, `status`, `created_at`, `dispatched_at`)
+- `OutboxTransport` writes transactionally
+- Relay worker publishes pending events and marks dispatched
+
+**1.4 Add `MemoryTransport` if missing (P1)**  
+**File:** `crates/rustok-core/src/events/memory.rs`  
+In-memory transport via `tokio::sync::broadcast`.
+
+### 23.3 Stage 2: Iggy Integration — Detailed Changes
+
+**2.1 New crate `rustok-iggy` (P1)**  
+**Path:** `crates/rustok-iggy/`  
+Structure:
+```
+crates/rustok-iggy/
+├── Cargo.toml
+└── src/
+    ├── lib.rs
+    ├── config.rs           # IggyConfig (or in rustok-config)
+    ├── transport.rs        # IggyTransport impl EventTransport
+    ├── backend/
+    │   ├── mod.rs          # IggyBackend trait
+    │   ├── embedded.rs     # EmbeddedBackend
+    │   └── remote.rs       # RemoteBackend
+    ├── topology.rs         # auto-create streams/topics
+    ├── partitioning.rs     # partition by tenant_id
+    ├── consumer.rs         # consumer group management
+    └── replay.rs           # event replay API
+```
+
+**2.2 Add Iggy config (P1)**  
+**File:** `crates/rustok-config/src/types.rs` (or current location)  
+Add:
+- `IggyConfig`
+- `IggyEmbeddedConfig`
+- `IggyRemoteConfig`
+- `IggyTopologyConfig`
+
+**2.3 Feature flag for Iggy (P1)**  
+**File:** `crates/rustok-core/Cargo.toml` or workspace  
+Add:
+```toml
+[features]
+iggy = ["rustok-iggy"]
+```
+
+### 23.4 Stage 3: Platform Foundation — Detailed Changes
+
+**3.1 Extend `RusToKModule` trait (P0)**  
+**File:** `crates/rustok-core/src/module.rs`  
+Add:
+- `fn dependencies(&self) -> &'static [&'static str]` (topological sort)
+- `async fn health(&self) -> HealthStatus` (K8s probes)
+
+Add enum:
+- `HealthStatus { Healthy, Degraded, Unhealthy }`
+
+**3.2 Improve `AppContext` (P0)**  
+**File:** `crates/rustok-core/src/context.rs`  
+Add fields (if missing):
+- `events: Arc<dyn EventTransport>`
+- `cache: Arc<dyn CacheBackend>` (Phase 2)
+- `search: Arc<dyn SearchBackend>` (Phase 2)
+
+**3.3 Telemetry improvements (P1)**  
+**File:** `crates/rustok-telemetry/`  
+Check/add:
+- JSON logging for production
+- Prometheus metrics endpoint
+- TraceId propagation in events
+
+**3.4 Config hierarchy (P1)**  
+**File:** `crates/rustok-config/src/lib.rs`  
+Check/add:
+- `default.toml → local.toml → ENV` overrides
+- `RUSTOK_*` environment prefix
+
+### 23.5 Summary Table of Changes
+
+| # | Change | Type | File/Crate | Priority |
+|---|--------|------|-----------|----------|
+| 1.1 | EventEnvelope fields | Modify | `rustok-core/events` | P0 |
+| 1.2 | EventTransport methods | Modify | `rustok-core/events` | P0 |
+| 1.3 | OutboxTransport | New crate | `rustok-outbox` | P0 |
+| 1.4 | MemoryTransport | Add/Check | `rustok-core/events` | P1 |
+| 2.1 | IggyTransport | New crate | `rustok-iggy` | P1 |
+| 2.2 | Iggy config | Add | `rustok-config` | P1 |
+| 2.3 | Iggy feature flag | Add | `Cargo.toml` | P1 |
+| 3.1 | Module dependencies/health | Modify | `rustok-core/module` | P0 |
+| 3.2 | AppContext fields | Modify | `rustok-core/context` | P0 |
+| 3.3 | Telemetry improvements | Check/Add | `rustok-telemetry` | P1 |
+| 3.4 | Config hierarchy | Check/Add | `rustok-config` | P1 |
+
+### 23.6 Delivery Order
+
+**Week 1 (P0):**
+- 1.1 EventEnvelope extension
+- 1.2 EventTransport extension
+- 3.1 RusToKModule extension
+- 3.2 AppContext extension
+
+**Week 2 (P0 continued):**
+- 1.3 `rustok-outbox` crate (full implementation)
+
+**Week 3 (P1, production-ready):**
+- 2.1 `rustok-iggy` crate
+- 2.2 Iggy config
+- 2.3 Feature flags
+- 3.3 Telemetry check
+- 3.4 Config check
+
 END OF MANIFEST v4.1
