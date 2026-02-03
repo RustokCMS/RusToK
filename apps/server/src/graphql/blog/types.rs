@@ -73,7 +73,7 @@ impl From<NodeResponse> for GqlPost {
         let body = node.bodies.first();
 
         // Extract tags from metadata
-        let tags = if let Some(serde_json::Value::Object(map)) = &node.metadata {
+        let tags = if let serde_json::Value::Object(map) = &node.metadata {
             if let Some(tags_val) = map.get("tags") {
                 serde_json::from_value(tags_val.clone()).unwrap_or_default()
             } else {

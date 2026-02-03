@@ -77,10 +77,11 @@ impl ContentMutation {
         let security = SecurityContext::new(auth.role.clone(), Some(auth.user_id));
 
         let service = NodeService::new(db.clone(), event_bus.clone());
+        let resolved_author_id = input.author_id.or(author_id);
         let domain_input = rustok_content::dto::UpdateNodeInput {
-            parent_id: input.parent_id,
-            author_id: input.author_id,
-            category_id: input.category_id,
+            parent_id: input.parent_id.map(Some),
+            author_id: resolved_author_id.map(Some),
+            category_id: input.category_id.map(Some),
             status: input.status.map(Into::into),
             position: input.position,
             depth: input.depth,
@@ -118,7 +119,7 @@ impl ContentMutation {
         &self,
         ctx: &Context<'_>,
         id: Uuid,
-        author_id: Option<Uuid>,
+        _author_id: Option<Uuid>,
     ) -> Result<bool> {
         let db = ctx.data::<DatabaseConnection>()?;
         let event_bus = ctx.data::<EventBus>()?;

@@ -5,7 +5,7 @@ pub mod posts;
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/blog")
-        .add("/health", super::health::routes())
+        .add("/health", get(super::health::health))
         .add("/posts", get(posts::list_posts).post(posts::create_post))
         .add(
             "/posts/:id",

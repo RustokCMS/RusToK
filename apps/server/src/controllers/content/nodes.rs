@@ -4,7 +4,7 @@ use axum::{
 };
 use loco_rs::prelude::*;
 use rustok_content::{CreateNodeInput, ListNodesFilter, NodeService, UpdateNodeInput};
-use rustok_core::{EventBus, SecurityContext};
+use rustok_core::EventBus;
 use uuid::Uuid;
 
 use crate::context::TenantContext;
