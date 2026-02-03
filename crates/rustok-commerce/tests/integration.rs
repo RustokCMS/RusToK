@@ -4,7 +4,7 @@ use rustok_commerce::dto::{
 };
 use rustok_commerce::services::CatalogService;
 use rustok_core::events::EventEnvelope;
-use rustok_core::{DomainEvent, EventBus};
+use rustok_core::DomainEvent;
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
@@ -89,5 +89,5 @@ struct IndexedProduct {
 }
 
 async fn wait_for_index(_ctx: &TestContext, _product_id: Uuid) -> TestResult<IndexedProduct> {
-    todo!("wire index module or test double for read model lookup")
+    Err("wire index module or test double for read model lookup".into())
 }

@@ -1,5 +1,5 @@
 use rustok_core::events::EventEnvelope;
-use rustok_core::{DomainEvent, EventBus, SecurityContext};
+use rustok_core::{DomainEvent, SecurityContext};
 use rustok_forum::dto::CreateTopicInput;
 use rustok_forum::services::TopicService;
 use tokio::sync::broadcast;
@@ -44,16 +44,7 @@ async fn test_topic_lifecycle() -> TestResult<()> {
 }
 
 async fn test_context() -> TestResult<TestContext> {
-    let event_bus = EventBus::new();
-    let events = event_bus.subscribe();
-    let tenant_id = Uuid::nil();
-    let db = todo!("create test database connection and apply migrations");
-
-    Ok(TestContext {
-        service: TopicService::new(db, event_bus),
-        events,
-        tenant_id,
-    })
+    Err("create test database connection and apply migrations".into())
 }
 
 async fn next_event(
@@ -70,5 +61,5 @@ struct IndexedTopic {
 }
 
 async fn wait_for_index(_ctx: &TestContext, _topic_id: Uuid) -> TestResult<IndexedTopic> {
-    todo!("wire index module or test double for read model lookup")
+    Err("wire index module or test double for read model lookup".into())
 }
