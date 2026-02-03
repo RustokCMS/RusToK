@@ -14,7 +14,6 @@ use crate::serialization::{BincodeSerializer, EventSerializer, JsonSerializer};
 use crate::topology::TopologyManager;
 use crate::{producer, topology};
 
-#[derive(Debug)]
 pub struct IggyTransport {
     config: IggyConfig,
     backend: Arc<dyn IggyBackend>,
