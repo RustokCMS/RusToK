@@ -10,6 +10,7 @@ rustok-core.workspace = true
 
 # Database
 sea-orm.workspace = true
+sea-orm-migration.workspace = true
 
 # Async
 tokio.workspace = true

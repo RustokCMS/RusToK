@@ -34,6 +34,16 @@
 - **Specialized Modules:** Товары, Блог и пр. — у каждого свои таблицы и бизнес-логика.
 - **Empty Tables Cost Zero:** Неиспользуемые таблицы не нагружают систему.
 
+**Module Contracts (code-aligned):**
+`rustok-core` — инфраструктурный crate, не регистрируется как `RusToKModule`. Остальные модули реализуют единый контракт (slug/name/description/version) и стандартный набор unit-тестов для метаданных и миграций.
+
+| Crate | slug | name | description |
+|-------|------|------|-------------|
+| `rustok-content` | `content` | Content | Core CMS Module (Nodes, Bodies, Categories) |
+| `rustok-blog` | `blog` | Blog | Posts, Pages, Comments |
+| `rustok-commerce` | `commerce` | Commerce | Products, Orders, Cart, Checkout |
+| `rustok-index` | `index` | Index | CQRS Read Model (Fast Search) |
+
 ### 2.3 CQRS (Write vs Read)
 - **Write Model (Modules):** строгие реляционные таблицы (3NF), транзакции, валидация.
 - **Read Model (Index/Catalog):** денормализованные JSONB-таблицы/индексы, GIN, быстрый поиск.
