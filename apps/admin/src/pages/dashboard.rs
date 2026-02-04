@@ -1,25 +1,63 @@
 use leptos::*;
 
-use crate::components::ui::Button;
+use crate::components::ui::{Button, LanguageToggle};
+use crate::providers::locale::{translate, use_locale};
 use crate::providers::auth::use_auth;
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
     let auth = use_auth();
+    let locale = use_locale();
 
-    let stats = [
-        ("Активные тенанты", "28", "+3 за неделю"),
-        ("Модули в работе", "12", "Commerce, Blog, Tickets"),
-        ("Время отклика API", "128ms", "−14% за 7 дней"),
-        ("Задач в очереди", "7", "2 критичных"),
-    ];
+    let stats = move || {
+        vec![
+            (
+                translate(locale.locale.get(), "dashboard.stats.tenants"),
+                "28",
+                translate(locale.locale.get(), "dashboard.stats.tenantsHint"),
+            ),
+            (
+                translate(locale.locale.get(), "dashboard.stats.modules"),
+                "12",
+                translate(locale.locale.get(), "dashboard.stats.modulesHint"),
+            ),
+            (
+                translate(locale.locale.get(), "dashboard.stats.latency"),
+                "128ms",
+                translate(locale.locale.get(), "dashboard.stats.latencyHint"),
+            ),
+            (
+                translate(locale.locale.get(), "dashboard.stats.queue"),
+                "7",
+                translate(locale.locale.get(), "dashboard.stats.queueHint"),
+            ),
+        ]
+    };
 
-    let activity = [
-        ("Новый тенант", "Nordic Supply", "2 минуты назад"),
-        ("Модуль", "Commerce обновлён до v1.0.3", "20 минут назад"),
-        ("Безопасность", "Обновлены роли редакторов", "1 час назад"),
-        ("Контент", "Запущена публикация промо-страницы", "Сегодня"),
-    ];
+    let activity = move || {
+        vec![
+            (
+                translate(locale.locale.get(), "dashboard.activity.tenant"),
+                translate(locale.locale.get(), "dashboard.activity.tenantDetail"),
+                translate(locale.locale.get(), "dashboard.activity.tenantTime"),
+            ),
+            (
+                translate(locale.locale.get(), "dashboard.activity.module"),
+                translate(locale.locale.get(), "dashboard.activity.moduleDetail"),
+                translate(locale.locale.get(), "dashboard.activity.moduleTime"),
+            ),
+            (
+                translate(locale.locale.get(), "dashboard.activity.security"),
+                translate(locale.locale.get(), "dashboard.activity.securityDetail"),
+                translate(locale.locale.get(), "dashboard.activity.securityTime"),
+            ),
+            (
+                translate(locale.locale.get(), "dashboard.activity.content"),
+                translate(locale.locale.get(), "dashboard.activity.contentDetail"),
+                translate(locale.locale.get(), "dashboard.activity.contentTime"),
+            ),
+        ]
+    };
 
     let logout = move |_| {
         auth.set_token.set(None);
@@ -30,7 +68,7 @@ pub fn Dashboard() -> impl IntoView {
         <section class="dashboard">
             <header class="dashboard-header">
                 <div>
-                    <span class="badge">"Dashboard"</span>
+                    <span class="badge">{move || translate(locale.locale.get(), "app.dashboard")}</span>
                     <h1>
                         {move || {
                             auth.user
@@ -40,21 +78,22 @@ pub fn Dashboard() -> impl IntoView {
                         }}
                     </h1>
                     <p style="margin:8px 0 0; color:#64748b;">
-                        "Сводка системы RusToK: ключевые метрики и быстрый доступ к модулям."
+                        {move || translate(locale.locale.get(), "dashboard.subtitle")}
                     </p>
                 </div>
                 <div class="dashboard-actions">
+                    <LanguageToggle />
                     <Button on_click=logout class="ghost-button">
-                        "Выйти"
+                        {move || translate(locale.locale.get(), "dashboard.logout")}
                     </Button>
                     <Button on_click=move |_| {}>
-                        "Создать тенант"
+                        {move || translate(locale.locale.get(), "dashboard.createTenant")}
                     </Button>
                 </div>
             </header>
 
             <div class="stats-grid">
-                {stats
+                {stats()
                     .iter()
                     .map(|(title, value, hint)| {
                         view! {
@@ -70,8 +109,8 @@ pub fn Dashboard() -> impl IntoView {
 
             <div class="dashboard-panels">
                 <div class="panel">
-                    <h4>"Последняя активность"</h4>
-                    {activity
+                    <h4>{move || translate(locale.locale.get(), "dashboard.activity.title")}</h4>
+                    {activity()
                         .iter()
                         .map(|(title, detail, time)| {
                             view! {
@@ -87,12 +126,20 @@ pub fn Dashboard() -> impl IntoView {
                         .collect_view()}
                 </div>
                 <div class="panel">
-                    <h4>"Быстрые действия"</h4>
+                    <h4>{move || translate(locale.locale.get(), "dashboard.quick.title")}</h4>
                     <div class="quick-actions">
-                        <button type="button">"Запустить аудит безопасности"</button>
-                        <button type="button">"Открыть список модулей"</button>
-                        <button type="button">"Проверить метрики API"</button>
-                        <button type="button">"Сформировать отчёт по ролям"</button>
+                        <button type="button">
+                            {move || translate(locale.locale.get(), "dashboard.quick.security")}
+                        </button>
+                        <a href="/users">
+                            {move || translate(locale.locale.get(), "dashboard.quick.users")}
+                        </a>
+                        <button type="button">
+                            {move || translate(locale.locale.get(), "dashboard.quick.metrics")}
+                        </button>
+                        <button type="button">
+                            {move || translate(locale.locale.get(), "dashboard.quick.roles")}
+                        </button>
                     </div>
                 </div>
             </div>
