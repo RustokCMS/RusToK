@@ -94,26 +94,26 @@ pub fn Register() -> impl IntoView {
                         value=tenant
                         set_value=set_tenant
                         placeholder="demo"
-                        label=Signal::derive(move || translate(locale.locale.get(), "register.tenantLabel").to_string())
+                        label=move || translate(locale.locale.get(), "register.tenantLabel")
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=Signal::derive(move || translate(locale.locale.get(), "register.emailLabel").to_string())
+                        label=move || translate(locale.locale.get(), "register.emailLabel")
                     />
                     <Input
                         value=name
                         set_value=set_name
                         placeholder="Alex Morgan"
-                        label=Signal::derive(move || translate(locale.locale.get(), "register.nameLabel").to_string())
+                        label=move || translate(locale.locale.get(), "register.nameLabel")
                     />
                     <Input
                         value=password
                         set_value=set_password
                         placeholder="••••••••"
                         type_="password"
-                        label=Signal::derive(move || translate(locale.locale.get(), "register.passwordLabel").to_string())
+                        label=move || translate(locale.locale.get(), "register.passwordLabel")
                     />
                     <p class="form-hint">{move || translate(locale.locale.get(), "register.passwordHint")}</p>
                     <Button on_click=on_submit class="w-full">
@@ -138,7 +138,7 @@ pub fn Register() -> impl IntoView {
                         value=invite_token
                         set_value=set_invite_token
                         placeholder="INVITE-2024-0001"
-                        label=Signal::derive(move || translate(locale.locale.get(), "register.inviteLabel").to_string())
+                        label=move || translate(locale.locale.get(), "register.inviteLabel")
                     />
                     <Button on_click=on_accept_invite class="w-full ghost-button">
                         {move || translate(locale.locale.get(), "register.inviteSubmit")}
@@ -154,7 +154,7 @@ pub fn Register() -> impl IntoView {
                         value=verification_email
                         set_value=set_verification_email
                         placeholder="admin@rustok.io"
-                        label=Signal::derive(move || translate(locale.locale.get(), "register.verifyLabel").to_string())
+                        label=move || translate(locale.locale.get(), "register.verifyLabel")
                     />
                     <Button on_click=on_resend_verification class="w-full ghost-button">
                         {move || translate(locale.locale.get(), "register.verifySubmit")}

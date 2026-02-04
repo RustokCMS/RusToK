@@ -53,14 +53,14 @@ pub fn use_locale() -> LocaleContext {
     use_context::<LocaleContext>().expect("LocaleContext not found")
 }
 
-pub fn translate(locale: Locale, key: &str) -> &'static str {
+pub fn translate(locale: Locale, key: &str) -> String {
     match locale {
         Locale::En => translate_en(key),
         Locale::Ru => translate_ru(key),
     }
 }
 
-fn translate_en(key: &str) -> &'static str {
+fn translate_en(key: &str) -> String {
     app::translate_en(key)
         .or_else(|| auth::translate_en(key))
         .or_else(|| login::translate_en(key))
@@ -68,9 +68,10 @@ fn translate_en(key: &str) -> &'static str {
         .or_else(|| users::translate_en(key))
         .or_else(|| errors::translate_en(key))
         .unwrap_or(key)
+        .to_string()
 }
 
-fn translate_ru(key: &str) -> &'static str {
+fn translate_ru(key: &str) -> String {
     app::translate_ru(key)
         .or_else(|| auth::translate_ru(key))
         .or_else(|| login::translate_ru(key))
@@ -78,6 +79,7 @@ fn translate_ru(key: &str) -> &'static str {
         .or_else(|| users::translate_ru(key))
         .or_else(|| errors::translate_ru(key))
         .unwrap_or(key)
+        .to_string()
 }
 
 fn local_storage() -> Option<web_sys::Storage> {

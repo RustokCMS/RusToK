@@ -141,22 +141,26 @@ pub fn Login() -> impl IntoView {
                         value=tenant
                         set_value=set_tenant
                         placeholder="demo"
-                        label=Signal::derive(move || translate(locale.locale.get(), "auth.tenantLabel").to_string())
+                        label=move || translate(locale.locale.get(), "auth.tenantLabel")
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=Signal::derive(move || translate(locale.locale.get(), "auth.emailLabel").to_string())
+                        label=move || translate(locale.locale.get(), "auth.emailLabel")
                     />
                     <Input
                         value=password
                         set_value=set_password
                         placeholder="••••••••"
                         type_="password"
-                        label=Signal::derive(move || translate(locale.locale.get(), "auth.passwordLabel").to_string())
+                        label=move || translate(locale.locale.get(), "auth.passwordLabel")
                     />
-                    <Button on_click=on_submit class="w-full" disabled=move || is_loading.get()>
+                    <Button
+                        on_click=on_submit
+                        class="w-full"
+                        disabled=Signal::derive(move || is_loading.get())
+                    >
                         {move || translate(locale.locale.get(), "auth.submit")}
                     </Button>
                     <div class="auth-links">

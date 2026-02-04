@@ -74,7 +74,7 @@ pub fn Users() -> impl IntoView {
     let (role_filter, set_role_filter) = signal(String::new());
     let (status_filter, set_status_filter) = signal(String::new());
 
-    let rest_resource = create_resource(
+    let rest_resource = Resource::new(
         move || refresh_counter.get(),
         move |_| {
             let token = api_token.get().trim().to_string();
@@ -94,7 +94,7 @@ pub fn Users() -> impl IntoView {
         },
     );
 
-    let graphql_resource = create_resource(
+    let graphql_resource = Resource::new(
         move || (refresh_counter.get(), page.get(), limit.get()),
         move |_| {
             let token = api_token.get().trim().to_string();
@@ -126,6 +126,14 @@ pub fn Users() -> impl IntoView {
     let previous_page = move |_| set_page.update(|value| *value = (*value - 1).max(1));
     let reset_pagination = move || set_page.set(1);
 
+    Effect::new(move |_| {
+        let value = limit_input.get();
+        if let Ok(parsed) = value.parse::<i64>() {
+            set_limit.set(parsed.max(1));
+            reset_pagination();
+        }
+    });
+
     view! {
         <section class="users-page">
             <header class="dashboard-header">
@@ -151,25 +159,19 @@ pub fn Users() -> impl IntoView {
                         value=api_token
                         set_value=set_api_token
                         placeholder="Bearer token"
-                        label=Signal::derive(move || translate(locale.locale.get(), "users.access.token").to_string())
+                        label=move || translate(locale.locale.get(), "users.access.token")
                     />
                     <Input
                         value=tenant_slug
                         set_value=set_tenant_slug
                         placeholder="demo"
-                        label=Signal::derive(move || translate(locale.locale.get(), "users.access.tenant").to_string())
+                        label=move || translate(locale.locale.get(), "users.access.tenant")
                     />
                     <Input
                         value=limit_input
-                        set_value=move |value| {
-                            set_limit_input.set(value.clone());
-                            if let Ok(parsed) = value.parse::<i64>() {
-                                set_limit.set(parsed.max(1));
-                                reset_pagination();
-                            }
-                        }
+                        set_value=set_limit_input
                         placeholder="12"
-                        label=Signal::derive(move || translate(locale.locale.get(), "users.access.limit").to_string())
+                        label=move || translate(locale.locale.get(), "users.access.limit")
                     />
                 </div>
                 <p class="form-hint">
@@ -222,20 +224,20 @@ pub fn Users() -> impl IntoView {
                                     <Input
                                         value=search_query
                                         set_value=set_search_query
-                                        placeholder=move || translate(locale.locale.get(), "users.filters.searchPlaceholder").to_string()
-                                        label=Signal::derive(move || translate(locale.locale.get(), "users.filters.search").to_string())
+                                        placeholder=move || translate(locale.locale.get(), "users.filters.searchPlaceholder")
+                                        label=move || translate(locale.locale.get(), "users.filters.search")
                                     />
                                     <Input
                                         value=role_filter
                                         set_value=set_role_filter
-                                        placeholder=move || translate(locale.locale.get(), "users.filters.rolePlaceholder").to_string()
-                                        label=Signal::derive(move || translate(locale.locale.get(), "users.filters.role").to_string())
+                                        placeholder=move || translate(locale.locale.get(), "users.filters.rolePlaceholder")
+                                        label=move || translate(locale.locale.get(), "users.filters.role")
                                     />
                                     <Input
                                         value=status_filter
                                         set_value=set_status_filter
-                                        placeholder=move || translate(locale.locale.get(), "users.filters.statusPlaceholder").to_string()
-                                        label=Signal::derive(move || translate(locale.locale.get(), "users.filters.status").to_string())
+                                        placeholder=move || translate(locale.locale.get(), "users.filters.statusPlaceholder")
+                                        label=move || translate(locale.locale.get(), "users.filters.status")
                                     />
                                 </div>
                                 <div class="table-wrap">
@@ -303,7 +305,7 @@ pub fn Users() -> impl IntoView {
                                     <Button
                                         on_click=previous_page
                                         class="ghost-button"
-                                        disabled=move || page.get() <= 1
+                                        disabled=Signal::derive(move || page.get() <= 1)
                                     >
                                         {move || translate(locale.locale.get(), "users.pagination.prev")}
                                     </Button>
@@ -313,10 +315,10 @@ pub fn Users() -> impl IntoView {
                                     <Button
                                         on_click=next_page
                                         class="ghost-button"
-                                        disabled=move || {
+                                        disabled=Signal::derive(move || {
                                             let total = response.users.page_info.total_count;
                                             page.get() * limit.get() >= total
-                                        }
+                                        })
                                     >
                                         {move || translate(locale.locale.get(), "users.pagination.next")}
                                     </Button>

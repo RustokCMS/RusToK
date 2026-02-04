@@ -53,19 +53,19 @@ pub fn Profile() -> impl IntoView {
                         value=name
                         set_value=set_name
                         placeholder="Alex Morgan"
-                        label=Signal::derive(move || translate(locale.locale.get(), "profile.nameLabel").to_string())
+                        label=move || translate(locale.locale.get(), "profile.nameLabel")
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=Signal::derive(move || translate(locale.locale.get(), "profile.emailLabel").to_string())
+                        label=move || translate(locale.locale.get(), "profile.emailLabel")
                     />
                     <Input
                         value=avatar
                         set_value=set_avatar
                         placeholder="https://cdn.rustok.io/avatar.png"
-                        label=Signal::derive(move || translate(locale.locale.get(), "profile.avatarLabel").to_string())
+                        label=move || translate(locale.locale.get(), "profile.avatarLabel")
                     />
                     <div class="input-group">
                         <label>{move || translate(locale.locale.get(), "profile.timezoneLabel")}</label>

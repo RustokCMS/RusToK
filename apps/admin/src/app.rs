@@ -19,7 +19,7 @@ pub fn App() -> impl IntoView {
         <Router>
             <main class="app-shell">
                 <Style />
-                <Routes>
+                <Routes fallback=|| view! { <NotFound /> }>
                     <Route path=path!("/login") view=Login />
                     <Route path=path!("/register") view=Register />
                     <Route path=path!("/reset") view=ResetPassword />

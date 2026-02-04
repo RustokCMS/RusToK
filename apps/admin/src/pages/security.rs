@@ -3,17 +3,17 @@ use leptos::prelude::*;
 use crate::components::ui::{Button, Input};
 use crate::providers::locale::{translate, use_locale};
 
-struct SessionItem<'a> {
-    device: &'a str,
-    ip: &'a str,
-    last_active_key: &'a str,
-    status_key: &'a str,
+struct SessionItem {
+    device: &'static str,
+    ip: &'static str,
+    last_active_key: &'static str,
+    status_key: &'static str,
 }
 
-struct LoginEvent<'a> {
-    timestamp_key: &'a str,
-    ip: &'a str,
-    status_key: &'a str,
+struct LoginEvent {
+    timestamp_key: &'static str,
+    ip: &'static str,
+    status_key: &'static str,
 }
 
 #[component]
@@ -102,14 +102,14 @@ pub fn Security() -> impl IntoView {
                         set_value=set_current_password
                         placeholder="••••••••"
                         type_="password"
-                        label=Signal::derive(move || translate(locale.locale.get(), "security.currentPasswordLabel").to_string())
+                        label=move || translate(locale.locale.get(), "security.currentPasswordLabel")
                     />
                     <Input
                         value=new_password
                         set_value=set_new_password
                         placeholder="••••••••"
                         type_="password"
-                        label=Signal::derive(move || translate(locale.locale.get(), "security.newPasswordLabel").to_string())
+                        label=move || translate(locale.locale.get(), "security.newPasswordLabel")
                     />
                     <p class="form-hint">{move || translate(locale.locale.get(), "security.passwordHint")}</p>
                     <Button on_click=on_change_password class="w-full">
@@ -127,7 +127,7 @@ pub fn Security() -> impl IntoView {
                     </p>
                     <div class="session-list">
                         {sessions
-                            .iter()
+                            .into_iter()
                             .map(|session| {
                                 view! {
                                     <div class="session-item">
@@ -160,7 +160,7 @@ pub fn Security() -> impl IntoView {
                     </p>
                     <div class="session-list">
                         {history
-                            .iter()
+                            .into_iter()
                             .map(|event| {
                                 view! {
                                     <div class="session-item">

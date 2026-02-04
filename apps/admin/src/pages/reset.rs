@@ -77,13 +77,13 @@ pub fn ResetPassword() -> impl IntoView {
                         value=tenant
                         set_value=set_tenant
                         placeholder="demo"
-                        label=Signal::derive(move || translate(locale.locale.get(), "reset.tenantLabel").to_string())
+                        label=move || translate(locale.locale.get(), "reset.tenantLabel")
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=Signal::derive(move || translate(locale.locale.get(), "reset.emailLabel").to_string())
+                        label=move || translate(locale.locale.get(), "reset.emailLabel")
                     />
                     <Button on_click=on_request class="w-full">
                         {move || translate(locale.locale.get(), "reset.requestSubmit")}
@@ -99,14 +99,14 @@ pub fn ResetPassword() -> impl IntoView {
                         value=token
                         set_value=set_token
                         placeholder="RESET-2024-0001"
-                        label=Signal::derive(move || translate(locale.locale.get(), "reset.tokenLabel").to_string())
+                        label=move || translate(locale.locale.get(), "reset.tokenLabel")
                     />
                     <Input
                         value=new_password
                         set_value=set_new_password
                         placeholder="••••••••"
                         type_="password"
-                        label=Signal::derive(move || translate(locale.locale.get(), "reset.newPasswordLabel").to_string())
+                        label=move || translate(locale.locale.get(), "reset.newPasswordLabel")
                     />
                     <p class="form-hint">{move || translate(locale.locale.get(), "reset.tokenHint")}</p>
                     <Button on_click=on_reset class="w-full ghost-button">

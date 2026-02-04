@@ -10,7 +10,7 @@ use crate::providers::locale::{translate, use_locale};
 
 #[derive(Params, PartialEq)]
 struct UserParams {
-    id: String,
+    id: Option<String>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -42,12 +42,29 @@ pub fn UserDetails() -> impl IntoView {
     let params = use_params::<UserParams>();
     let (tenant_slug, set_tenant_slug) = signal(String::new());
 
-    let user_resource = create_resource(
-        move || (params.get().ok().map(|p| p.id), tenant_slug.get()),
+    let user_resource = Resource::new(
+        move || {
+            (
+                params.with(|params| {
+                    params
+                        .as_ref()
+                        .ok()
+                        .and_then(|params| params.id.clone())
+                }),
+                tenant_slug.get(),
+            )
+        },
         move |_| {
             let token = auth.token.get().unwrap_or_default();
             let tenant = tenant_slug.get().trim().to_string();
-            let user_id = params.get().ok().map(|p| p.id).unwrap_or_default();
+            let user_id = params
+                .with(|params| {
+                    params
+                        .as_ref()
+                        .ok()
+                        .and_then(|params| params.id.clone())
+                        .unwrap_or_default()
+                });
 
             async move {
                 request::<UserVariables, GraphqlUserResponse>(
@@ -90,7 +107,7 @@ pub fn UserDetails() -> impl IntoView {
                         value=tenant_slug
                         set_value=set_tenant_slug
                         placeholder="demo"
-                        label=Signal::derive(move || translate(locale.locale.get(), "users.access.tenant").to_string())
+                        label=move || translate(locale.locale.get(), "users.access.tenant")
                     />
                 </div>
                 <p class="form-hint">

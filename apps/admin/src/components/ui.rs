@@ -8,13 +8,13 @@ pub fn Button(
     #[prop(into)] on_click: Callback<web_sys::MouseEvent>,
     #[prop(optional)] children: Option<Children>,
     #[prop(optional, into)] class: String,
-    #[prop(default = false)] disabled: bool,
+    #[prop(default = false, into)] disabled: MaybeSignal<bool>,
 ) -> impl IntoView {
     view! {
         <button
             class=format!("primary-button {}", class)
-            on:click=move |ev| on_click.call(ev)
-            disabled=disabled
+            on:click=move |ev| on_click.run(ev)
+            disabled=move || disabled.get()
         >
             {children.map(|c| c())}
         </button>
@@ -25,9 +25,9 @@ pub fn Button(
 pub fn Input(
     #[prop(into)] value: Signal<String>,
     #[prop(into)] set_value: WriteSignal<String>,
-    #[prop(into)] placeholder: String,
+    #[prop(into)] placeholder: TextProp,
     #[prop(default = "text")] type_: &'static str,
-    #[prop(default = String::new().into(), into)] label: Signal<String>,
+    #[prop(default = String::new().into(), into)] label: TextProp,
 ) -> impl IntoView {
     view! {
         <div class="input-group">
