@@ -5,8 +5,9 @@ use axum::{
     Router,
 };
 // GlobalAttributes enables id= usage in view! macros.
-use leptos::prelude::{ClassAttribute, CollectView, ElementChild, GlobalAttributes};
-use leptos::ssr::render_to_string;
+use leptos::prelude::{
+    ClassAttribute, CollectView, ElementChild, GlobalAttributes, RenderHtml,
+};
 use leptos::{component, view, IntoView};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -325,10 +326,10 @@ fn StorefrontShell(locale: String) -> impl IntoView {
 
 fn render_shell(locale: &str) -> String {
     let locale_owned = locale.to_string();
-    let app_html = render_to_string(move || {
+    let app_html = {
         let locale = locale_owned.clone();
-        view! { <StorefrontShell locale=locale /> }
-    });
+        view! { <StorefrontShell locale=locale /> }.to_html()
+    };
     format!(
         r#"<!DOCTYPE html>
 <html lang="{locale}" data-theme="rustok">
