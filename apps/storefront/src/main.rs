@@ -4,8 +4,9 @@ use axum::{
     routing::get,
     Router,
 };
-use leptos::{component, view, IntoView};
-use leptos::prelude::{CollectView, ClassAttribute, ElementChild, render_to_string};
+// GlobalAttributes enables id= usage in view! macros.
+use leptos::prelude::{ClassAttribute, CollectView, ElementChild, GlobalAttributes};
+use leptos::{component, render_to_string, view, IntoView};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
