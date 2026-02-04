@@ -14,11 +14,7 @@ pub fn Profile() -> impl IntoView {
         .get()
         .and_then(|user| user.name)
         .unwrap_or_default();
-    let initial_email = auth
-        .user
-        .get()
-        .map(|user| user.email)
-        .unwrap_or_default();
+    let initial_email = auth.user.get().map(|user| user.email).unwrap_or_default();
 
     let (name, set_name) = create_signal(initial_name);
     let (email, set_email) = create_signal(initial_email);
