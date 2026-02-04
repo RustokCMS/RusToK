@@ -2,11 +2,13 @@ pub mod bridge;
 pub mod context;
 pub mod engine;
 pub mod error;
+pub mod model;
 
 pub use bridge::Bridge;
 pub use context::{ExecutionContext, ExecutionPhase};
 pub use engine::{EngineConfig, ScriptEngine};
 pub use error::{ScriptError, ScriptResult};
+pub use model::{EntityProxy, Script, ScriptId, ScriptStatus, ScriptTrigger, TriggerEvent};
 
 pub fn create_default_engine() -> ScriptEngine {
     let config = EngineConfig::default();
