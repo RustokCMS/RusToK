@@ -75,7 +75,7 @@ utoipa = "4.2"
 utoipa-swagger-ui = { version = "7.0", features = ["vendored"] }
 moka = { version = "0.12", features = ["future"] }
 argon2 = "0.5"
-jsonwebtoken = "9.3"
+jsonwebtoken = "10.3"
 rand = "0.8"
 password-hash = "0.5"
 sha2 = "0.10"
