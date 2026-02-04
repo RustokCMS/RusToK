@@ -9,7 +9,7 @@ pub fn register_utils(engine: &mut Engine) {
     engine.register_fn("now", now_timestamp);
     engine.register_fn("now_unix", now_unix);
 
-    engine.register_result_fn("abort", abort_script);
+    engine.register_fn("abort", abort_script);
 
     engine.register_fn("format_money", format_money);
     engine.register_fn("is_empty", is_empty);

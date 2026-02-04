@@ -178,7 +178,7 @@ pub async fn run_script<S: ScriptRegistry>(
         crate::runner::ExecutionOutcome::Aborted { reason } => {
             (false, Some(reason), None, serde_json::Value::Null)
         }
-        crate::runner::ExecutionOutcome::Failed { error } => (
+        crate::runner::ExecutionOutcome::Failed { ref error } => (
             false,
             Some(error.to_string()),
             None,

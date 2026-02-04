@@ -98,7 +98,7 @@ impl ExecutionContext {
             match self.phase {
                 ExecutionPhase::Before => scope.push("entity", proxy.clone()),
                 _ => scope.push_constant("entity", proxy.clone()),
-            }
+            };
         }
 
         if let Some(ref proxy) = self.entity_before_proxy {

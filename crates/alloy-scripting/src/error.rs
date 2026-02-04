@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 pub enum ScriptError {
     #[error("Compilation failed: {0}")]
     Compilation(String),
