@@ -71,9 +71,10 @@ The tenant resolver middleware keeps a **local in-memory cache** (Moka) keyed by
 - Normalized cache keys (e.g., `uuid:`, `slug:`, `host:` prefixes) to avoid collisions and simplify debugging.
 - Added short-lived **negative caching** for 404 tenant lookups to reduce repeated DB hits.
 - Enabled cache stats (hit/miss/evictions + negative cache stats) and exposed them via the `/metrics` endpoint.
+- Routed tenant caching through the shared `CacheBackend` interface with an in-memory backend implementation.
 
 **Future improvement**
-- Consider routing tenant cache through the shared `CacheBackend` interface to enable distributed caches (e.g., Redis) and unified observability.
+- Add a distributed `CacheBackend` implementation (e.g., Redis) to share tenant cache across instances.
 
 ### 2. CQRS-lite (Write vs Read)
 To ensure maximum Performance on read paths (Storefront) without sacrificing data integrity on write paths (Admin), RusTok uses a **CQRS-lite** approach:

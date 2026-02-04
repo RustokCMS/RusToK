@@ -9,9 +9,10 @@ use axum::{
     response::Response,
 };
 use loco_rs::app::AppContext;
-use moka::future::Cache;
 use once_cell::sync::Lazy;
+use rustok_core::{CacheBackend, InMemoryCacheBackend};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -21,21 +22,19 @@ use crate::models::tenants;
 
 // Tenant cache: normalized identifier (host/slug/uuid) -> TenantContext
 // TTL: 5 minutes, Max entries: 1000
-static TENANT_CACHE: Lazy<Cache<String, TenantContext>> = Lazy::new(|| {
-    Cache::builder()
-        .record_stats()
-        .time_to_live(Duration::from_secs(300))
-        .max_capacity(1_000)
-        .build()
+static TENANT_CACHE: Lazy<Arc<dyn CacheBackend>> = Lazy::new(|| {
+    Arc::new(InMemoryCacheBackend::new(
+        Duration::from_secs(300),
+        1_000,
+    ))
 });
 
 // Negative cache for 404 lookups (short-lived).
-static TENANT_NEGATIVE_CACHE: Lazy<Cache<String, ()>> = Lazy::new(|| {
-    Cache::builder()
-        .record_stats()
-        .time_to_live(Duration::from_secs(60))
-        .max_capacity(1_000)
-        .build()
+static TENANT_NEGATIVE_CACHE: Lazy<Arc<dyn CacheBackend>> = Lazy::new(|| {
+    Arc::new(InMemoryCacheBackend::new(
+        Duration::from_secs(60),
+        1_000,
+    ))
 });
 
 static TENANT_NEGATIVE_INSERTS: AtomicU64 = AtomicU64::new(0);
@@ -50,12 +49,17 @@ pub async fn resolve(
     let identifier = resolve_identifier(&req, &settings)?;
     let cache_key = normalize_cache_key(identifier.kind, &identifier.value);
 
-    if TENANT_NEGATIVE_CACHE.get(&cache_key).await.is_some() {
+    if TENANT_NEGATIVE_CACHE
+        .get(&cache_key)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .is_some()
+    {
         return Err(StatusCode::NOT_FOUND);
     }
 
     // Check cache first
-    if let Some(cached_context) = TENANT_CACHE.get(&cache_key).await {
+    if let Some(cached_context) = get_cached_tenant(&cache_key).await? {
         req.extensions_mut()
             .insert(TenantContextExtension(cached_context));
         return Ok(next.run(req).await);
@@ -78,12 +82,15 @@ pub async fn resolve(
         Some(tenant) => {
             let context = TenantContext::from_model(&tenant);
             // Store in cache
-            TENANT_CACHE.insert(cache_key, context.clone()).await;
+            set_cached_tenant(cache_key, &context).await?;
             req.extensions_mut().insert(TenantContextExtension(context));
             Ok(next.run(req).await)
         }
         None => {
-            TENANT_NEGATIVE_CACHE.insert(cache_key, ()).await;
+            TENANT_NEGATIVE_CACHE
+                .set(cache_key, Vec::new())
+                .await
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
             TENANT_NEGATIVE_INSERTS.fetch_add(1, Ordering::Relaxed);
             Err(StatusCode::NOT_FOUND)
         }
@@ -202,6 +209,36 @@ fn normalize_cache_key(kind: TenantIdentifierKind, value: &str) -> String {
     format!("{prefix}:{value}")
 }
 
+async fn get_cached_tenant(cache_key: &str) -> Result<Option<TenantContext>, StatusCode> {
+    let cached = TENANT_CACHE
+        .get(cache_key)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    let Some(bytes) = cached else {
+        return Ok(None);
+    };
+
+    match serde_json::from_slice::<TenantContext>(&bytes) {
+        Ok(context) => Ok(Some(context)),
+        Err(_) => {
+            let _ = TENANT_CACHE.invalidate(cache_key).await;
+            Ok(None)
+        }
+    }
+}
+
+async fn set_cached_tenant(
+    cache_key: String,
+    context: &TenantContext,
+) -> Result<(), StatusCode> {
+    let bytes = serde_json::to_vec(context).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    TENANT_CACHE
+        .set(cache_key, bytes)
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct TenantCacheStats {
     pub hits: u64,
@@ -220,14 +257,14 @@ pub fn tenant_cache_stats() -> TenantCacheStats {
     let negative_stats = TENANT_NEGATIVE_CACHE.stats();
 
     TenantCacheStats {
-        hits: stats.hit_count(),
-        misses: stats.miss_count(),
-        evictions: stats.eviction_count(),
-        negative_hits: negative_stats.hit_count(),
-        negative_misses: negative_stats.miss_count(),
-        negative_evictions: negative_stats.eviction_count(),
-        entries: TENANT_CACHE.entry_count(),
-        negative_entries: TENANT_NEGATIVE_CACHE.entry_count(),
+        hits: stats.hits,
+        misses: stats.misses,
+        evictions: stats.evictions,
+        negative_hits: negative_stats.hits,
+        negative_misses: negative_stats.misses,
+        negative_evictions: negative_stats.evictions,
+        entries: stats.entries,
+        negative_entries: negative_stats.entries,
         negative_inserts: TENANT_NEGATIVE_INSERTS.load(Ordering::Relaxed),
     }
 }
@@ -236,24 +273,24 @@ pub fn tenant_cache_stats() -> TenantCacheStats {
 pub async fn invalidate_tenant_cache(identifier: &str) {
     let resolved = classify_identifier(identifier.to_string());
     let cache_key = normalize_cache_key(resolved.kind, &resolved.value);
-    TENANT_CACHE.invalidate(&cache_key).await;
-    TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
 }
 
 pub async fn invalidate_tenant_cache_by_host(host: &str) {
     let cache_key = normalize_cache_key(TenantIdentifierKind::Host, &host.to_lowercase());
-    TENANT_CACHE.invalidate(&cache_key).await;
-    TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
 }
 
 pub async fn invalidate_tenant_cache_by_uuid(tenant_id: Uuid) {
     let cache_key = normalize_cache_key(TenantIdentifierKind::Uuid, &tenant_id.to_string());
-    TENANT_CACHE.invalidate(&cache_key).await;
-    TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
 }
 
 pub async fn invalidate_tenant_cache_by_slug(slug: &str) {
     let cache_key = normalize_cache_key(TenantIdentifierKind::Slug, slug);
-    TENANT_CACHE.invalidate(&cache_key).await;
-    TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_CACHE.invalidate(&cache_key).await;
+    let _ = TENANT_NEGATIVE_CACHE.invalidate(&cache_key).await;
 }
