@@ -175,13 +175,10 @@ pub async fn run_script<S: ScriptRegistry>(
                 .map(dynamic_to_json)
                 .unwrap_or(serde_json::Value::Null),
         ),
-        crate::runner::ExecutionOutcome::Aborted { reason } => (
-            false,
-            Some(reason),
-            None,
-            serde_json::Value::Null,
-        ),
-        crate::runner::ExecutionOutcome::Failed { error } => (
+        crate::runner::ExecutionOutcome::Aborted { ref reason } => {
+            (false, Some(reason), None, serde_json::Value::Null)
+        }
+        crate::runner::ExecutionOutcome::Failed { ref error } => (
             false,
             Some(error.to_string()),
             None,

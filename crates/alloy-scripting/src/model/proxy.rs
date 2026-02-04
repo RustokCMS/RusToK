@@ -3,7 +3,7 @@ use rhai::{CustomType, Dynamic, TypeBuilder};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-#[derive(Debug, Clone, CustomType)]
+#[derive(Debug, Clone)]
 pub struct EntityProxy {
     id: String,
     entity_type: String,
@@ -99,29 +99,35 @@ impl EntityProxy {
 
     pub fn commit_changes(&self) {
         let mut state = self.state.write();
-        for (key, value) in state.changes.drain() {
+        let changes = std::mem::take(&mut state.changes);
+        for (key, value) in changes {
             state.data.insert(key, value);
         }
     }
 }
 
+impl CustomType for EntityProxy {
+    fn build(mut builder: TypeBuilder<Self>) {
+        builder
+            .with_name("Entity")
+            .with_get("id", |entity: &mut EntityProxy| entity.id.clone())
+            .with_get("type", |entity: &mut EntityProxy| {
+                entity.entity_type.clone()
+            })
+            .with_indexer_get(|entity: &mut EntityProxy, key: &str| entity.get(key))
+            .with_indexer_set(|entity: &mut EntityProxy, key: &str, val: Dynamic| {
+                entity.set(key, val);
+            })
+            .with_fn("is_changed", |entity: &mut EntityProxy, field: &str| {
+                entity.is_changed(field)
+            })
+            .with_fn("has_changes", |entity: &mut EntityProxy| {
+                entity.has_changes()
+            })
+            .with_fn("snapshot", |entity: &mut EntityProxy| entity.snapshot());
+    }
+}
+
 pub fn register_entity_proxy(engine: &mut rhai::Engine) {
-    engine
-        .build_type::<EntityProxy>()
-        .with_name("Entity")
-        .with_get("id", |entity: &mut EntityProxy| entity.id.clone())
-        .with_get("type", |entity: &mut EntityProxy| {
-            entity.entity_type.clone()
-        })
-        .with_indexer_get(|entity: &mut EntityProxy, key: &str| entity.get(key))
-        .with_indexer_set(|entity: &mut EntityProxy, key: &str, val: Dynamic| {
-            entity.set(key, val);
-        })
-        .with_fn("is_changed", |entity: &mut EntityProxy, field: &str| {
-            entity.is_changed(field)
-        })
-        .with_fn("has_changes", |entity: &mut EntityProxy| {
-            entity.has_changes()
-        })
-        .with_fn("snapshot", |entity: &mut EntityProxy| entity.snapshot());
+    engine.build_type::<EntityProxy>();
 }

@@ -40,9 +40,19 @@ impl ScriptEngine {
         }
     }
 
-    pub fn register_fn<A, R, F>(&mut self, name: &str, func: F)
-    where
-        F: rhai::RegisterNativeFunction<A, R> + Send + Sync + 'static,
+    pub fn register_fn<
+        A: 'static,
+        const N: usize,
+        const X: bool,
+        R: 'static,
+        const RETURN_RESULT: bool,
+        F,
+    >(
+        &mut self,
+        name: &str,
+        func: F,
+    ) where
+        F: rhai::RhaiNativeFunc<A, N, X, R, RETURN_RESULT> + Send + Sync + 'static,
     {
         self.engine.register_fn(name, func);
     }
