@@ -1,7 +1,7 @@
 use leptos::prelude::*;
 use leptos_router::components::{Route, Router, Routes};
-use leptos_router::path;
 use leptos_router::hooks::use_navigate;
+use leptos_router::path;
 
 use crate::pages::{
     dashboard::Dashboard, login::Login, not_found::NotFound, profile::Profile, register::Register,
