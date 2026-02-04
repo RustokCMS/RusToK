@@ -28,8 +28,8 @@ type GraphqlUsersResponse = {
   errors?: Array<{ message: string }>;
 };
 
-const graphqlQuery = `query Users($pagination: PaginationInput) {
-  users(pagination: $pagination) {
+const graphqlQuery = `query Users($pagination: PaginationInput, $filter: UsersFilter, $search: String) {
+  users(pagination: $pagination, filter: $filter, search: $search) {
     edges {
       node {
         id
@@ -89,14 +89,40 @@ async function fetchRestUser() {
   }
 }
 
-async function fetchGraphqlUsers() {
+type UsersSearchParams = {
+  page?: string;
+  search?: string;
+  role?: string;
+  status?: string;
+};
+
+async function fetchGraphqlUsers(options: {
+  page: number;
+  search?: string;
+  role?: string;
+  status?: string;
+  limit: number;
+}) {
+  const { page, search, role, status, limit } = options;
+  const offset = Math.max(0, page - 1) * limit;
+  const filter =
+    role || status
+      ? {
+          role: role || null,
+          status: status || null,
+        }
+      : null;
   try {
     const response = await fetch(`${apiBaseUrl}/api/graphql`, {
       method: "POST",
       headers: buildHeaders(),
       body: JSON.stringify({
         query: graphqlQuery,
-        variables: { pagination: { offset: 0, limit: 8 } },
+        variables: {
+          pagination: { offset, limit },
+          filter,
+          search: search || null,
+        },
       }),
     });
 
@@ -115,13 +141,46 @@ async function fetchGraphqlUsers() {
   }
 }
 
-export default async function UsersPage() {
+type UsersPageProps = {
+  searchParams?: UsersSearchParams;
+};
+
+export default async function UsersPage({ searchParams }: UsersPageProps) {
   const t = await getTranslations("users");
   const locale = await getLocale();
+  const requestedPage = Number(searchParams?.page ?? 1) || 1;
+  const search = searchParams?.search?.trim();
+  const role = searchParams?.role?.trim();
+  const status = searchParams?.status?.trim();
+  const limit = 8;
   const [restResult, graphqlResult] = await Promise.all([
     fetchRestUser(),
-    fetchGraphqlUsers(),
+    fetchGraphqlUsers({
+      page: Math.max(1, requestedPage),
+      search,
+      role,
+      status,
+      limit,
+    }),
   ]);
+  const totalCount = graphqlResult.data?.pageInfo.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const currentPage = Math.min(Math.max(1, requestedPage), totalPages);
+  const buildQueryString = (overrides: Partial<UsersSearchParams>) => {
+    const params = new URLSearchParams();
+    const nextPage = overrides.page ?? String(currentPage);
+    const nextSearch = overrides.search ?? search ?? "";
+    const nextRole = overrides.role ?? role ?? "";
+    const nextStatus = overrides.status ?? status ?? "";
+
+    if (nextPage && nextPage !== "1") params.set("page", nextPage);
+    if (nextSearch) params.set("search", nextSearch);
+    if (nextRole) params.set("role", nextRole);
+    if (nextStatus) params.set("status", nextStatus);
+
+    const query = params.toString();
+    return query ? `?${query}` : "";
+  };
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -204,6 +263,67 @@ export default async function UsersPage() {
               </div>
             ) : (
               <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+                <form
+                  className="border-b border-slate-100 bg-slate-50 px-4 py-3"
+                  method="get"
+                >
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <label className="text-xs font-semibold uppercase text-slate-400">
+                      {t("filters.search")}
+                      <input
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none"
+                        defaultValue={search ?? ""}
+                        name="search"
+                        placeholder={t("filters.searchPlaceholder")}
+                      />
+                    </label>
+                    <label className="text-xs font-semibold uppercase text-slate-400">
+                      {t("filters.role")}
+                      <select
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900"
+                        defaultValue={role ?? ""}
+                        name="role"
+                      >
+                        <option value="">{t("filters.rolePlaceholder")}</option>
+                        <option value="ADMIN">{t("filters.roleAdmin")}</option>
+                        <option value="EDITOR">{t("filters.roleEditor")}</option>
+                        <option value="VIEWER">{t("filters.roleViewer")}</option>
+                      </select>
+                    </label>
+                    <label className="text-xs font-semibold uppercase text-slate-400">
+                      {t("filters.status")}
+                      <select
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900"
+                        defaultValue={status ?? ""}
+                        name="status"
+                      >
+                        <option value="">
+                          {t("filters.statusPlaceholder")}
+                        </option>
+                        <option value="ACTIVE">{t("filters.statusActive")}</option>
+                        <option value="DISABLED">
+                          {t("filters.statusDisabled")}
+                        </option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <p className="text-xs text-slate-500">
+                      {t("graphql.total", { total: totalCount })}
+                    </p>
+                    <div className="flex gap-2">
+                      <button className="btn btn-outline btn-sm" type="submit">
+                        {t("filters.apply")}
+                      </button>
+                      <Link
+                        className="btn btn-ghost btn-sm"
+                        href={`/${locale}/users`}
+                      >
+                        {t("filters.reset")}
+                      </Link>
+                    </div>
+                  </div>
+                </form>
                 <table className="min-w-full text-sm">
                   <thead className="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-400">
                     <tr>
@@ -243,10 +363,31 @@ export default async function UsersPage() {
                     ))}
                   </tbody>
                 </table>
-                <div className="border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
-                  {t("graphql.total", {
-                    total: graphqlResult.data?.pageInfo.totalCount ?? 0,
-                  })}
+                <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
+                  <span>
+                    {t("pagination.page", {
+                      current: currentPage,
+                      total: totalPages,
+                    })}
+                  </span>
+                  <div className="flex gap-2">
+                    <Link
+                      className={`btn btn-outline btn-xs ${currentPage <= 1 ? "pointer-events-none opacity-50" : ""}`}
+                      href={`/${locale}/users${buildQueryString({
+                        page: String(currentPage - 1),
+                      })}`}
+                    >
+                      {t("pagination.prev")}
+                    </Link>
+                    <Link
+                      className={`btn btn-outline btn-xs ${currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}`}
+                      href={`/${locale}/users${buildQueryString({
+                        page: String(currentPage + 1),
+                      })}`}
+                    >
+                      {t("pagination.next")}
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}

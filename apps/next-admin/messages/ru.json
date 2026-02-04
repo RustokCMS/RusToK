@@ -87,6 +87,26 @@
       },
       "total": "Всего: {total}"
     },
+    "filters": {
+      "search": "Поиск",
+      "searchPlaceholder": "Поиск по email или имени",
+      "role": "Роль",
+      "rolePlaceholder": "Все роли",
+      "roleAdmin": "Администратор",
+      "roleEditor": "Редактор",
+      "roleViewer": "Наблюдатель",
+      "status": "Статус",
+      "statusPlaceholder": "Все статусы",
+      "statusActive": "Активен",
+      "statusDisabled": "Отключён",
+      "apply": "Применить фильтры",
+      "reset": "Сбросить"
+    },
+    "pagination": {
+      "page": "Страница {current} из {total}",
+      "prev": "Назад",
+      "next": "Дальше"
+    },
     "detail": {
       "title": "Профиль пользователя",
       "subtitle": "Детали пользователя из GraphQL.",

@@ -87,6 +87,26 @@
       },
       "total": "Total: {total}"
     },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by email or name",
+      "role": "Role",
+      "rolePlaceholder": "All roles",
+      "roleAdmin": "Admin",
+      "roleEditor": "Editor",
+      "roleViewer": "Viewer",
+      "status": "Status",
+      "statusPlaceholder": "All statuses",
+      "statusActive": "Active",
+      "statusDisabled": "Disabled",
+      "apply": "Apply filters",
+      "reset": "Reset"
+    },
+    "pagination": {
+      "page": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
     "detail": {
       "title": "User profile",
       "subtitle": "User details from GraphQL.",
