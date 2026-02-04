@@ -203,8 +203,7 @@ fn translate_ru(key: &str) -> &'static str {
 }
 
 fn local_storage() -> Option<web_sys::Storage> {
-    web_sys::window()
-        .and_then(|window| window.local_storage().ok().flatten())
+    web_sys::window().and_then(|window| window.local_storage().ok().flatten())
 }
 
 fn load_locale_from_storage() -> Option<Locale> {

@@ -1,8 +1,8 @@
 use leptos::*;
 
 use crate::components::ui::{Button, LanguageToggle};
-use crate::providers::locale::{translate, use_locale};
 use crate::providers::auth::use_auth;
+use crate::providers::locale::{translate, use_locale};
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
