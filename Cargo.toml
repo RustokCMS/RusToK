@@ -21,7 +21,7 @@ repository = "https://github.com/RustokCMS/RusToK"
 
 [workspace.dependencies]
 # Loco Framework
-loco-rs = "0.16.4"
+loco-rs = "0.16"
 
 # Async Runtime
 tokio = { version = "1.40", features = ["full"] }
