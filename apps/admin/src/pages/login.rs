@@ -50,7 +50,7 @@ pub fn Login() -> impl IntoView {
     let on_submit = move |_| {
         if tenant.get().is_empty() || email.get().is_empty() || password.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "login.errorRequired").to_string(),
+                translate(locale.locale.get(), "auth.errorRequired").to_string(),
             ));
             return;
         }
@@ -111,23 +111,23 @@ pub fn Login() -> impl IntoView {
     view! {
         <section class="auth-grid">
             <aside class="auth-visual">
-                <span class="badge">{move || translate(locale.locale.get(), "login.badge")}</span>
-                <h1>{move || translate(locale.locale.get(), "login.heroTitle")}</h1>
+                <span class="badge">{move || translate(locale.locale.get(), "auth.badge")}</span>
+                <h1>{move || translate(locale.locale.get(), "auth.heroTitle")}</h1>
                 <p>
-                    {move || translate(locale.locale.get(), "login.heroSubtitle")}
+                    {move || translate(locale.locale.get(), "auth.heroSubtitle")}
                 </p>
                 <div>
                     <p>
-                        <strong>{move || translate(locale.locale.get(), "login.heroListTitle")}</strong>
+                        <strong>{move || translate(locale.locale.get(), "auth.heroListTitle")}</strong>
                     </p>
-                    <p>{move || translate(locale.locale.get(), "login.heroListSubtitle")}</p>
+                    <p>{move || translate(locale.locale.get(), "auth.heroListSubtitle")}</p>
                 </div>
             </aside>
             <div class="auth-form">
                 <div class="auth-card">
                     <div>
-                        <h2>{move || translate(locale.locale.get(), "login.title")}</h2>
-                        <p>{move || translate(locale.locale.get(), "login.subtitle")}</p>
+                        <h2>{move || translate(locale.locale.get(), "auth.title")}</h2>
+                        <p>{move || translate(locale.locale.get(), "auth.subtitle")}</p>
                     </div>
                     <LanguageToggle />
                     <Show when=move || error.get().is_some()>
@@ -137,27 +137,27 @@ pub fn Login() -> impl IntoView {
                         value=tenant
                         set_value=set_tenant
                         placeholder="demo"
-                        label=move || translate(locale.locale.get(), "login.tenantLabel").to_string()
+                        label=move || translate(locale.locale.get(), "auth.tenantLabel").to_string()
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=move || translate(locale.locale.get(), "login.emailLabel").to_string()
+                        label=move || translate(locale.locale.get(), "auth.emailLabel").to_string()
                     />
                     <Input
                         value=password
                         set_value=set_password
                         placeholder="••••••••"
                         type_="password"
-                        label=move || translate(locale.locale.get(), "login.passwordLabel").to_string()
+                        label=move || translate(locale.locale.get(), "auth.passwordLabel").to_string()
                     />
                     <Button on_click=on_submit class="w-full" disabled=move || is_loading.get()>
-                        {move || translate(locale.locale.get(), "login.submit")}
+                        {move || translate(locale.locale.get(), "auth.submit")}
                     </Button>
                 </div>
                 <p style="margin:0; color:#64748b;">
-                    {move || translate(locale.locale.get(), "login.footer")}
+                    {move || translate(locale.locale.get(), "auth.footer")}
                 </p>
             </div>
         </section>

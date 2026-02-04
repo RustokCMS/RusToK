@@ -1,5 +1,5 @@
-use async_graphql::{ComplexObject, Context, Result, SimpleObject};
-use rustok_core::{Permission, Rbac, UserRole};
+use async_graphql::{ComplexObject, Context, Enum, InputObject, Result, SimpleObject};
+use rustok_core::{Permission, Rbac, UserRole, UserStatus};
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -22,6 +22,68 @@ pub struct User {
     pub role: String,
     pub status: String,
     pub created_at: String,
+}
+
+#[derive(Enum, Copy, Clone, Debug, Eq, PartialEq)]
+#[graphql(rename_items = "SCREAMING_SNAKE_CASE")]
+pub enum GqlUserRole {
+    SuperAdmin,
+    Admin,
+    Manager,
+    Customer,
+}
+
+impl From<GqlUserRole> for UserRole {
+    fn from(role: GqlUserRole) -> Self {
+        match role {
+            GqlUserRole::SuperAdmin => UserRole::SuperAdmin,
+            GqlUserRole::Admin => UserRole::Admin,
+            GqlUserRole::Manager => UserRole::Manager,
+            GqlUserRole::Customer => UserRole::Customer,
+        }
+    }
+}
+
+#[derive(Enum, Copy, Clone, Debug, Eq, PartialEq)]
+#[graphql(rename_items = "SCREAMING_SNAKE_CASE")]
+pub enum GqlUserStatus {
+    Active,
+    Inactive,
+    Banned,
+}
+
+impl From<GqlUserStatus> for UserStatus {
+    fn from(status: GqlUserStatus) -> Self {
+        match status {
+            GqlUserStatus::Active => UserStatus::Active,
+            GqlUserStatus::Inactive => UserStatus::Inactive,
+            GqlUserStatus::Banned => UserStatus::Banned,
+        }
+    }
+}
+
+#[derive(InputObject, Debug, Clone)]
+pub struct UsersFilter {
+    pub role: Option<GqlUserRole>,
+    pub status: Option<GqlUserStatus>,
+}
+
+#[derive(InputObject, Debug, Clone)]
+pub struct CreateUserInput {
+    pub email: String,
+    pub password: String,
+    pub name: Option<String>,
+    pub role: Option<GqlUserRole>,
+    pub status: Option<GqlUserStatus>,
+}
+
+#[derive(InputObject, Debug, Clone)]
+pub struct UpdateUserInput {
+    pub email: Option<String>,
+    pub password: Option<String>,
+    pub name: Option<String>,
+    pub role: Option<GqlUserRole>,
+    pub status: Option<GqlUserStatus>,
 }
 
 #[ComplexObject]

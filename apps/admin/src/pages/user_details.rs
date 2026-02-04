@@ -68,7 +68,7 @@ pub fn UserDetails() -> impl IntoView {
         <section class="users-page">
             <header class="dashboard-header">
                 <div>
-                    <span class="badge">{move || translate(locale.locale.get(), "app.users")}</span>
+                    <span class="badge">{move || translate(locale.locale.get(), "app.nav.users")}</span>
                     <h1>{move || translate(locale.locale.get(), "users.detail.title")}</h1>
                     <p style="margin:8px 0 0; color:#64748b;">
                         {move || translate(locale.locale.get(), "users.detail.subtitle")}

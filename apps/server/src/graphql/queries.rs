@@ -1,12 +1,14 @@
 use async_graphql::{Context, FieldError, Object, Result};
-use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect};
+use sea_orm::{
+    ColumnTrait, Condition, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect,
+};
 use std::collections::HashSet;
 
 use crate::context::{AuthContext, TenantContext};
 use crate::graphql::common::{encode_cursor, PageInfo, PaginationInput};
 use crate::graphql::errors::GraphQLError;
 use crate::graphql::types::{
-    ModuleRegistryItem, Tenant, TenantModule, User, UserConnection, UserEdge,
+    ModuleRegistryItem, Tenant, TenantModule, User, UserConnection, UserEdge, UsersFilter,
 };
 use crate::models::_entities::tenant_modules::Column as TenantModulesColumn;
 use crate::models::_entities::tenant_modules::Entity as TenantModulesEntity;
@@ -136,6 +138,8 @@ impl RootQuery {
         &self,
         ctx: &Context<'_>,
         #[graphql(default)] pagination: PaginationInput,
+        filter: Option<UsersFilter>,
+        search: Option<String>,
     ) -> Result<UserConnection> {
         let auth = ctx
             .data::<AuthContext>()
@@ -150,7 +154,29 @@ impl RootQuery {
         }
 
         let (offset, limit) = pagination.normalize();
-        let query = users::Entity::find().filter(UsersColumn::TenantId.eq(tenant.id));
+        let mut query = users::Entity::find().filter(UsersColumn::TenantId.eq(tenant.id));
+
+        if let Some(filter) = filter {
+            if let Some(role) = filter.role {
+                let role: rustok_core::UserRole = role.into();
+                query = query.filter(UsersColumn::Role.eq(role.to_string()));
+            }
+
+            if let Some(status) = filter.status {
+                let status: rustok_core::UserStatus = status.into();
+                query = query.filter(UsersColumn::Status.eq(status.to_string()));
+            }
+        }
+
+        if let Some(search) = search {
+            let search = search.trim();
+            if !search.is_empty() {
+                let condition = Condition::any()
+                    .add(UsersColumn::Email.contains(search))
+                    .add(UsersColumn::Name.contains(search));
+                query = query.filter(condition);
+            }
+        }
         let total = query
             .clone()
             .count(&app_ctx.db)

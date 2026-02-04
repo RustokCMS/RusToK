@@ -138,12 +138,12 @@ mutation DisableUser($id: ID!) {
 
 ## Deliverables checklist
 
-- [ ] i18n refactor + aligned keys
-- [ ] Login flow (REST) in both apps
-- [ ] Users list (GraphQL) with pagination + filters
+- [x] i18n refactor + aligned keys
+- [x] Login flow (REST) in both apps
+- [x] Users list (GraphQL) with pagination + filters
 - [x] User details
-- [ ] CRUD mutations + RBAC
-- [ ] Admin UI parity + shared components
+- [x] CRUD mutations + RBAC
+- [x] Admin UI parity + shared components
 
 ## Notes / decisions
 

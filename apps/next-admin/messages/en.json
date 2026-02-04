@@ -1,5 +1,9 @@
 {
   "app": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "users": "Users"
+    },
     "dashboard": {
       "eyebrow": "RusToK Admin",
       "title": "Control center",
@@ -36,6 +40,23 @@
       "alertDescription": "Localization is wired via next-intl (ru/en)."
     }
   },
+  "auth": {
+    "badge": "Admin Foundation",
+    "heroTitle": "RusToK Control Center",
+    "heroSubtitle": "Manage tenants, modules, and content in one place. Configurable access, fast actions, and transparent analytics.",
+    "heroListTitle": "Included in v1.0",
+    "heroListSubtitle": "Login, roles, activity charts, and module control.",
+    "title": "Sign in to admin",
+    "subtitle": "Enter your credentials to access the control panel.",
+    "tenantLabel": "Tenant Slug",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submit": "Continue",
+    "demoLink": "Open demo dashboard →",
+    "footer": "Need access? Contact a security administrator to activate.",
+    "errorRequired": "Please fill in all fields",
+    "errorDemoDisabled": "Demo login is disabled. Use server auth or enable RUSTOK_DEMO_MODE."
+  },
   "users": {
     "eyebrow": "Users",
     "title": "Users",
@@ -65,6 +86,28 @@
         "createdAt": "Created"
       },
       "total": "Total: {total}"
+    },
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search by email or name",
+      "role": "Role",
+      "rolePlaceholder": "All roles",
+      "roleSuperAdmin": "Super admin",
+      "roleAdmin": "Admin",
+      "roleManager": "Manager",
+      "roleCustomer": "Customer",
+      "status": "Status",
+      "statusPlaceholder": "All statuses",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "statusBanned": "Banned",
+      "apply": "Apply filters",
+      "reset": "Reset"
+    },
+    "pagination": {
+      "page": "Page {current} of {total}",
+      "prev": "Previous",
+      "next": "Next"
     },
     "detail": {
       "title": "User profile",

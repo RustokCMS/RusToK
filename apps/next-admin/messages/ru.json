@@ -1,5 +1,9 @@
 {
   "app": {
+    "nav": {
+      "dashboard": "Дашборд",
+      "users": "Пользователи"
+    },
     "dashboard": {
       "eyebrow": "RusToK Admin",
       "title": "Панель управления",
@@ -36,6 +40,23 @@
       "alertDescription": "Локализация включена через next-intl (ru/en)."
     }
   },
+  "auth": {
+    "badge": "Admin Foundation",
+    "heroTitle": "RusToK Control Center",
+    "heroSubtitle": "Управляйте тенантами, модулями и контентом в одном месте. Настраиваемый доступ, быстрые действия и прозрачная аналитика.",
+    "heroListTitle": "Входит в v1.0",
+    "heroListSubtitle": "Логин, роли, графики активности и контроль модулей.",
+    "title": "Вход в админ-панель",
+    "subtitle": "Введите рабочие данные для доступа к панели управления.",
+    "tenantLabel": "Tenant Slug",
+    "emailLabel": "Email",
+    "passwordLabel": "Пароль",
+    "submit": "Продолжить",
+    "demoLink": "Перейти в демонстрационный дашборд →",
+    "footer": "Нужен доступ? Напишите администратору безопасности для активации.",
+    "errorRequired": "Заполните все поля",
+    "errorDemoDisabled": "Демо-вход отключен. Используйте серверную аутентификацию или включите RUSTOK_DEMO_MODE."
+  },
   "users": {
     "eyebrow": "Users",
     "title": "Пользователи",
@@ -65,6 +86,28 @@
         "createdAt": "Создан"
       },
       "total": "Всего: {total}"
+    },
+    "filters": {
+      "search": "Поиск",
+      "searchPlaceholder": "Поиск по email или имени",
+      "role": "Роль",
+      "rolePlaceholder": "Все роли",
+      "roleSuperAdmin": "Суперадмин",
+      "roleAdmin": "Администратор",
+      "roleManager": "Менеджер",
+      "roleCustomer": "Клиент",
+      "status": "Статус",
+      "statusPlaceholder": "Все статусы",
+      "statusActive": "Активен",
+      "statusInactive": "Неактивен",
+      "statusBanned": "Забанен",
+      "apply": "Применить фильтры",
+      "reset": "Сбросить"
+    },
+    "pagination": {
+      "page": "Страница {current} из {total}",
+      "prev": "Назад",
+      "next": "Дальше"
     },
     "detail": {
       "title": "Профиль пользователя",

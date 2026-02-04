@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { PageHeader } from "@/components/ui/page-header";
 type RestUser = {
   id: string;
   email: string;
@@ -27,14 +29,8 @@ type GraphqlUsersResponse = {
   errors?: Array<{ message: string }>;
 };
 
-type FetchError = {
-  kind: "http" | "network" | "graphql";
-  status?: number;
-  message?: string;
-};
-
-const graphqlQuery = `query Users($pagination: PaginationInput) {
-  users(pagination: $pagination) {
+const graphqlQuery = `query Users($pagination: PaginationInput, $filter: UsersFilter, $search: String) {
+  users(pagination: $pagination, filter: $filter, search: $search) {
     edges {
       node {
         id
@@ -57,16 +53,21 @@ const apiToken = process.env.ADMIN_API_TOKEN;
 const tenantSlug = process.env.ADMIN_TENANT_SLUG;
 
 const buildHeaders = () => {
+  const cookieStore = cookies();
+  const cookieToken = cookieStore.get("rustok-admin-token")?.value;
+  const cookieTenant = cookieStore.get("rustok-admin-tenant")?.value;
+  const resolvedToken = cookieToken ?? apiToken;
+  const resolvedTenant = cookieTenant ?? tenantSlug;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
 
-  if (apiToken) {
-    headers.Authorization = `Bearer ${apiToken}`;
+  if (resolvedToken) {
+    headers.Authorization = `Bearer ${resolvedToken}`;
   }
 
-  if (tenantSlug) {
-    headers["X-Tenant-Slug"] = tenantSlug;
+  if (resolvedTenant) {
+    headers["X-Tenant-Slug"] = resolvedTenant;
   }
 
   return headers;
@@ -89,14 +90,40 @@ async function fetchRestUser() {
   }
 }
 
-async function fetchGraphqlUsers() {
+type UsersSearchParams = {
+  page?: string;
+  search?: string;
+  role?: string;
+  status?: string;
+};
+
+async function fetchGraphqlUsers(options: {
+  page: number;
+  search?: string;
+  role?: string;
+  status?: string;
+  limit: number;
+}) {
+  const { page, search, role, status, limit } = options;
+  const offset = Math.max(0, page - 1) * limit;
+  const filter =
+    role || status
+      ? {
+          role: role || null,
+          status: status || null,
+        }
+      : null;
   try {
     const response = await fetch(`${apiBaseUrl}/api/graphql`, {
       method: "POST",
       headers: buildHeaders(),
       body: JSON.stringify({
         query: graphqlQuery,
-        variables: { pagination: { offset: 0, limit: 8 } },
+        variables: {
+          pagination: { offset, limit },
+          filter,
+          search: search || null,
+        },
       }),
     });
 
@@ -120,48 +147,64 @@ async function fetchGraphqlUsers() {
   }
 }
 
-export default async function UsersPage() {
+type UsersPageProps = {
+  searchParams?: UsersSearchParams;
+};
+
+export default async function UsersPage({ searchParams }: UsersPageProps) {
   const t = await getTranslations("users");
-  const errors = await getTranslations("errors");
   const locale = await getLocale();
+  const requestedPage = Number(searchParams?.page ?? 1) || 1;
+  const search = searchParams?.search?.trim();
+  const role = searchParams?.role?.trim();
+  const status = searchParams?.status?.trim();
+  const limit = 8;
   const [restResult, graphqlResult] = await Promise.all([
     fetchRestUser(),
-    fetchGraphqlUsers(),
+    fetchGraphqlUsers({
+      page: Math.max(1, requestedPage),
+      search,
+      role,
+      status,
+      limit,
+    }),
   ]);
-  const formatError = (error: FetchError) => {
-    switch (error.kind) {
-      case "http":
-        return error.status ? `${errors("http")} ${error.status}` : errors("http");
-      case "graphql":
-        return error.message
-          ? `${errors("unknown")} ${error.message}`
-          : errors("unknown");
-      case "network":
-      default:
-        return errors("network");
-    }
+  const totalCount = graphqlResult.data?.pageInfo.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / limit));
+  const currentPage = Math.min(Math.max(1, requestedPage), totalPages);
+  const buildQueryString = (overrides: Partial<UsersSearchParams>) => {
+    const params = new URLSearchParams();
+    const nextPage = overrides.page ?? String(currentPage);
+    const nextSearch = overrides.search ?? search ?? "";
+    const nextRole = overrides.role ?? role ?? "";
+    const nextStatus = overrides.status ?? status ?? "";
+
+    if (nextPage && nextPage !== "1") params.set("page", nextPage);
+    if (nextSearch) params.set("search", nextSearch);
+    if (nextRole) params.set("role", nextRole);
+    if (nextStatus) params.set("status", nextStatus);
+
+    const query = params.toString();
+    return query ? `?${query}` : "";
   };
 
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto max-w-6xl px-6 py-12">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-indigo-600">{t("eyebrow")}</p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-              {t("title")}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">
-              {t("subtitle")}
-            </p>
-          </div>
-          <a
-            className="btn btn-outline"
-            href={`/${locale}`}
-          >
-            {t("back")}
-          </a>
-        </header>
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          subtitle={t("subtitle")}
+          breadcrumbs={[
+            { label: t("back"), href: `/${locale}` },
+            { label: t("title") },
+          ]}
+          actions={
+            <a className="btn btn-outline" href={`/${locale}`}>
+              {t("back")}
+            </a>
+          }
+        />
 
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">
@@ -223,6 +266,71 @@ export default async function UsersPage() {
               </div>
             ) : (
               <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+                <form
+                  className="border-b border-slate-100 bg-slate-50 px-4 py-3"
+                  method="get"
+                >
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <label className="text-xs font-semibold uppercase text-slate-400">
+                      {t("filters.search")}
+                      <input
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none"
+                        defaultValue={search ?? ""}
+                        name="search"
+                        placeholder={t("filters.searchPlaceholder")}
+                      />
+                    </label>
+                    <label className="text-xs font-semibold uppercase text-slate-400">
+                      {t("filters.role")}
+                      <select
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900"
+                        defaultValue={role ?? ""}
+                        name="role"
+                      >
+                        <option value="">{t("filters.rolePlaceholder")}</option>
+                        <option value="SUPER_ADMIN">
+                          {t("filters.roleSuperAdmin")}
+                        </option>
+                        <option value="ADMIN">{t("filters.roleAdmin")}</option>
+                        <option value="MANAGER">{t("filters.roleManager")}</option>
+                        <option value="CUSTOMER">{t("filters.roleCustomer")}</option>
+                      </select>
+                    </label>
+                    <label className="text-xs font-semibold uppercase text-slate-400">
+                      {t("filters.status")}
+                      <select
+                        className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900"
+                        defaultValue={status ?? ""}
+                        name="status"
+                      >
+                        <option value="">
+                          {t("filters.statusPlaceholder")}
+                        </option>
+                        <option value="ACTIVE">{t("filters.statusActive")}</option>
+                        <option value="INACTIVE">
+                          {t("filters.statusInactive")}
+                        </option>
+                        <option value="BANNED">{t("filters.statusBanned")}</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <p className="text-xs text-slate-500">
+                      {t("graphql.total", { total: totalCount })}
+                    </p>
+                    <div className="flex gap-2">
+                      <button className="btn btn-outline btn-sm" type="submit">
+                        {t("filters.apply")}
+                      </button>
+                      <Link
+                        className="btn btn-ghost btn-sm"
+                        href={`/${locale}/users`}
+                      >
+                        {t("filters.reset")}
+                      </Link>
+                    </div>
+                  </div>
+                </form>
                 <table className="min-w-full text-sm">
                   <thead className="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-400">
                     <tr>
@@ -262,10 +370,31 @@ export default async function UsersPage() {
                     ))}
                   </tbody>
                 </table>
-                <div className="border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
-                  {t("graphql.total", {
-                    total: graphqlResult.data?.pageInfo.totalCount ?? 0,
-                  })}
+                <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-xs text-slate-500">
+                  <span>
+                    {t("pagination.page", {
+                      current: currentPage,
+                      total: totalPages,
+                    })}
+                  </span>
+                  <div className="flex gap-2">
+                    <Link
+                      className={`btn btn-outline btn-xs ${currentPage <= 1 ? "pointer-events-none opacity-50" : ""}`}
+                      href={`/${locale}/users${buildQueryString({
+                        page: String(currentPage - 1),
+                      })}`}
+                    >
+                      {t("pagination.prev")}
+                    </Link>
+                    <Link
+                      className={`btn btn-outline btn-xs ${currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}`}
+                      href={`/${locale}/users${buildQueryString({
+                        page: String(currentPage + 1),
+                      })}`}
+                    >
+                      {t("pagination.next")}
+                    </Link>
+                  </div>
                 </div>
               </div>
             )}

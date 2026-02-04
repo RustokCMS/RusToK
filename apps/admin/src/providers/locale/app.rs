@@ -1,15 +1,15 @@
 pub fn translate_en(key: &str) -> Option<&'static str> {
     match key {
-        "app.dashboard" => Some("Dashboard"),
-        "app.users" => Some("Users"),
+        "app.nav.dashboard" => Some("Dashboard"),
+        "app.nav.users" => Some("Users"),
         _ => None,
     }
 }
 
 pub fn translate_ru(key: &str) -> Option<&'static str> {
     match key {
-        "app.dashboard" => Some("Дашборд"),
-        "app.users" => Some("Пользователи"),
+        "app.nav.dashboard" => Some("Дашборд"),
+        "app.nav.users" => Some("Пользователи"),
         _ => None,
     }
 }

@@ -12,24 +12,24 @@ pub fn Dashboard() -> impl IntoView {
     let stats = move || {
         vec![
             (
-                translate(locale.locale.get(), "dashboard.stats.tenants"),
+                translate(locale.locale.get(), "app.dashboard.stats.tenants"),
                 "28",
-                translate(locale.locale.get(), "dashboard.stats.tenantsHint"),
+                translate(locale.locale.get(), "app.dashboard.stats.tenantsHint"),
             ),
             (
-                translate(locale.locale.get(), "dashboard.stats.modules"),
+                translate(locale.locale.get(), "app.dashboard.stats.modules"),
                 "12",
-                translate(locale.locale.get(), "dashboard.stats.modulesHint"),
+                translate(locale.locale.get(), "app.dashboard.stats.modulesHint"),
             ),
             (
-                translate(locale.locale.get(), "dashboard.stats.latency"),
+                translate(locale.locale.get(), "app.dashboard.stats.latency"),
                 "128ms",
-                translate(locale.locale.get(), "dashboard.stats.latencyHint"),
+                translate(locale.locale.get(), "app.dashboard.stats.latencyHint"),
             ),
             (
-                translate(locale.locale.get(), "dashboard.stats.queue"),
+                translate(locale.locale.get(), "app.dashboard.stats.queue"),
                 "7",
-                translate(locale.locale.get(), "dashboard.stats.queueHint"),
+                translate(locale.locale.get(), "app.dashboard.stats.queueHint"),
             ),
         ]
     };
@@ -37,24 +37,24 @@ pub fn Dashboard() -> impl IntoView {
     let activity = move || {
         vec![
             (
-                translate(locale.locale.get(), "dashboard.activity.tenant"),
-                translate(locale.locale.get(), "dashboard.activity.tenantDetail"),
-                translate(locale.locale.get(), "dashboard.activity.tenantTime"),
+                translate(locale.locale.get(), "app.dashboard.activity.tenant"),
+                translate(locale.locale.get(), "app.dashboard.activity.tenantDetail"),
+                translate(locale.locale.get(), "app.dashboard.activity.tenantTime"),
             ),
             (
-                translate(locale.locale.get(), "dashboard.activity.module"),
-                translate(locale.locale.get(), "dashboard.activity.moduleDetail"),
-                translate(locale.locale.get(), "dashboard.activity.moduleTime"),
+                translate(locale.locale.get(), "app.dashboard.activity.module"),
+                translate(locale.locale.get(), "app.dashboard.activity.moduleDetail"),
+                translate(locale.locale.get(), "app.dashboard.activity.moduleTime"),
             ),
             (
-                translate(locale.locale.get(), "dashboard.activity.security"),
-                translate(locale.locale.get(), "dashboard.activity.securityDetail"),
-                translate(locale.locale.get(), "dashboard.activity.securityTime"),
+                translate(locale.locale.get(), "app.dashboard.activity.security"),
+                translate(locale.locale.get(), "app.dashboard.activity.securityDetail"),
+                translate(locale.locale.get(), "app.dashboard.activity.securityTime"),
             ),
             (
-                translate(locale.locale.get(), "dashboard.activity.content"),
-                translate(locale.locale.get(), "dashboard.activity.contentDetail"),
-                translate(locale.locale.get(), "dashboard.activity.contentTime"),
+                translate(locale.locale.get(), "app.dashboard.activity.content"),
+                translate(locale.locale.get(), "app.dashboard.activity.contentDetail"),
+                translate(locale.locale.get(), "app.dashboard.activity.contentTime"),
             ),
         ]
     };
@@ -68,7 +68,7 @@ pub fn Dashboard() -> impl IntoView {
         <section class="dashboard">
             <header class="dashboard-header">
                 <div>
-                    <span class="badge">{move || translate(locale.locale.get(), "app.dashboard")}</span>
+                    <span class="badge">{move || translate(locale.locale.get(), "app.nav.dashboard")}</span>
                     <h1>
                         {move || {
                             auth.user
@@ -78,16 +78,16 @@ pub fn Dashboard() -> impl IntoView {
                         }}
                     </h1>
                     <p style="margin:8px 0 0; color:#64748b;">
-                        {move || translate(locale.locale.get(), "dashboard.subtitle")}
+                        {move || translate(locale.locale.get(), "app.dashboard.subtitle")}
                     </p>
                 </div>
                 <div class="dashboard-actions">
                     <LanguageToggle />
                     <Button on_click=logout class="ghost-button">
-                        {move || translate(locale.locale.get(), "dashboard.logout")}
+                        {move || translate(locale.locale.get(), "app.dashboard.logout")}
                     </Button>
                     <Button on_click=move |_| {}>
-                        {move || translate(locale.locale.get(), "dashboard.createTenant")}
+                        {move || translate(locale.locale.get(), "app.dashboard.createTenant")}
                     </Button>
                 </div>
             </header>
@@ -109,7 +109,7 @@ pub fn Dashboard() -> impl IntoView {
 
             <div class="dashboard-panels">
                 <div class="panel">
-                    <h4>{move || translate(locale.locale.get(), "dashboard.activity.title")}</h4>
+                    <h4>{move || translate(locale.locale.get(), "app.dashboard.activity.title")}</h4>
                     {activity()
                         .iter()
                         .map(|(title, detail, time)| {
@@ -126,19 +126,19 @@ pub fn Dashboard() -> impl IntoView {
                         .collect_view()}
                 </div>
                 <div class="panel">
-                    <h4>{move || translate(locale.locale.get(), "dashboard.quick.title")}</h4>
+                    <h4>{move || translate(locale.locale.get(), "app.dashboard.quick.title")}</h4>
                     <div class="quick-actions">
                         <button type="button">
-                            {move || translate(locale.locale.get(), "dashboard.quick.security")}
+                            {move || translate(locale.locale.get(), "app.dashboard.quick.security")}
                         </button>
                         <a href="/users">
-                            {move || translate(locale.locale.get(), "dashboard.quick.users")}
+                            {move || translate(locale.locale.get(), "app.dashboard.quick.users")}
                         </a>
                         <button type="button">
-                            {move || translate(locale.locale.get(), "dashboard.quick.metrics")}
+                            {move || translate(locale.locale.get(), "app.dashboard.quick.metrics")}
                         </button>
                         <button type="button">
-                            {move || translate(locale.locale.get(), "dashboard.quick.roles")}
+                            {move || translate(locale.locale.get(), "app.dashboard.quick.roles")}
                         </button>
                     </div>
                 </div>

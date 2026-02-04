@@ -1,11 +1,29 @@
 import createMiddleware from "next-intl/middleware";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { defaultLocale, locales } from "./src/i18n";
 
-export default createMiddleware({
+const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
 });
+
+export default function middleware(request: NextRequest) {
+  const response = intlMiddleware(request);
+  const { pathname } = request.nextUrl;
+  const [, locale] = pathname.split("/");
+  const isLocaleRoute = locales.includes(locale as (typeof locales)[number]);
+  const isLoginRoute = pathname.endsWith("/login");
+  const token = request.cookies.get("rustok-admin-token")?.value;
+
+  if (isLocaleRoute && !isLoginRoute && !token) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = `/${locale}/login`;
+    return NextResponse.redirect(loginUrl);
+  }
+
+  return response;
+}
 
 export const config = {
   matcher: ["/", "/(ru|en)/:path*"],
