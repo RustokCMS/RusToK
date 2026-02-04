@@ -3,6 +3,7 @@ pub mod context;
 pub mod engine;
 pub mod error;
 pub mod integration;
+pub mod migration;
 pub mod api;
 pub mod model;
 pub mod runner;
@@ -15,13 +16,14 @@ pub use engine::{EngineConfig, ScriptEngine};
 pub use error::{ScriptError, ScriptResult};
 pub use integration::{BeforeHookResult, HookExecutor, ScriptableEntity};
 pub use api::{AppState, create_router};
+pub use migration::ScriptsMigration;
 pub use model::{
     register_entity_proxy, EntityProxy, EventType, HttpMethod, Script, ScriptId, ScriptStatus,
     ScriptTrigger,
 };
 pub use runner::{ExecutionOutcome, ExecutionResult, HookOutcome, ScriptOrchestrator};
 pub use scheduler::{ScheduledJob, Scheduler};
-pub use storage::{InMemoryStorage, ScriptQuery, ScriptRegistry};
+pub use storage::{InMemoryStorage, ScriptQuery, ScriptRegistry, SeaOrmStorage};
 
 pub fn create_default_engine() -> ScriptEngine {
     let config = EngineConfig::default();

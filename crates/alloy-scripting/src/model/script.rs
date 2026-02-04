@@ -87,3 +87,15 @@ impl Script {
         self.updated_at = Utc::now();
     }
 }
+
+impl ScriptStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Draft => "draft",
+            Self::Active => "active",
+            Self::Paused => "paused",
+            Self::Disabled => "disabled",
+            Self::Archived => "archived",
+        }
+    }
+}

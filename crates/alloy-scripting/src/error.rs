@@ -22,6 +22,15 @@ pub enum ScriptError {
 
     #[error("Max call depth exceeded: {depth}")]
     MaxDepthExceeded { depth: usize },
+
+    #[error("Storage error: {0}")]
+    Storage(String),
+
+    #[error("Invalid trigger: {0}")]
+    InvalidTrigger(String),
+
+    #[error("Invalid status: {0}")]
+    InvalidStatus(String),
 }
 
 pub type ScriptResult<T> = Result<T, ScriptError>;
