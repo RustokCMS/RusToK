@@ -2,8 +2,9 @@ use leptos::*;
 use serde::{Deserialize, Serialize};
 
 use crate::api::{request, rest_get, ApiError};
-use crate::components::ui::{Button, Input};
+use crate::components::ui::{Button, Input, LanguageToggle};
 use crate::providers::auth::use_auth;
+use crate::providers::locale::{translate, use_locale};
 
 #[derive(Clone, Debug, Deserialize)]
 struct RestUser {
@@ -61,6 +62,7 @@ struct PaginationInput {
 #[component]
 pub fn Users() -> impl IntoView {
     let auth = use_auth();
+    let locale = use_locale();
     let (api_token, set_api_token) = create_signal(auth.token.get().unwrap_or_default());
     let (tenant_slug, set_tenant_slug) = create_signal(String::new());
     let (refresh_counter, set_refresh_counter) = create_signal(0u32);
@@ -114,54 +116,53 @@ pub fn Users() -> impl IntoView {
         <section class="users-page">
             <header class="dashboard-header">
                 <div>
-                    <span class="badge">"Users"</span>
-                    <h1>"Пользователи"</h1>
+                    <span class="badge">{move || translate(locale.locale.get(), "app.users")}</span>
+                    <h1>{move || translate(locale.locale.get(), "users.title")}</h1>
                     <p style="margin:8px 0 0; color:#64748b;">
-                        "Демонстрация работы с REST и GraphQL API. "
-                        "Введите токен администратора и tenant slug для доступа."
+                        {move || translate(locale.locale.get(), "users.subtitle")}
                     </p>
                 </div>
                 <div class="dashboard-actions">
+                    <LanguageToggle />
                     <Button on_click=refresh class="ghost-button">
-                        "Обновить"
+                        {move || translate(locale.locale.get(), "users.refresh")}
                     </Button>
                 </div>
             </header>
 
             <div class="panel users-panel">
-                <h4>"Параметры доступа"</h4>
+                <h4>{move || translate(locale.locale.get(), "users.access.title")}</h4>
                 <div class="form-grid">
                     <Input
                         value=api_token
                         set_value=set_api_token
                         placeholder="Bearer token"
-                        label="Bearer token"
+                        label=move || translate(locale.locale.get(), "users.access.token").to_string()
                     />
                     <Input
                         value=tenant_slug
                         set_value=set_tenant_slug
                         placeholder="demo"
-                        label="Tenant slug"
+                        label=move || translate(locale.locale.get(), "users.access.tenant").to_string()
                     />
                 </div>
                 <p class="form-hint">
-                    "REST эндпоинт /api/auth/me требует Bearer-токен. "
-                    "GraphQL users требует permissions users:list."
+                    {move || translate(locale.locale.get(), "users.access.hint")}
                 </p>
             </div>
 
             <div class="users-grid">
                 <div class="panel">
-                    <h4>"REST: /api/auth/me"</h4>
-                    <Suspense fallback=move || view! { <p>"Загрузка..."</p> }>
+                    <h4>{move || translate(locale.locale.get(), "users.rest.title")}</h4>
+                    <Suspense fallback=move || view! { <p>{move || translate(locale.locale.get(), "users.rest.loading")}</p> }>
                         {move || match rest_resource.get() {
-                            None => view! { <p>"Ожидание ответа..."</p> }.into_view(),
+                            None => view! { <p>{move || translate(locale.locale.get(), "users.rest.pending")}</p> }.into_view(),
                             Some(Ok(user)) => view! {
                                 <div class="user-card">
                                     <strong>{user.email}</strong>
                                     <span class="badge">{user.role}</span>
                                     <p style="margin:8px 0 0; color:#64748b;">
-                                        {user.name.unwrap_or_else(|| "Без имени".to_string())}
+                                        {user.name.unwrap_or_else(|| translate(locale.locale.get(), "users.noName").to_string())}
                                     </p>
                                     <p class="meta-text">{user.id}</p>
                                 </div>
@@ -170,9 +171,9 @@ pub fn Users() -> impl IntoView {
                             Some(Err(err)) => view! {
                                 <div class="alert">
                                     {match err {
-                                        ApiError::Unauthorized => "Нет доступа: проверьте токен.".to_string(),
-                                        ApiError::Http(code) => format!("Ошибка REST: {}", code),
-                                        ApiError::Network => "Сетевая ошибка.".to_string(),
+                                        ApiError::Unauthorized => translate(locale.locale.get(), "users.rest.unauthorized").to_string(),
+                                        ApiError::Http(code) => format!("{} {}", translate(locale.locale.get(), "users.rest.error"), code),
+                                        ApiError::Network => translate(locale.locale.get(), "users.rest.error").to_string(),
                                         ApiError::Graphql(message) => format!("Ошибка: {}", message),
                                     }}
                                 </div>
@@ -183,22 +184,22 @@ pub fn Users() -> impl IntoView {
                 </div>
 
                 <div class="panel">
-                    <h4>"GraphQL: users"</h4>
-                    <Suspense fallback=move || view! { <p>"Загрузка..."</p> }>
+                    <h4>{move || translate(locale.locale.get(), "users.graphql.title")}</h4>
+                    <Suspense fallback=move || view! { <p>{move || translate(locale.locale.get(), "users.rest.loading")}</p> }>
                         {move || match graphql_resource.get() {
-                            None => view! { <p>"Ожидание ответа..."</p> }.into_view(),
+                            None => view! { <p>{move || translate(locale.locale.get(), "users.rest.pending")}</p> }.into_view(),
                             Some(Ok(response)) => view! {
                                 <p class="meta-text">
-                                    "Всего пользователей: " {response.users.page_info.total_count}
+                                    {move || translate(locale.locale.get(), "users.graphql.total")} " " {response.users.page_info.total_count}
                                 </p>
                                 <div class="table-wrap">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>"Email"</th>
-                                                <th>"Имя"</th>
-                                                <th>"Роль"</th>
-                                                <th>"Статус"</th>
+                                                <th>{move || translate(locale.locale.get(), "users.graphql.email")}</th>
+                                                <th>{move || translate(locale.locale.get(), "users.graphql.name")}</th>
+                                                <th>{move || translate(locale.locale.get(), "users.graphql.role")}</th>
+                                                <th>{move || translate(locale.locale.get(), "users.graphql.status")}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -211,7 +212,7 @@ pub fn Users() -> impl IntoView {
                                                     view! {
                                                         <tr>
                                                             <td>{user.email.clone()}</td>
-                                                            <td>{user.name.clone().unwrap_or_else(|| "—".to_string())}</td>
+                                                            <td>{user.name.clone().unwrap_or_else(|| translate(locale.locale.get(), "users.placeholderDash").to_string())}</td>
                                                             <td>{user.role.clone()}</td>
                                                             <td>
                                                                 <span class="status-pill">{user.status.clone()}</span>
@@ -228,10 +229,10 @@ pub fn Users() -> impl IntoView {
                             Some(Err(err)) => view! {
                                 <div class="alert">
                                     {match err {
-                                        ApiError::Unauthorized => "Нет доступа: проверьте токен.".to_string(),
-                                        ApiError::Http(code) => format!("Ошибка GraphQL: {}", code),
-                                        ApiError::Network => "Сетевая ошибка.".to_string(),
-                                        ApiError::Graphql(message) => format!("Ошибка GraphQL: {}", message),
+                                        ApiError::Unauthorized => translate(locale.locale.get(), "users.graphql.unauthorized").to_string(),
+                                        ApiError::Http(code) => format!("{} {}", translate(locale.locale.get(), "users.graphql.error"), code),
+                                        ApiError::Network => translate(locale.locale.get(), "users.graphql.network").to_string(),
+                                        ApiError::Graphql(message) => format!("{} {}", translate(locale.locale.get(), "users.graphql.error"), message),
                                     }}
                                 </div>
                             }

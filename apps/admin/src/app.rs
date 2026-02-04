@@ -3,10 +3,12 @@ use leptos_router::{use_navigate, Route, Router, Routes};
 
 use crate::pages::{dashboard::Dashboard, login::Login, not_found::NotFound, users::Users};
 use crate::providers::auth::{provide_auth_context, use_auth};
+use crate::providers::locale::provide_locale_context;
 
 #[component]
 pub fn App() -> impl IntoView {
     provide_auth_context();
+    provide_locale_context();
 
     view! {
         <Router>
@@ -92,6 +94,7 @@ fn Style() -> impl IntoView {
             ".primary-button { background: #2563eb; color: #fff; border: none; padding: 12px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; }\n"
             ".primary-button.w-full { width: 100%; }\n"
             ".ghost-button { background: transparent; color: #2563eb; border: 1px solid #cbd5f5; }\n"
+            ".ghost-button.active { background: #2563eb; color: #fff; }\n"
             ".secondary-link { color: #2563eb; text-decoration: none; font-size: 0.9rem; }\n"
             ".badge { background: #e2e8f0; padding: 6px 12px; border-radius: 999px; font-size: 0.85rem; color: #475569; }\n"
             ".alert { background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; }\n"
@@ -126,6 +129,7 @@ fn Style() -> impl IntoView {
             ".data-table th { text-align: left; font-size: 0.85rem; color: #64748b; padding-bottom: 8px; }\n"
             ".data-table td { padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }\n"
             ".status-pill { background: #e2e8f0; color: #475569; padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; }\n"
+            ".locale-toggle { display: flex; gap: 8px; }\n"
             "@media (max-width: 960px) {\n"
             "  .auth-grid { grid-template-columns: 1fr; }\n"
             "  .auth-form { padding: 48px 32px; }\n"
