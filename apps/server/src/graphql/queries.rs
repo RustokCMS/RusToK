@@ -1,7 +1,5 @@
 use async_graphql::{Context, FieldError, Object, Result};
-use sea_orm::{
-    ColumnTrait, Condition, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect,
-};
+use sea_orm::{ColumnTrait, Condition, EntityTrait, PaginatorTrait, QueryFilter, QuerySelect};
 use std::collections::HashSet;
 
 use crate::context::{AuthContext, TenantContext};

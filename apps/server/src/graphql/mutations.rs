@@ -6,9 +6,9 @@ use std::collections::HashSet;
 use crate::context::{AuthContext, TenantContext};
 use crate::graphql::errors::GraphQLError;
 use crate::graphql::types::{CreateUserInput, TenantModule, UpdateUserInput, User};
+use crate::models::_entities::tenant_modules::Entity as TenantModulesEntity;
 use crate::models::_entities::users::Column as UsersColumn;
 use crate::models::users;
-use crate::models::_entities::tenant_modules::Entity as TenantModulesEntity;
 use rustok_core::{ModuleContext, ModuleRegistry};
 
 #[derive(Default)]
@@ -106,7 +106,10 @@ impl RootMutation {
                 .await
                 .map_err(|err| <FieldError as GraphQLError>::internal_error(&err.to_string()))?;
 
-            if existing.as_ref().is_some_and(|existing| existing.id != user.id) {
+            if existing
+                .as_ref()
+                .is_some_and(|existing| existing.id != user.id)
+            {
                 return Err(FieldError::new("User with this email already exists"));
             }
         }
@@ -152,8 +155,7 @@ impl RootMutation {
         let tenant = ctx.data::<TenantContext>()?;
         let app_ctx = ctx.data::<loco_rs::prelude::AppContext>()?;
 
-        if !rustok_core::Rbac::has_permission(&auth.role, &rustok_core::Permission::USERS_MANAGE)
-        {
+        if !rustok_core::Rbac::has_permission(&auth.role, &rustok_core::Permission::USERS_MANAGE) {
             return Err(<FieldError as GraphQLError>::permission_denied(
                 "Permission denied: users:manage required",
             ));
