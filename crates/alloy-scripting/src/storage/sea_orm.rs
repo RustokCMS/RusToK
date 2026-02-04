@@ -83,7 +83,7 @@ impl SeaOrmStorage {
                     .get("event")
                     .and_then(|value| value.as_str())
                     .unwrap_or_default();
-                let event = EventType::from_str(event_str)
+                let event = EventType::parse(event_str)
                     .ok_or_else(|| ScriptError::InvalidTrigger(format!("event: {event_str}")))?;
                 Ok(ScriptTrigger::Event { entity_type, event })
             }
@@ -106,7 +106,7 @@ impl SeaOrmStorage {
                     .get("method")
                     .and_then(|value| value.as_str())
                     .unwrap_or("GET");
-                let method = HttpMethod::from_str(method_str)
+                let method = HttpMethod::parse(method_str)
                     .ok_or_else(|| ScriptError::InvalidTrigger(format!("method: {method_str}")))?;
                 Ok(ScriptTrigger::Api { path, method })
             }

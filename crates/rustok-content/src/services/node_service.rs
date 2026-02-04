@@ -133,7 +133,7 @@ impl NodeService {
         &self,
         node_id: Uuid,
         security: SecurityContext,
-        mut update: UpdateNodeInput,
+        update: UpdateNodeInput,
     ) -> ContentResult<NodeResponse> {
         let node_model = self.find_node(node_id).await?;
 

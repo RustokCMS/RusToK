@@ -15,6 +15,7 @@ pub struct Claims {
     pub role: String,   // User Role (cached for quick checks)
 }
 
+#[derive(Clone)]
 pub struct JwtConfig {
     pub secret: String,
     pub expiration: i64, // seconds

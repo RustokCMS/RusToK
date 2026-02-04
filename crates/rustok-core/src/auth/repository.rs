@@ -38,7 +38,7 @@ impl UserRepository {
             .filter(Column::Id.eq(id))
             .col_expr(
                 Column::LastLoginAt,
-                sea_orm::sea_query::Expr::current_timestamp(),
+                sea_orm::sea_query::Expr::current_timestamp().into(),
             )
             .exec(&self.db)
             .await

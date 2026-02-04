@@ -49,6 +49,7 @@ pub struct UpdateNodeInput {
     pub metadata: Option<Value>,
     pub translations: Option<Vec<NodeTranslationInput>>,
     pub bodies: Option<Vec<BodyInput>>,
+    #[schema(value_type = String, format = DateTime)]
     pub published_at: Option<Option<DateTimeWithTimeZone>>,
 }
 

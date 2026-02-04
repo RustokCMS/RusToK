@@ -5,6 +5,7 @@ use alloy_scripting::integration::ScriptableEntity;
 use chrono::Utc;
 use rhai::Dynamic;
 use sea_orm::entity::prelude::*;
+use sea_orm::{ConnectionTrait, Set};
 use serde::{Deserialize, Serialize};
 
 use crate::types::{UserRole, UserStatus};
@@ -31,8 +32,12 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
+#[async_trait::async_trait]
 impl ActiveModelBehavior for ActiveModel {
-    fn before_save(mut self, _insert: bool) -> Result<Self, DbErr> {
+    async fn before_save<C>(mut self, _db: &C, _insert: bool) -> Result<Self, DbErr>
+    where
+        C: ConnectionTrait,
+    {
         self.updated_at = Set(chrono::DateTime::<chrono::FixedOffset>::from(Utc::now()));
         Ok(self)
     }

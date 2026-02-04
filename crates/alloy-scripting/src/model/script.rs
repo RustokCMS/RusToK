@@ -100,8 +100,8 @@ impl ScriptStatus {
         }
     }
 
-    pub fn from_str(value: &str) -> Option<Self> {
-        FromStr::from_str(value).ok()
+    pub fn parse(value: &str) -> Option<Self> {
+        value.parse().ok()
     }
 }
 

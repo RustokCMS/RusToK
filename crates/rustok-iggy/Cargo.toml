@@ -13,7 +13,7 @@ tracing.workspace = true
 anyhow.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
-bincode = "3.0.0"
+bincode = "1.3.3"
 
 rustok-core.workspace = true
 
