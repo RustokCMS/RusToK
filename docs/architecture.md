@@ -11,8 +11,8 @@ The platform is structured as a **Modular Monolith**. While all modules are comp
 ```mermaid
 graph TD
     subgraph "External Layers"
-        Admin[Admin Panel: Leptos CSR]
-        Store[Storefront: Leptos SSR]
+        Admin[Admin Panel: Leptos CSR / Next.js]
+        Store[Storefront: Leptos SSR / Next.js]
         API_Ext[External Integrations]
     end
 
@@ -125,8 +125,8 @@ Interaction follows a strict hierarchy:
 | Component | Path | Responsibility |
 |-----------|------|----------------|
 | **Server** | `apps/server` | Main API entry point, route orchestration, and configuration. |
-| **Admin** | `apps/admin` | WASM-based dashboard for managing content and store. |
-| **Storefront** | `apps/storefront` | SEO-optimized public-facing site with SSR. |
+| **Admin** | `apps/admin` / `apps/next-admin` | WASM-based dashboard or Next.js dashboard for managing content and store. |
+| **Storefront** | `apps/storefront` / `apps/next-frontend` | SEO-optimized public-facing site with SSR (Leptos) or Next.js. |
 | **Core** | `crates/rustok-core` | Shared logic: Auth, Events, ID generation (ULID), and Registry. |
 | **Content** | `crates/rustok-content` | Universal content model (Nodes & Bodies). |
 | **Commerce** | `crates/rustok-commerce` | E-commerce engine: Products, Variants, Inventory, and Prices. |

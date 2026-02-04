@@ -25,7 +25,7 @@
 
 ## 🎯 What is RusToK?
 
-**RusToK** is an event-driven, modular highload universal platform for for any source that has data. Each module is isolated and ready for microservices. It combines the developer experience of Laravel/Rails with the performance of Rust, utilizing a "Tank" strategy for stability and a "CQRS-lite" approach for blazing fast reads.
+**RusToK** is an event-driven, modular highload platform for any product with data. Each module is isolated and microservice-ready, while still shipping as a single, secure Rust binary. It combines the developer experience of Laravel/Rails with the performance of Rust, using a "Tank" strategy for stability and a "CQRS-lite" approach for fast reads.
 
 Modules in RusToK are compiled into a binary for maximum performance and security, but follow a standardized layout (Entities/DTO/Services) for easy maintainability. •
 Rustok can become the foundation of anything that has any data. !!! .
@@ -81,7 +81,7 @@ Most platforms are either **fast but complex** (Go/C++) or **productive but slow
 - 🛠️ **CLI Generators** — `cargo loco generate model/controller/migration`
 - 📝 **Type-Safe Everything** — From database to frontend, one language
 - 🧪 **Testing Built-in** — Unit, integration, and E2E test support
-- 🎨 **Storefront UI Stack** — Leptos SSR with Tailwind + DaisyUI
+- 🎨 **Storefront UI Stack** — Leptos SSR + Next.js starters with Tailwind + DaisyUI
 - 📚 **Auto-generated Docs** — OpenAPI/GraphQL schema documentation
 
 ### Performance & Reliability
@@ -266,6 +266,16 @@ RUSTOK_DEMO_MODE=1 trunk serve --open
 # Run storefront (terminal 3)
 cargo run -p rustok-storefront
 
+# (Optional) Run Next.js admin (terminal 4)
+cd apps/next-admin
+npm install
+npm run dev
+
+# (Optional) Run Next.js storefront (terminal 5)
+cd apps/next-frontend
+npm install
+npm run dev
+
 # (Optional) Build Tailwind + DaisyUI styles
 cd apps/storefront
 npm install
@@ -330,11 +340,13 @@ RusToK/
 │   │   └── migration/          # Database migrations
 │   │
 │   ├── admin/                  # ⚙️ Admin Panel (Leptos CSR)
+│   ├── next-admin/             # ⚙️ Admin Panel (Next.js App Router)
 │   │   └── src/
 │   │       ├── pages/          # Admin views
 │   │       └── components/     # Reusable UI
 │   │
 │   ├── storefront/             # 🛍️ Public Store (Leptos SSR)
+│   ├── next-frontend/          # 🛍️ Public Store (Next.js App Router)
 │   │   └── src/
 │   │       ├── pages/          # SEO-optimized pages
 │   │       └── components/     # Store UI components
