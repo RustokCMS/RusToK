@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -43,15 +44,23 @@ impl EventType {
     }
 
     pub fn from_str(value: &str) -> Option<Self> {
+        FromStr::from_str(value).ok()
+    }
+}
+
+impl FromStr for EventType {
+    type Err = ();
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
-            "before_create" => Some(Self::BeforeCreate),
-            "after_create" => Some(Self::AfterCreate),
-            "before_update" => Some(Self::BeforeUpdate),
-            "after_update" => Some(Self::AfterUpdate),
-            "before_delete" => Some(Self::BeforeDelete),
-            "after_delete" => Some(Self::AfterDelete),
-            "on_commit" => Some(Self::OnCommit),
-            _ => None,
+            "before_create" => Ok(Self::BeforeCreate),
+            "after_create" => Ok(Self::AfterCreate),
+            "before_update" => Ok(Self::BeforeUpdate),
+            "after_update" => Ok(Self::AfterUpdate),
+            "before_delete" => Ok(Self::BeforeDelete),
+            "after_delete" => Ok(Self::AfterDelete),
+            "on_commit" => Ok(Self::OnCommit),
+            _ => Err(()),
         }
     }
 }
@@ -77,12 +86,20 @@ impl HttpMethod {
     }
 
     pub fn from_str(value: &str) -> Option<Self> {
+        FromStr::from_str(value).ok()
+    }
+}
+
+impl FromStr for HttpMethod {
+    type Err = ();
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
-            "GET" => Some(Self::GET),
-            "POST" => Some(Self::POST),
-            "PUT" => Some(Self::PUT),
-            "DELETE" => Some(Self::DELETE),
-            _ => None,
+            "GET" => Ok(Self::GET),
+            "POST" => Ok(Self::POST),
+            "PUT" => Ok(Self::PUT),
+            "DELETE" => Ok(Self::DELETE),
+            _ => Err(()),
         }
     }
 }

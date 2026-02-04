@@ -8,9 +8,8 @@ use crate::error::{ScriptError, ScriptResult};
 
 use super::config::EngineConfig;
 
-struct CompiledScript {
+pub struct CompiledScript {
     ast: AST,
-    name: String,
 }
 
 pub struct ScriptEngine {
@@ -73,10 +72,7 @@ impl ScriptEngine {
             .compile(source)
             .map_err(|e| ScriptError::Compilation(e.to_string()))?;
 
-        let compiled = Arc::new(CompiledScript {
-            ast,
-            name: name.to_string(),
-        });
+        let compiled = Arc::new(CompiledScript { ast });
 
         let mut cache = self.cache.write();
         cache.insert(name.to_string(), Arc::clone(&compiled));

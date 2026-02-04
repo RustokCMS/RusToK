@@ -74,6 +74,7 @@ impl<S: ScriptRegistry> HookExecutor<S> {
     }
 }
 
+#[allow(dead_code)]
 pub fn event_phase(event: EventType) -> ExecutionPhase {
     match event {
         EventType::BeforeCreate | EventType::BeforeUpdate | EventType::BeforeDelete => {

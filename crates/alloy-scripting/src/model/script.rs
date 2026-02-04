@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 use uuid::Uuid;
 
 use super::trigger::ScriptTrigger;
@@ -100,13 +101,21 @@ impl ScriptStatus {
     }
 
     pub fn from_str(value: &str) -> Option<Self> {
+        FromStr::from_str(value).ok()
+    }
+}
+
+impl FromStr for ScriptStatus {
+    type Err = ();
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value {
-            "draft" => Some(Self::Draft),
-            "active" => Some(Self::Active),
-            "paused" => Some(Self::Paused),
-            "disabled" => Some(Self::Disabled),
-            "archived" => Some(Self::Archived),
-            _ => None,
+            "draft" => Ok(Self::Draft),
+            "active" => Ok(Self::Active),
+            "paused" => Ok(Self::Paused),
+            "disabled" => Ok(Self::Disabled),
+            "archived" => Ok(Self::Archived),
+            _ => Err(()),
         }
     }
 }
