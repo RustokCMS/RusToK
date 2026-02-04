@@ -6,7 +6,8 @@ use axum::{
 };
 // GlobalAttributes enables id= usage in view! macros.
 use leptos::prelude::{ClassAttribute, CollectView, ElementChild, GlobalAttributes};
-use leptos::{component, render_to_string, view, IntoView};
+use leptos::ssr::render_to_string;
+use leptos::{component, view, IntoView};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
