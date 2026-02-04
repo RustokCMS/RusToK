@@ -4,7 +4,8 @@ use axum::{
     routing::get,
     Router,
 };
-use leptos::prelude::{render_to_string, ClassAttribute, CollectView, ElementChild};
+use leptos::prelude::{ClassAttribute, CollectView, ElementChild, GlobalAttributes};
+use leptos::ssr::render_to_string;
 use leptos::{component, view, IntoView};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
