@@ -477,6 +477,22 @@ DATABASE_URL=postgres://localhost/rustok_test cargo test
 
 See [docs/testing-guidelines.md](docs/testing-guidelines.md) for guidance on layering tests, avoiding flakiness, and mock boundaries.
 
+### Dependency Maintenance
+
+```bash
+# Check outdated dependencies (root workspace crates only)
+cargo outdated -R
+
+# Update lockfile (keep Cargo.toml unchanged)
+cargo update
+
+# Security audit
+cargo audit
+
+# License + advisory policy checks
+cargo deny check
+```
+
 ### Code Quality
 
 ```bash
@@ -488,6 +504,15 @@ cargo clippy --workspace -- -D warnings
 
 # Check before commit
 cargo fmt --all -- --check && cargo clippy --workspace
+```
+
+### Release Checklist
+
+```bash
+cargo test --workspace
+cargo clippy --workspace --all-targets -- -D warnings
+cargo audit
+cargo deny check
 ```
 
 ### Useful Commands
