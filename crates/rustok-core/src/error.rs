@@ -21,4 +21,7 @@ pub enum Error {
 
     #[error("Permission denied: {0}")]
     Forbidden(String),
+
+    #[error("Cache error: {0}")]
+    Cache(String),
 }

@@ -19,6 +19,11 @@ jsonwebtoken = "9"
 once_cell = "1.19"
 sea-orm-migration.workspace = true
 rustok-telemetry.workspace = true
+moka.workspace = true
+redis = { version = "0.25", features = ["tokio-comp", "connection-manager"], optional = true }
+
+[features]
+redis-cache = ["redis"]
 
 [dev-dependencies]
 tokio.workspace = true

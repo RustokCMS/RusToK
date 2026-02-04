@@ -65,13 +65,16 @@ Every request passes through the `TenantContext` middleware, which identifies th
 
 ### 1.1. Request-Level Caching (Tenant Context)
 **Current behavior (code today)**  
-The tenant resolver middleware keeps a **local in-memory cache** (Moka) keyed by identifier (`host` / `slug` / `uuid`). It uses a **TTL of 5 minutes** and a **max capacity of 1,000 entries**. On cache hit, the request avoids a DB lookup; on miss, it queries the DB and stores the tenant context. After tenant updates, the cache entry should be explicitly invalidated by identifier so subsequent requests re-fetch fresh data.
+The tenant resolver middleware keeps a **local in-memory cache** (Moka) keyed by a **normalized identifier** (`uuid:`, `slug:`, `host:`). It uses a **TTL of 5 minutes** and a **max capacity of 1,000 entries**. On cache hit, the request avoids a DB lookup; on miss, it queries the DB and stores the tenant context. After tenant updates, the cache entry is explicitly invalidated so subsequent requests re-fetch fresh data.
 
-**Planned improvements (not yet implemented)**
-- Normalize cache keys (e.g., `uuid:`, `slug:`, `host:` prefixes) to avoid collisions and simplify debugging.
-- Add short-lived negative caching for 404 tenant lookups to reduce repeated DB hits.
-- Add cache metrics (hit/miss/evictions) and tune TTL/size based on production traffic.
-- Consider routing tenant cache through the shared `CacheBackend` interface to enable distributed caches (e.g., Redis) and unified observability.
+**Implemented improvements**
+- Normalized cache keys (e.g., `uuid:`, `slug:`, `host:` prefixes) to avoid collisions and simplify debugging.
+- Added short-lived **negative caching** for 404 tenant lookups to reduce repeated DB hits.
+- Enabled cache stats (hit/miss/evictions + negative cache stats) and exposed them via the `/metrics` endpoint.
+- Routed tenant caching through the shared `CacheBackend` interface with an in-memory backend implementation.
+
+**Distributed cache support**
+- `CacheBackend` now supports a Redis-backed implementation (`RedisCacheBackend`) behind the `redis-cache` feature flag for multi-instance deployments.
 
 ### 2. CQRS-lite (Write vs Read)
 To ensure maximum Performance on read paths (Storefront) without sacrificing data integrity on write paths (Admin), RusTok uses a **CQRS-lite** approach:
