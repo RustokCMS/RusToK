@@ -62,9 +62,9 @@ anyhow = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 
 # Leptos
-leptos = "0.8.15"
-leptos_axum = "0.8.15"
-leptos_router = "0.8.15"
+leptos = "0.8.11"
+leptos_axum = "0.8.11"
+leptos_router = "0.8.11"
 
 # Logging
 tracing = "0.1"
