@@ -32,6 +32,10 @@ impl EntityProxy {
         }
     }
 
+    pub fn empty(entity_type: impl Into<String>) -> Self {
+        Self::new("", entity_type, HashMap::new())
+    }
+
     pub fn id(&self) -> &str {
         &self.id
     }
@@ -65,14 +69,39 @@ impl EntityProxy {
         state.changes.clone()
     }
 
+    pub fn take_changes(&self) -> HashMap<String, Dynamic> {
+        self.changes()
+    }
+
     pub fn original(&self) -> HashMap<String, Dynamic> {
         let state = self.state.read();
         state.data.clone()
     }
 
+    pub fn snapshot(&self) -> HashMap<String, Dynamic> {
+        let state = self.state.read();
+        let mut result = state.data.clone();
+        for (key, value) in &state.changes {
+            result.insert(key.clone(), value.clone());
+        }
+        result
+    }
+
     pub fn has_changes(&self) -> bool {
         let state = self.state.read();
         !state.changes.is_empty()
+    }
+
+    pub fn clear_changes(&self) {
+        let mut state = self.state.write();
+        state.changes.clear();
+    }
+
+    pub fn commit_changes(&self) {
+        let mut state = self.state.write();
+        for (key, value) in state.changes.drain() {
+            state.data.insert(key, value);
+        }
     }
 }
 
@@ -93,5 +122,6 @@ pub fn register_entity_proxy(engine: &mut rhai::Engine) {
         })
         .with_fn("has_changes", |entity: &mut EntityProxy| {
             entity.has_changes()
-        });
+        })
+        .with_fn("snapshot", |entity: &mut EntityProxy| entity.snapshot());
 }
