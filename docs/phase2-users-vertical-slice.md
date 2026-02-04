@@ -141,7 +141,7 @@ mutation DisableUser($id: ID!) {
 - [x] Users list (GraphQL) with pagination + filters
 - [x] User details
 - [x] CRUD mutations + RBAC
-- [ ] Admin UI parity + shared components
+- [x] Admin UI parity + shared components
 
 ## Notes / decisions
 

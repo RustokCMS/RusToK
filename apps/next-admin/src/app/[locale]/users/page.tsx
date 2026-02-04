@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { PageHeader } from "@/components/ui/page-header";
 type RestUser = {
   id: string;
   email: string;
@@ -185,23 +186,20 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto max-w-6xl px-6 py-12">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-indigo-600">{t("eyebrow")}</p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-              {t("title")}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">
-              {t("subtitle")}
-            </p>
-          </div>
-          <a
-            className="btn btn-outline"
-            href={`/${locale}`}
-          >
-            {t("back")}
-          </a>
-        </header>
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          subtitle={t("subtitle")}
+          breadcrumbs={[
+            { label: t("back"), href: `/${locale}` },
+            { label: t("title") },
+          ]}
+          actions={
+            <a className="btn btn-outline" href={`/${locale}`}>
+              {t("back")}
+            </a>
+          }
+        />
 
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { PageHeader } from "@/components/ui/page-header";
 type GraphqlUser = {
   id: string;
   email: string;
@@ -91,22 +92,21 @@ export default async function UsersDetailPage({ params }: UsersDetailPageProps) 
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto max-w-5xl px-6 py-12">
-        <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-indigo-600">
-              {t("eyebrow")}
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-              {t("detail.title")}
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-slate-500">
-              {t("detail.subtitle")}
-            </p>
-          </div>
-          <Link className="btn btn-outline" href={`/${locale}/users`}>
-            {t("detail.back")}
-          </Link>
-        </header>
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("detail.title")}
+          subtitle={t("detail.subtitle")}
+          breadcrumbs={[
+            { label: t("back"), href: `/${locale}` },
+            { label: t("title"), href: `/${locale}/users` },
+            { label: t("detail.title") },
+          ]}
+          actions={
+            <Link className="btn btn-outline" href={`/${locale}/users`}>
+              {t("detail.back")}
+            </Link>
+          }
+        />
 
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900">
