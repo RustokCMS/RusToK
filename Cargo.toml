@@ -81,7 +81,7 @@ password-hash = "0.5"
 sha2 = "0.10"
 once_cell = "1.19"
 hex = "0.4"
-iggy = "0.8.3"
+iggy = "0.6"
 reqwest-middleware = "0.4.2"
 
 # Internal crates
