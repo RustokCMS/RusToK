@@ -22,6 +22,10 @@ Applies to the following apps:
 - **Leptos**: use `leptos-shadcn-ui` for equivalent primitives.
 - **Remove DaisyUI** to reduce duplicate styling systems and ensure a single source of UI truth.
 
+Note: the canonical shadcn/ui implementation is Tailwind-first, so Tailwind remains the styling substrate
+for the Next.js apps. The Leptos side can consume the same design tokens (CSS variables) while rendering
+the shadcn-style components with leptos-shadcn-ui.
+
 ## Shared UI strategy
 
 ### 1) Design tokens (single source of truth)
