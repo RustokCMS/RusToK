@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::task::spawn_local;
 use serde::{Deserialize, Serialize};
 
 use crate::api::{rest_get, rest_post, ApiError};
@@ -26,9 +27,7 @@ struct ChangePasswordParams {
 }
 
 #[derive(Deserialize)]
-struct GenericStatus {
-    status: String,
-}
+struct GenericStatus {}
 
 #[component]
 pub fn Security() -> impl IntoView {
@@ -44,12 +43,14 @@ pub fn Security() -> impl IntoView {
 
     let load_sessions = move || {
         let token = auth.token.get();
+        let tenant_slug = auth.tenant_slug.get();
         let set_sessions = set_sessions;
         let set_error = set_error;
         let locale_signal = locale.locale;
 
         spawn_local(async move {
-            let result = rest_get::<SessionsResponse>("/api/auth/sessions", token, None).await;
+            let result =
+                rest_get::<SessionsResponse>("/api/auth/sessions", token, tenant_slug).await;
             match result {
                 Ok(response) => {
                     set_error.set(None);
@@ -78,12 +79,14 @@ pub fn Security() -> impl IntoView {
 
     let load_history = move || {
         let token = auth.token.get();
+        let tenant_slug = auth.tenant_slug.get();
         let set_history = set_history;
         let set_error = set_error;
         let locale_signal = locale.locale;
 
         spawn_local(async move {
-            let result = rest_get::<SessionsResponse>("/api/auth/history", token, None).await;
+            let result =
+                rest_get::<SessionsResponse>("/api/auth/history", token, tenant_slug).await;
             match result {
                 Ok(response) => {
                     set_error.set(None);
@@ -120,6 +123,7 @@ pub fn Security() -> impl IntoView {
         }
 
         let token = auth.token.get();
+        let tenant_slug = auth.tenant_slug.get();
         if token.is_none() {
             set_error.set(Some(
                 translate(locale.locale.get(), "errors.auth.unauthorized").to_string(),
@@ -142,7 +146,7 @@ pub fn Security() -> impl IntoView {
                     new_password: new_password_value,
                 },
                 token,
-                None,
+                tenant_slug,
             )
             .await;
 
@@ -150,7 +154,7 @@ pub fn Security() -> impl IntoView {
                 Ok(_) => {
                     set_error.set(None);
                     set_status.set(Some(
-                        translate(locale_signal.get(), "security.passwordUpdated").to_string(),
+                        translate(locale_signal.get(), "security.signOutAll").to_string(),
                     ));
                 }
                 Err(err) => {
@@ -177,6 +181,7 @@ pub fn Security() -> impl IntoView {
 
     let on_sign_out_all = move |_| {
         let token = auth.token.get();
+        let tenant_slug = auth.tenant_slug.get();
         let set_error = set_error;
         let set_status = set_status;
         let locale_signal = locale.locale;
@@ -186,7 +191,7 @@ pub fn Security() -> impl IntoView {
                 "/api/auth/sessions/revoke-all",
                 &serde_json::json!({}),
                 token,
-                None,
+                tenant_slug,
             )
             .await;
 

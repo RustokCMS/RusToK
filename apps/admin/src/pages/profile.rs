@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::task::spawn_local;
 use serde::{Deserialize, Serialize};
 
 use crate::api::{rest_post, ApiError};
@@ -38,6 +39,7 @@ pub fn Profile() -> impl IntoView {
 
     let on_save = move |_| {
         let token = auth.token.get();
+        let tenant_slug = auth.tenant_slug.get();
         if token.is_none() {
             set_error.set(Some(
                 translate(locale.locale.get(), "errors.auth.unauthorized").to_string(),
@@ -63,7 +65,7 @@ pub fn Profile() -> impl IntoView {
                     },
                 },
                 token,
-                None,
+                tenant_slug,
             )
             .await;
 

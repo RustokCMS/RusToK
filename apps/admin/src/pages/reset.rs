@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::task::spawn_local;
 use serde::{Deserialize, Serialize};
 
 use crate::api::{rest_post, ApiError};
@@ -22,15 +23,15 @@ struct ResetConfirmParams {
 }
 
 #[derive(Deserialize)]
-struct GenericStatus {
-    status: String,
-}
+struct GenericStatus {}
 
 #[component]
 pub fn ResetPassword() -> impl IntoView {
+    let auth = crate::providers::auth::use_auth();
     let locale = use_locale();
 
-    let (tenant, set_tenant) = signal(String::new());
+    let initial_tenant = auth.tenant_slug.get().unwrap_or_default();
+    let (tenant, set_tenant) = signal(initial_tenant);
     let (email, set_email) = signal(String::new());
     let (token, set_token) = signal(String::new());
     let (new_password, set_new_password) = signal(String::new());
@@ -58,7 +59,7 @@ pub fn ResetPassword() -> impl IntoView {
                 "/api/auth/reset/request",
                 &ResetRequestParams { email: email_value },
                 None,
-                Some(tenant_value),
+                Some(tenant_value.clone()),
             )
             .await;
 
@@ -118,7 +119,7 @@ pub fn ResetPassword() -> impl IntoView {
                     password: password_value,
                 },
                 None,
-                Some(tenant_value),
+                Some(tenant_value.clone()),
             )
             .await;
 

@@ -58,7 +58,7 @@ pub fn PaginationPrevious(
     let href = href.unwrap_or_else(|| "#".to_string());
     let label = children
         .map(|child| child())
-        .unwrap_or_else(|| view! { "Previous" });
+        .unwrap_or_else(|| view! { <span>"Previous"</span> }.into_any());
 
     view! {
         <a class=class href=href aria-disabled=disabled>
@@ -82,7 +82,7 @@ pub fn PaginationNext(
     let href = href.unwrap_or_else(|| "#".to_string());
     let label = children
         .map(|child| child())
-        .unwrap_or_else(|| view! { "Next" });
+        .unwrap_or_else(|| view! { <span>"Next"</span> }.into_any());
 
     view! {
         <a class=class href=href aria-disabled=disabled>

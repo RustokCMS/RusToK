@@ -1,4 +1,5 @@
 use leptos::prelude::*;
+use leptos::task::spawn_local;
 use leptos_router::hooks::use_navigate;
 use serde::{Deserialize, Serialize};
 
@@ -60,6 +61,7 @@ pub fn Register() -> impl IntoView {
         let set_status = set_status;
         let set_token = auth.set_token;
         let set_user = auth.set_user;
+        let set_tenant_slug = auth.set_tenant_slug;
         let locale_signal = locale.locale;
         let navigate = navigate.clone();
 
@@ -76,7 +78,7 @@ pub fn Register() -> impl IntoView {
                     },
                 },
                 None,
-                Some(tenant_value),
+                Some(tenant_value.clone()),
             )
             .await;
 
@@ -87,6 +89,7 @@ pub fn Register() -> impl IntoView {
                         translate(locale_signal.get(), "register.success").to_string(),
                     ));
                     set_token.set(Some(response.access_token));
+                    set_tenant_slug.set(Some(tenant_value));
                     set_user.set(Some(User {
                         id: response.user.id,
                         email: response.user.email,
