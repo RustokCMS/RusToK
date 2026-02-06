@@ -77,24 +77,35 @@ pub fn Security() -> impl IntoView {
     ];
 
     view! {
-        <section class="settings-page">
-            <header class="settings-header">
+        <section class="px-10 py-8">
+            <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <span class="badge">{move || translate(locale.locale.get(), "security.badge")}</span>
-                    <h1>{move || translate(locale.locale.get(), "security.title")}</h1>
-                    <p>{move || translate(locale.locale.get(), "security.subtitle")}</p>
+                    <span class="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
+                        {move || translate(locale.locale.get(), "security.badge")}
+                    </span>
+                    <h1 class="mt-2 text-2xl font-semibold">
+                        {move || translate(locale.locale.get(), "security.title")}
+                    </h1>
+                    <p class="mt-2 text-sm text-slate-500">
+                        {move || translate(locale.locale.get(), "security.subtitle")}
+                    </p>
                 </div>
-                <div class="settings-actions">
-                    <Button on_click=move |_| {} class="ghost-button">
+                <div class="flex flex-wrap items-center gap-3">
+                    <Button
+                        on_click=move |_| {}
+                        class="border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
+                    >
                         {move || translate(locale.locale.get(), "security.signOutAll")}
                     </Button>
                 </div>
             </header>
 
-            <div class="settings-grid">
-                <div class="settings-card">
-                    <h3>{move || translate(locale.locale.get(), "security.passwordTitle")}</h3>
-                    <p class="section-subtitle">
+            <div class="grid gap-6 lg:grid-cols-2">
+                <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+                    <h3 class="text-lg font-semibold">
+                        {move || translate(locale.locale.get(), "security.passwordTitle")}
+                    </h3>
+                    <p class="text-sm text-slate-500">
                         {move || translate(locale.locale.get(), "security.passwordSubtitle")}
                     </p>
                     <Input
@@ -111,38 +122,44 @@ pub fn Security() -> impl IntoView {
                         type_="password"
                         label=move || translate(locale.locale.get(), "security.newPasswordLabel")
                     />
-                    <p class="form-hint">{move || translate(locale.locale.get(), "security.passwordHint")}</p>
+                    <p class="text-sm text-slate-500">
+                        {move || translate(locale.locale.get(), "security.passwordHint")}
+                    </p>
                     <Button on_click=on_change_password class="w-full">
                         {move || translate(locale.locale.get(), "security.passwordSubmit")}
                     </Button>
                     <Show when=move || status.get().is_some()>
-                        <div class="alert success">{move || status.get().unwrap_or_default()}</div>
+                        <div class="rounded-xl bg-emerald-100 px-4 py-2 text-sm text-emerald-700">
+                            {move || status.get().unwrap_or_default()}
+                        </div>
                     </Show>
                 </div>
 
-                <div class="settings-card">
-                    <h3>{move || translate(locale.locale.get(), "security.sessionsTitle")}</h3>
-                    <p class="section-subtitle">
+                <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+                    <h3 class="text-lg font-semibold">
+                        {move || translate(locale.locale.get(), "security.sessionsTitle")}
+                    </h3>
+                    <p class="text-sm text-slate-500">
                         {move || translate(locale.locale.get(), "security.sessionsSubtitle")}
                     </p>
-                    <div class="session-list">
+                    <div class="grid gap-3">
                         {sessions
                             .into_iter()
                             .map(|session| {
                                 view! {
-                                    <div class="session-item">
+                                    <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                                         <div>
                                             <strong>{session.device}</strong>
-                                            <p class="form-hint">
+                                            <p class="text-sm text-slate-500">
                                                 {move || translate(locale.locale.get(), "security.sessionIp")} ": "
                                                 {session.ip}
                                             </p>
                                         </div>
-                                        <div class="session-meta">
-                                            <span class="status-pill">
+                                        <div class="grid gap-1 text-right">
+                                            <span class="inline-flex items-center justify-center rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">
                                                 {move || translate(locale.locale.get(), session.status_key)}
                                             </span>
-                                            <span class="meta-text">
+                                            <span class="text-xs text-slate-400">
                                                 {move || translate(locale.locale.get(), session.last_active_key)}
                                             </span>
                                         </div>
@@ -153,27 +170,29 @@ pub fn Security() -> impl IntoView {
                     </div>
                 </div>
 
-                <div class="settings-card">
-                    <h3>{move || translate(locale.locale.get(), "security.historyTitle")}</h3>
-                    <p class="section-subtitle">
+                <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+                    <h3 class="text-lg font-semibold">
+                        {move || translate(locale.locale.get(), "security.historyTitle")}
+                    </h3>
+                    <p class="text-sm text-slate-500">
                         {move || translate(locale.locale.get(), "security.historySubtitle")}
                     </p>
-                    <div class="session-list">
+                    <div class="grid gap-3">
                         {history
                             .into_iter()
                             .map(|event| {
                                 view! {
-                                    <div class="session-item">
+                                    <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                                         <div>
                                             <strong>
                                                 {move || translate(locale.locale.get(), event.timestamp_key)}
                                             </strong>
-                                            <p class="form-hint">
+                                            <p class="text-sm text-slate-500">
                                                 {move || translate(locale.locale.get(), "security.sessionIp")} ": "
                                                 {event.ip}
                                             </p>
                                         </div>
-                                        <span class="status-pill">
+                                        <span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">
                                             {move || translate(locale.locale.get(), event.status_key)}
                                         </span>
                                     </div>

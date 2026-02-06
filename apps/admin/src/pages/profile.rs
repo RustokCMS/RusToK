@@ -30,23 +30,31 @@ pub fn Profile() -> impl IntoView {
     };
 
     view! {
-        <section class="settings-page">
-            <header class="settings-header">
+        <section class="px-10 py-8">
+            <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <span class="badge">{move || translate(locale.locale.get(), "profile.badge")}</span>
-                    <h1>{move || translate(locale.locale.get(), "profile.title")}</h1>
-                    <p>{move || translate(locale.locale.get(), "profile.subtitle")}</p>
+                    <span class="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
+                        {move || translate(locale.locale.get(), "profile.badge")}
+                    </span>
+                    <h1 class="mt-2 text-2xl font-semibold">
+                        {move || translate(locale.locale.get(), "profile.title")}
+                    </h1>
+                    <p class="mt-2 text-sm text-slate-500">
+                        {move || translate(locale.locale.get(), "profile.subtitle")}
+                    </p>
                 </div>
-                <div class="settings-actions">
+                <div class="flex flex-wrap items-center gap-3">
                     <LanguageToggle />
                     <Button on_click=on_save>{move || translate(locale.locale.get(), "profile.save")}</Button>
                 </div>
             </header>
 
-            <div class="settings-grid">
-                <div class="settings-card">
-                    <h3>{move || translate(locale.locale.get(), "profile.sectionTitle")}</h3>
-                    <p class="section-subtitle">
+            <div class="grid gap-6 lg:grid-cols-2">
+                <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+                    <h3 class="text-lg font-semibold">
+                        {move || translate(locale.locale.get(), "profile.sectionTitle")}
+                    </h3>
+                    <p class="text-sm text-slate-500">
                         {move || translate(locale.locale.get(), "profile.sectionSubtitle")}
                     </p>
                     <Input
@@ -67,10 +75,12 @@ pub fn Profile() -> impl IntoView {
                         placeholder="https://cdn.rustok.io/avatar.png"
                         label=move || translate(locale.locale.get(), "profile.avatarLabel")
                     />
-                    <div class="input-group">
-                        <label>{move || translate(locale.locale.get(), "profile.timezoneLabel")}</label>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm text-slate-600">
+                            {move || translate(locale.locale.get(), "profile.timezoneLabel")}
+                        </label>
                         <select
-                            class="input-select"
+                            class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             on:change=move |ev| set_timezone.set(event_target_value(&ev))
                             prop:value=timezone
                         >
@@ -80,58 +90,67 @@ pub fn Profile() -> impl IntoView {
                             <option value="Asia/Dubai">"Asia/Dubai"</option>
                         </select>
                     </div>
-                    <div class="input-group">
-                        <label>{move || translate(locale.locale.get(), "profile.userLocaleLabel")}</label>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm text-slate-600">
+                            {move || translate(locale.locale.get(), "profile.userLocaleLabel")}
+                        </label>
                         <select
-                            class="input-select"
+                            class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             on:change=move |ev| set_preferred_locale.set(event_target_value(&ev))
                             prop:value=preferred_locale
                         >
                             <option value="ru">{move || translate(locale.locale.get(), "profile.localeRu")}</option>
                             <option value="en">{move || translate(locale.locale.get(), "profile.localeEn")}</option>
                         </select>
-                        <p class="form-hint">
+                        <p class="text-sm text-slate-500">
                             {move || translate(locale.locale.get(), "profile.localeHint")}
                         </p>
                     </div>
                     <Show when=move || status.get().is_some()>
-                        <div class="alert success">{move || status.get().unwrap_or_default()}</div>
+                        <div class="rounded-xl bg-emerald-100 px-4 py-2 text-sm text-emerald-700">
+                            {move || status.get().unwrap_or_default()}
+                        </div>
                     </Show>
                 </div>
 
-                <div class="settings-card">
-                    <h3>{move || translate(locale.locale.get(), "profile.preferencesTitle")}</h3>
-                    <p class="section-subtitle">
+                <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
+                    <h3 class="text-lg font-semibold">
+                        {move || translate(locale.locale.get(), "profile.preferencesTitle")}
+                    </h3>
+                    <p class="text-sm text-slate-500">
                         {move || translate(locale.locale.get(), "profile.preferencesSubtitle")}
                     </p>
-                    <div class="preference-row">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                         <div>
                             <strong>{move || translate(locale.locale.get(), "profile.uiLocaleLabel")}</strong>
-                            <p class="form-hint">
+                            <p class="text-sm text-slate-500">
                                 {move || translate(locale.locale.get(), "profile.uiLocaleHint")}
                             </p>
                         </div>
                         <LanguageToggle />
                     </div>
-                    <div class="preference-row">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                         <div>
                             <strong>{move || translate(locale.locale.get(), "profile.notificationsTitle")}</strong>
-                            <p class="form-hint">
+                            <p class="text-sm text-slate-500">
                                 {move || translate(locale.locale.get(), "profile.notificationsHint")}
                             </p>
                         </div>
-                        <span class="status-pill">
+                        <span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">
                             {move || translate(locale.locale.get(), "profile.notificationsStatus")}
                         </span>
                     </div>
-                    <div class="preference-row">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                         <div>
                             <strong>{move || translate(locale.locale.get(), "profile.auditTitle")}</strong>
-                            <p class="form-hint">
+                            <p class="text-sm text-slate-500">
                                 {move || translate(locale.locale.get(), "profile.auditHint")}
                             </p>
                         </div>
-                        <Button on_click=move |_| {} class="ghost-button">
+                        <Button
+                            on_click=move |_| {}
+                            class="border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
+                        >
                             {move || translate(locale.locale.get(), "profile.auditAction")}
                         </Button>
                     </div>
