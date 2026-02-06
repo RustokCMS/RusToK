@@ -365,7 +365,7 @@ async fn css_handler() -> impl IntoResponse {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route(
             "/",
@@ -383,8 +383,7 @@ async fn main() {
         )
         .route("/assets/app.css", get(css_handler));
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3100")
-        .await
-        .expect("bind storefront");
-    axum::serve(listener, app).await.expect("serve storefront");
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3100").await?;
+    axum::serve(listener, app).await?;
+    Ok(())
 }
