@@ -2,14 +2,14 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
-use rustok_core::events::{EventEnvelope, EventTransport, ReliabilityLevel};
-use rustok_core::Result;
-use rustok_iggy_connector::{ConnectorConfig, EmbeddedConnector, IggyConnector, RemoteConnector};
 use crate::config::{IggyConfig, IggyMode};
 use crate::consumer::ConsumerGroupManager;
 use crate::serialization::{BincodeSerializer, EventSerializer, JsonSerializer};
 use crate::topology::TopologyManager;
 use crate::{producer, topology};
+use rustok_core::events::{EventEnvelope, EventTransport, ReliabilityLevel};
+use rustok_core::Result;
+use rustok_iggy_connector::{ConnectorConfig, EmbeddedConnector, IggyConnector, RemoteConnector};
 
 pub struct IggyTransport {
     config: IggyConfig,
