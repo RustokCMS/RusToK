@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::api::{rest_post, ApiError};
 use crate::components::ui::{Button, Input, LanguageToggle};
-use crate::providers::locale::{translate, use_locale};
+use crate::providers::locale::translate;
 
 #[derive(Serialize)]
 struct ResetRequestParams {
@@ -28,7 +28,6 @@ struct GenericStatus {}
 #[component]
 pub fn ResetPassword() -> impl IntoView {
     let auth = crate::providers::auth::use_auth();
-    let locale = use_locale();
 
     let initial_tenant = auth.tenant_slug.get().unwrap_or_default();
     let (tenant, set_tenant) = signal(initial_tenant);
@@ -42,7 +41,7 @@ pub fn ResetPassword() -> impl IntoView {
     let on_request = move |_| {
         if tenant.get().is_empty() || email.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "reset.errorRequired").to_string(),
+                translate("reset.errorRequired").to_string(),
             ));
             set_status.set(None);
             set_token_expired.set(false);
@@ -54,7 +53,6 @@ pub fn ResetPassword() -> impl IntoView {
         let set_error = set_error;
         let set_status = set_status;
         let set_token = set_token;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result = rest_post::<ResetRequestParams, ResetRequestResponse>(
@@ -72,26 +70,26 @@ pub fn ResetPassword() -> impl IntoView {
                         set_token.set(reset_token);
                     }
                     set_status.set(Some(
-                        translate(locale_signal.get(), "reset.requestSent").to_string(),
+                        translate("reset.requestSent").to_string(),
                     ));
                     set_token_expired.set(false);
                 }
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            translate("errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
                             set_token_expired.set(false);
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
                             set_token_expired.set(false);
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
                             set_token_expired.set(false);
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -105,7 +103,7 @@ pub fn ResetPassword() -> impl IntoView {
     let on_reset = move |_| {
         if token.get().is_empty() || new_password.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "reset.tokenRequired").to_string(),
+                translate("reset.tokenRequired").to_string(),
             ));
             set_status.set(None);
             set_token_expired.set(false);
@@ -117,7 +115,6 @@ pub fn ResetPassword() -> impl IntoView {
         let password_value = new_password.get();
         let set_error = set_error;
         let set_status = set_status;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result = rest_post::<ResetConfirmParams, GenericStatus>(
@@ -135,7 +132,7 @@ pub fn ResetPassword() -> impl IntoView {
                 Ok(_) => {
                     set_error.set(None);
                     set_status.set(Some(
-                        translate(locale_signal.get(), "reset.updated").to_string(),
+                        translate("reset.updated").to_string(),
                     ));
                     set_token_expired.set(false);
                 }
@@ -143,19 +140,19 @@ pub fn ResetPassword() -> impl IntoView {
                     let message = match err {
                         ApiError::Unauthorized => {
                             set_token_expired.set(true);
-                            translate(locale_signal.get(), "reset.tokenExpired").to_string()
+                            translate("reset.tokenExpired").to_string()
                         }
                         ApiError::Http(_) => {
                             set_token_expired.set(false);
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
                             set_token_expired.set(false);
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
                             set_token_expired.set(false);
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -169,16 +166,16 @@ pub fn ResetPassword() -> impl IntoView {
         <section class="grid min-h-screen grid-cols-1 lg:grid-cols-[1.2fr_1fr]">
             <aside class="flex flex-col justify-center gap-6 bg-[radial-gradient(circle_at_top_left,#1e3a8a,#0f172a)] p-12 text-white lg:p-16">
                 <span class="inline-flex w-fit items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
-                    {move || translate(locale.locale.get(), "reset.badge")}
+                    {move || translate("reset.badge")}
                 </span>
-                <h1 class="text-4xl font-semibold">{move || translate(locale.locale.get(), "reset.heroTitle")}</h1>
-                <p class="text-lg text-white/80">{move || translate(locale.locale.get(), "reset.heroSubtitle")}</p>
+                <h1 class="text-4xl font-semibold">{move || translate("reset.heroTitle")}</h1>
+                <p class="text-lg text-white/80">{move || translate("reset.heroSubtitle")}</p>
                 <div class="grid gap-2">
                     <p class="text-sm font-semibold">
-                        {move || translate(locale.locale.get(), "reset.heroListTitle")}
+                        {move || translate("reset.heroListTitle")}
                     </p>
                     <p class="text-sm text-white/75">
-                        {move || translate(locale.locale.get(), "reset.heroListSubtitle")}
+                        {move || translate("reset.heroListSubtitle")}
                     </p>
                 </div>
             </aside>
@@ -186,14 +183,14 @@ pub fn ResetPassword() -> impl IntoView {
                 <div class="flex flex-col gap-5 rounded-3xl bg-white p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                     <div>
                         <h2 class="text-2xl font-semibold">
-                            {move || translate(locale.locale.get(), "reset.title")}
+                            {move || translate("reset.title")}
                         </h2>
                         <p class="text-slate-500">
-                            {move || translate(locale.locale.get(), "reset.subtitle")}
+                            {move || translate("reset.subtitle")}
                         </p>
                     </div>
                     <div class="flex items-center justify-between gap-3 text-sm text-slate-600">
-                        <span>{move || translate(locale.locale.get(), "reset.languageLabel")}</span>
+                        <span>{move || translate("reset.languageLabel")}</span>
                         <LanguageToggle />
                     </div>
                     <Show when=move || error.get().is_some()>
@@ -207,50 +204,50 @@ pub fn ResetPassword() -> impl IntoView {
                         </div>
                     </Show>
                     <Show when=move || token_expired.get()>
-                        <div class="alert warning">{move || translate(locale.locale.get(), "reset.requestNewLink")}</div>
+                        <div class="alert warning">{move || translate("reset.requestNewLink")}</div>
                     </Show>
-                    <Input value=tenant set_value=set_tenant placeholder="demo" label=move || translate(locale.locale.get(), "reset.tenantLabel") />
-                    <Input value=email set_value=set_email placeholder="admin@rustok.io" label=move || translate(locale.locale.get(), "reset.emailLabel") />
-                    <Button on_click=on_request class="w-full">{move || translate(locale.locale.get(), "reset.requestSubmit")}</Button>
+                    <Input value=tenant set_value=set_tenant placeholder="demo" label=move || translate("reset.tenantLabel") />
+                    <Input value=email set_value=set_email placeholder="admin@rustok.io" label=move || translate("reset.emailLabel") />
+                    <Button on_click=on_request class="w-full">{move || translate("reset.requestSubmit")}</Button>
                 </div>
 
                 <div class="flex flex-col gap-5 rounded-3xl bg-white p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                     <div>
                         <h3 class="text-lg font-semibold">
-                            {move || translate(locale.locale.get(), "reset.tokenTitle")}
+                            {move || translate("reset.tokenTitle")}
                         </h3>
                         <p class="text-slate-500">
-                            {move || translate(locale.locale.get(), "reset.tokenSubtitle")}
+                            {move || translate("reset.tokenSubtitle")}
                         </p>
                     </div>
                     <Input
                         value=token
                         set_value=set_token
                         placeholder="RESET-2024-0001"
-                        label=move || translate(locale.locale.get(), "reset.tokenLabel")
+                        label=move || translate("reset.tokenLabel")
                     />
                     <Input
                         value=new_password
                         set_value=set_new_password
                         placeholder="••••••••"
                         type_="password"
-                        label=move || translate(locale.locale.get(), "reset.newPasswordLabel")
+                        label=move || translate("reset.newPasswordLabel")
                     />
                     <p class="text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "reset.tokenHint")}
+                        {move || translate("reset.tokenHint")}
                     </p>
                     <Button
                         on_click=on_reset
                         class="w-full border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                     >
-                        {move || translate(locale.locale.get(), "reset.tokenSubmit")}
+                        {move || translate("reset.tokenSubmit")}
                     </Button>
                     <div class="flex justify-between gap-3 text-sm">
                         <a class="text-blue-600 hover:underline" href="/login">
-                            {move || translate(locale.locale.get(), "reset.loginLink")}
+                            {move || translate("reset.loginLink")}
                         </a>
                         <a class="text-blue-600 hover:underline" href="/register">
-                            {move || translate(locale.locale.get(), "reset.registerLink")}
+                            {move || translate("reset.registerLink")}
                         </a>
                     </div>
                 </div>

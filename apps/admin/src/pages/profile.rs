@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::api::{rest_post, ApiError};
 use crate::components::ui::{Button, Input, LanguageToggle};
 use crate::providers::auth::use_auth;
-use crate::providers::locale::{translate, use_locale};
+use crate::providers::locale::translate;
 
 #[derive(Serialize)]
 struct UpdateProfileParams {
@@ -20,7 +20,6 @@ struct UserResponse {
 #[component]
 pub fn Profile() -> impl IntoView {
     let auth = use_auth();
-    let locale = use_locale();
 
     let initial_name = auth
         .user
@@ -42,7 +41,7 @@ pub fn Profile() -> impl IntoView {
         let tenant_slug = auth.tenant_slug.get();
         if token.is_none() {
             set_error.set(Some(
-                translate(locale.locale.get(), "errors.auth.unauthorized").to_string(),
+                translate("errors.auth.unauthorized").to_string(),
             ));
             set_status.set(None);
             return;
@@ -52,7 +51,6 @@ pub fn Profile() -> impl IntoView {
         let set_status = set_status;
         let set_error = set_error;
         let set_name = set_name;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result = rest_post::<UpdateProfileParams, UserResponse>(
@@ -76,22 +74,22 @@ pub fn Profile() -> impl IntoView {
                     }
                     set_error.set(None);
                     set_status.set(Some(
-                        translate(locale_signal.get(), "profile.saved").to_string(),
+                        translate("profile.saved").to_string(),
                     ));
                 }
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            translate("errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -106,50 +104,50 @@ pub fn Profile() -> impl IntoView {
             <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <span class="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
-                        {move || translate(locale.locale.get(), "profile.badge")}
+                        {move || translate("profile.badge")}
                     </span>
                     <h1 class="mt-2 text-2xl font-semibold">
-                        {move || translate(locale.locale.get(), "profile.title")}
+                        {move || translate("profile.title")}
                     </h1>
                     <p class="mt-2 text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "profile.subtitle")}
+                        {move || translate("profile.subtitle")}
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <LanguageToggle />
-                    <Button on_click=on_save>{move || translate(locale.locale.get(), "profile.save")}</Button>
+                    <Button on_click=on_save>{move || translate("profile.save")}</Button>
                 </div>
             </header>
 
             <div class="grid gap-6 lg:grid-cols-2">
                 <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
                     <h3 class="text-lg font-semibold">
-                        {move || translate(locale.locale.get(), "profile.sectionTitle")}
+                        {move || translate("profile.sectionTitle")}
                     </h3>
                     <p class="text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "profile.sectionSubtitle")}
+                        {move || translate("profile.sectionSubtitle")}
                     </p>
                     <Input
                         value=name
                         set_value=set_name
                         placeholder="Alex Morgan"
-                        label=move || translate(locale.locale.get(), "profile.nameLabel")
+                        label=move || translate("profile.nameLabel")
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=move || translate(locale.locale.get(), "profile.emailLabel")
+                        label=move || translate("profile.emailLabel")
                     />
                     <Input
                         value=avatar
                         set_value=set_avatar
                         placeholder="https://cdn.rustok.io/avatar.png"
-                        label=move || translate(locale.locale.get(), "profile.avatarLabel")
+                        label=move || translate("profile.avatarLabel")
                     />
                     <div class="flex flex-col gap-2">
                         <label class="text-sm text-slate-600">
-                            {move || translate(locale.locale.get(), "profile.timezoneLabel")}
+                            {move || translate("profile.timezoneLabel")}
                         </label>
                         <select
                             class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -164,18 +162,18 @@ pub fn Profile() -> impl IntoView {
                     </div>
                     <div class="flex flex-col gap-2">
                         <label class="text-sm text-slate-600">
-                            {move || translate(locale.locale.get(), "profile.userLocaleLabel")}
+                            {move || translate("profile.userLocaleLabel")}
                         </label>
                         <select
                             class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             on:change=move |ev| set_preferred_locale.set(event_target_value(&ev))
                             prop:value=preferred_locale
                         >
-                            <option value="ru">{move || translate(locale.locale.get(), "profile.localeRu")}</option>
-                            <option value="en">{move || translate(locale.locale.get(), "profile.localeEn")}</option>
+                            <option value="ru">{move || translate("profile.localeRu")}</option>
+                            <option value="en">{move || translate("profile.localeEn")}</option>
                         </select>
                         <p class="text-sm text-slate-500">
-                            {move || translate(locale.locale.get(), "profile.localeHint")}
+                            {move || translate("profile.localeHint")}
                         </p>
                     </div>
                     <Show when=move || error.get().is_some()>
@@ -190,43 +188,43 @@ pub fn Profile() -> impl IntoView {
 
                 <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
                     <h3 class="text-lg font-semibold">
-                        {move || translate(locale.locale.get(), "profile.preferencesTitle")}
+                        {move || translate("profile.preferencesTitle")}
                     </h3>
                     <p class="text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "profile.preferencesSubtitle")}
+                        {move || translate("profile.preferencesSubtitle")}
                     </p>
                     <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                         <div>
-                            <strong>{move || translate(locale.locale.get(), "profile.uiLocaleLabel")}</strong>
+                            <strong>{move || translate("profile.uiLocaleLabel")}</strong>
                             <p class="text-sm text-slate-500">
-                                {move || translate(locale.locale.get(), "profile.uiLocaleHint")}
+                                {move || translate("profile.uiLocaleHint")}
                             </p>
                         </div>
                         <LanguageToggle />
                     </div>
                     <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                         <div>
-                            <strong>{move || translate(locale.locale.get(), "profile.notificationsTitle")}</strong>
+                            <strong>{move || translate("profile.notificationsTitle")}</strong>
                             <p class="text-sm text-slate-500">
-                                {move || translate(locale.locale.get(), "profile.notificationsHint")}
+                                {move || translate("profile.notificationsHint")}
                             </p>
                         </div>
                         <span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">
-                            {move || translate(locale.locale.get(), "profile.notificationsStatus")}
+                            {move || translate("profile.notificationsStatus")}
                         </span>
                     </div>
                     <div class="flex items-center justify-between gap-4 border-b border-slate-200 py-3 last:border-b-0">
                         <div>
-                            <strong>{move || translate(locale.locale.get(), "profile.auditTitle")}</strong>
+                            <strong>{move || translate("profile.auditTitle")}</strong>
                             <p class="text-sm text-slate-500">
-                                {move || translate(locale.locale.get(), "profile.auditHint")}
+                                {move || translate("profile.auditHint")}
                             </p>
                         </div>
                         <Button
                             on_click=move |_| {}
                             class="border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                         >
-                            {move || translate(locale.locale.get(), "profile.auditAction")}
+                            {move || translate("profile.auditAction")}
                         </Button>
                     </div>
                 </div>

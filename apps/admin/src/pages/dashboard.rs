@@ -2,19 +2,18 @@ use leptos::prelude::*;
 
 use crate::components::ui::{Button, LanguageToggle, PageHeader, StatsCard};
 use crate::providers::auth::use_auth;
-use crate::providers::locale::{translate, use_locale};
+use crate::providers::locale::translate;
 
 #[component]
 pub fn Dashboard() -> impl IntoView {
     let auth = use_auth();
-    let locale = use_locale();
 
     let stats = move || {
         vec![
             (
-                translate(locale.locale.get(), "app.dashboard.stats.tenants"),
+                translate("app.dashboard.stats.tenants"),
                 "28",
-                translate(locale.locale.get(), "app.dashboard.stats.tenantsHint"),
+                translate("app.dashboard.stats.tenantsHint"),
                 view! {
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -22,9 +21,9 @@ pub fn Dashboard() -> impl IntoView {
                 }.into_any()
             ),
             (
-                translate(locale.locale.get(), "app.dashboard.stats.modules"),
+                translate("app.dashboard.stats.modules"),
                 "12",
-                translate(locale.locale.get(), "app.dashboard.stats.modulesHint"),
+                translate("app.dashboard.stats.modulesHint"),
                 view! {
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -32,9 +31,9 @@ pub fn Dashboard() -> impl IntoView {
                 }.into_any()
             ),
             (
-                translate(locale.locale.get(), "app.dashboard.stats.latency"),
+                translate("app.dashboard.stats.latency"),
                 "128ms",
-                translate(locale.locale.get(), "app.dashboard.stats.latencyHint"),
+                translate("app.dashboard.stats.latencyHint"),
                 view! {
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -42,9 +41,9 @@ pub fn Dashboard() -> impl IntoView {
                 }.into_any()
             ),
             (
-                translate(locale.locale.get(), "app.dashboard.stats.queue"),
+                translate("app.dashboard.stats.queue"),
                 "7",
-                translate(locale.locale.get(), "app.dashboard.stats.queueHint"),
+                translate("app.dashboard.stats.queueHint"),
                 view! {
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -57,24 +56,24 @@ pub fn Dashboard() -> impl IntoView {
     let activity = move || {
         vec![
             (
-                translate(locale.locale.get(), "app.dashboard.activity.tenant"),
-                translate(locale.locale.get(), "app.dashboard.activity.tenantDetail"),
-                translate(locale.locale.get(), "app.dashboard.activity.tenantTime"),
+                translate("app.dashboard.activity.tenant"),
+                translate("app.dashboard.activity.tenantDetail"),
+                translate("app.dashboard.activity.tenantTime"),
             ),
             (
-                translate(locale.locale.get(), "app.dashboard.activity.module"),
-                translate(locale.locale.get(), "app.dashboard.activity.moduleDetail"),
-                translate(locale.locale.get(), "app.dashboard.activity.moduleTime"),
+                translate("app.dashboard.activity.module"),
+                translate("app.dashboard.activity.moduleDetail"),
+                translate("app.dashboard.activity.moduleTime"),
             ),
             (
-                translate(locale.locale.get(), "app.dashboard.activity.security"),
-                translate(locale.locale.get(), "app.dashboard.activity.securityDetail"),
-                translate(locale.locale.get(), "app.dashboard.activity.securityTime"),
+                translate("app.dashboard.activity.security"),
+                translate("app.dashboard.activity.securityDetail"),
+                translate("app.dashboard.activity.securityTime"),
             ),
             (
-                translate(locale.locale.get(), "app.dashboard.activity.content"),
-                translate(locale.locale.get(), "app.dashboard.activity.contentDetail"),
-                translate(locale.locale.get(), "app.dashboard.activity.contentTime"),
+                translate("app.dashboard.activity.content"),
+                translate("app.dashboard.activity.contentDetail"),
+                translate("app.dashboard.activity.contentTime"),
             ),
         ]
     };
@@ -88,18 +87,18 @@ pub fn Dashboard() -> impl IntoView {
         <section class="px-10 py-8">
             <PageHeader
                 title=move || auth.user.get().and_then(|u| u.name).unwrap_or_else(|| "Dashboard".to_string())
-                eyebrow=Some(translate(locale.locale.get(), "app.nav.dashboard"))
-                subtitle=Some(translate(locale.locale.get(), "app.dashboard.subtitle"))
+                eyebrow=Some(translate("app.nav.dashboard"))
+                subtitle=Some(translate("app.dashboard.subtitle"))
                 actions=Some(move || view! {
                     <LanguageToggle />
                     <Button
                         on_click=logout
                         class="border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                     >
-                        {move || translate(locale.locale.get(), "app.dashboard.logout")}
+                        {move || translate("app.dashboard.logout")}
                     </Button>
                     <Button on_click=move |_| {}>
-                        {move || translate(locale.locale.get(), "app.dashboard.createTenant")}
+                        {move || translate("app.dashboard.createTenant")}
                     </Button>
                 }.into_any())
             />
@@ -124,7 +123,7 @@ pub fn Dashboard() -> impl IntoView {
             <div class="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
                 <div class="rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
                     <h4 class="mb-4 text-lg font-semibold">
-                        {move || translate(locale.locale.get(), "app.dashboard.activity.title")}
+                        {move || translate("app.dashboard.activity.title")}
                     </h4>
                     {activity()
                         .iter()
@@ -145,26 +144,26 @@ pub fn Dashboard() -> impl IntoView {
                 </div>
                 <div class="rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
                     <h4 class="mb-4 text-lg font-semibold">
-                        {move || translate(locale.locale.get(), "app.dashboard.quick.title")}
+                        {move || translate("app.dashboard.quick.title")}
                     </h4>
                     <div class="grid gap-3">
                         <a
                             class="rounded-xl bg-slate-100 px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
                             href="/security"
                         >
-                            {move || translate(locale.locale.get(), "app.dashboard.quick.security")}
+                            {move || translate("app.dashboard.quick.security")}
                         </a>
                         <a
                             class="rounded-xl bg-slate-100 px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
                             href="/profile"
                         >
-                            {move || translate(locale.locale.get(), "app.dashboard.quick.profile")}
+                            {move || translate("app.dashboard.quick.profile")}
                         </a>
                         <a
                             class="rounded-xl bg-slate-100 px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
                             href="/users"
                         >
-                            {move || translate(locale.locale.get(), "app.dashboard.quick.users")}
+                            {move || translate("app.dashboard.quick.users")}
                         </a>
                     </div>
                 </div>

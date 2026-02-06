@@ -1,18 +1,8 @@
 use leptos::prelude::*;
 use leptos::web_sys;
 
-mod app;
-mod auth;
-mod dashboard;
-mod errors;
-mod login;
-mod users;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Locale {
-    En,
-    Ru,
-}
+pub use crate::i18n::Locale;
+use crate::i18n;
 
 impl Locale {
     pub fn from_code(code: &str) -> Self {
@@ -36,7 +26,7 @@ pub struct LocaleContext {
     pub set_locale: WriteSignal<Locale>,
 }
 
-pub fn provide_locale_context() {
+pub fn provide_locale_context() -> LocaleContext {
     let initial_locale = load_locale_from_storage().unwrap_or(Locale::Ru);
     let (locale, set_locale) = signal(initial_locale);
 
@@ -46,40 +36,17 @@ pub fn provide_locale_context() {
         }
     });
 
-    provide_context(LocaleContext { locale, set_locale });
+    let context = LocaleContext { locale, set_locale };
+    provide_context(context.clone());
+    context
 }
 
 pub fn use_locale() -> LocaleContext {
     use_context::<LocaleContext>().expect("LocaleContext not found")
 }
 
-pub fn translate(locale: Locale, key: &str) -> String {
-    match locale {
-        Locale::En => translate_en(key),
-        Locale::Ru => translate_ru(key),
-    }
-}
-
-fn translate_en(key: &str) -> String {
-    app::translate_en(key)
-        .or_else(|| auth::translate_en(key))
-        .or_else(|| login::translate_en(key))
-        .or_else(|| dashboard::translate_en(key))
-        .or_else(|| users::translate_en(key))
-        .or_else(|| errors::translate_en(key))
-        .unwrap_or(key)
-        .to_string()
-}
-
-fn translate_ru(key: &str) -> String {
-    app::translate_ru(key)
-        .or_else(|| auth::translate_ru(key))
-        .or_else(|| login::translate_ru(key))
-        .or_else(|| dashboard::translate_ru(key))
-        .or_else(|| users::translate_ru(key))
-        .or_else(|| errors::translate_ru(key))
-        .unwrap_or(key)
-        .to_string()
+pub fn translate(key: &str) -> String {
+    i18n::translate(key)
 }
 
 fn local_storage() -> Option<web_sys::Storage> {

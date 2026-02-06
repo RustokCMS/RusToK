@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 leptos = { workspace = true, features = ["csr"] }
 leptos_router = { workspace = true }
+leptos_i18n = "0.6"
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::api::{rest_post, ApiError};
 use crate::components::ui::{Button, Input, LanguageToggle};
 use crate::providers::auth::{use_auth, User};
-use crate::providers::locale::{translate, use_locale};
+use crate::providers::locale::translate;
 
 #[derive(Serialize)]
 struct LoginParams {
@@ -32,7 +32,6 @@ struct AuthUser {
 #[component]
 pub fn Login() -> impl IntoView {
     let auth = use_auth();
-    let locale = use_locale();
     let navigate = use_navigate();
 
     let (tenant, set_tenant) = signal(String::new());
@@ -51,7 +50,7 @@ pub fn Login() -> impl IntoView {
     let on_submit = move |_| {
         if tenant.get().is_empty() || email.get().is_empty() || password.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "auth.errorRequired").to_string(),
+                translate("auth.errorRequired").to_string(),
             ));
             return;
         }
@@ -62,7 +61,6 @@ pub fn Login() -> impl IntoView {
         let set_token = auth.set_token;
         let set_user = auth.set_user;
         let set_tenant_slug = auth.set_tenant_slug;
-        let locale = locale.locale;
         let navigate = navigate.clone();
 
         set_error.set(None);
@@ -95,12 +93,12 @@ pub fn Login() -> impl IntoView {
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale.get(), "errors.auth.invalid_credentials").to_string()
+                            translate("errors.auth.invalid_credentials").to_string()
                         }
-                        ApiError::Http(_) => translate(locale.get(), "errors.http").to_string(),
-                        ApiError::Network => translate(locale.get(), "errors.network").to_string(),
+                        ApiError::Http(_) => translate("errors.http").to_string(),
+                        ApiError::Network => translate("errors.network").to_string(),
                         ApiError::Graphql(_) => {
-                            translate(locale.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -115,18 +113,18 @@ pub fn Login() -> impl IntoView {
         <section class="grid min-h-screen grid-cols-1 lg:grid-cols-[1.2fr_1fr]">
             <aside class="flex flex-col justify-center gap-6 bg-[radial-gradient(circle_at_top_left,#1e3a8a,#0f172a)] p-12 text-white lg:p-16">
                 <span class="inline-flex w-fit items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
-                    {move || translate(locale.locale.get(), "auth.badge")}
+                    {move || translate("auth.badge")}
                 </span>
-                <h1 class="text-4xl font-semibold">{move || translate(locale.locale.get(), "auth.heroTitle")}</h1>
+                <h1 class="text-4xl font-semibold">{move || translate("auth.heroTitle")}</h1>
                 <p class="text-lg text-white/80">
-                    {move || translate(locale.locale.get(), "auth.heroSubtitle")}
+                    {move || translate("auth.heroSubtitle")}
                 </p>
                 <div>
                     <p class="text-sm font-semibold">
-                        {move || translate(locale.locale.get(), "auth.heroListTitle")}
+                        {move || translate("auth.heroListTitle")}
                     </p>
                     <p class="text-sm text-white/75">
-                        {move || translate(locale.locale.get(), "auth.heroListSubtitle")}
+                        {move || translate("auth.heroListSubtitle")}
                     </p>
                 </div>
             </aside>
@@ -134,14 +132,14 @@ pub fn Login() -> impl IntoView {
                 <div class="flex flex-col gap-5 rounded-3xl bg-white p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                     <div>
                         <h2 class="text-2xl font-semibold">
-                            {move || translate(locale.locale.get(), "auth.title")}
+                            {move || translate("auth.title")}
                         </h2>
                         <p class="text-slate-500">
-                            {move || translate(locale.locale.get(), "auth.subtitle")}
+                            {move || translate("auth.subtitle")}
                         </p>
                     </div>
                     <div class="flex items-center justify-between gap-3 text-sm text-slate-600">
-                        <span>{move || translate(locale.locale.get(), "auth.languageLabel")}</span>
+                        <span>{move || translate("auth.languageLabel")}</span>
                         <LanguageToggle />
                     </div>
                     <Show when=move || error.get().is_some()>
@@ -153,39 +151,39 @@ pub fn Login() -> impl IntoView {
                         value=tenant
                         set_value=set_tenant
                         placeholder="demo"
-                        label=move || translate(locale.locale.get(), "auth.tenantLabel")
+                        label=move || translate("auth.tenantLabel")
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=move || translate(locale.locale.get(), "auth.emailLabel")
+                        label=move || translate("auth.emailLabel")
                     />
                     <Input
                         value=password
                         set_value=set_password
                         placeholder="••••••••"
                         type_="password"
-                        label=move || translate(locale.locale.get(), "auth.passwordLabel")
+                        label=move || translate("auth.passwordLabel")
                     />
                     <Button
                         on_click=on_submit
                         class="w-full"
                         disabled=Signal::derive(move || is_loading.get())
                     >
-                        {move || translate(locale.locale.get(), "auth.submit")}
+                        {move || translate("auth.submit")}
                     </Button>
                     <div class="flex justify-between gap-3 text-sm">
                         <a class="text-blue-600 hover:underline" href="/register">
-                            {move || translate(locale.locale.get(), "auth.registerLink")}
+                            {move || translate("auth.registerLink")}
                         </a>
                         <a class="text-blue-600 hover:underline" href="/reset">
-                            {move || translate(locale.locale.get(), "auth.resetLink")}
+                            {move || translate("auth.resetLink")}
                         </a>
                     </div>
                 </div>
                 <p class="text-sm text-slate-500">
-                    {move || translate(locale.locale.get(), "auth.footer")}
+                    {move || translate("auth.footer")}
                 </p>
             </div>
         </section>

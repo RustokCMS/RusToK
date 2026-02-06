@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::api::{rest_post, ApiError};
 use crate::components::ui::{Button, Input, LanguageToggle};
 use crate::providers::auth::{use_auth, User};
-use crate::providers::locale::{translate, use_locale};
+use crate::providers::locale::translate;
 
 #[derive(Serialize)]
 struct RegisterParams {
@@ -43,7 +43,6 @@ struct InviteAcceptResponse {
 #[component]
 pub fn Register() -> impl IntoView {
     let auth = use_auth();
-    let locale = use_locale();
     let navigate = use_navigate();
 
     let (tenant, set_tenant) = signal(String::new());
@@ -58,7 +57,7 @@ pub fn Register() -> impl IntoView {
     let on_submit = move |_| {
         if tenant.get().is_empty() || email.get().is_empty() || password.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "register.errorRequired").to_string(),
+                translate("register.errorRequired").to_string(),
             ));
             set_status.set(None);
             return;
@@ -73,7 +72,6 @@ pub fn Register() -> impl IntoView {
         let set_token = auth.set_token;
         let set_user = auth.set_user;
         let set_tenant_slug = auth.set_tenant_slug;
-        let locale_signal = locale.locale;
         let navigate = navigate.clone();
 
         spawn_local(async move {
@@ -97,7 +95,7 @@ pub fn Register() -> impl IntoView {
                 Ok(response) => {
                     set_error.set(None);
                     set_status.set(Some(
-                        translate(locale_signal.get(), "register.success").to_string(),
+                        translate("register.success").to_string(),
                     ));
                     set_token.set(Some(response.access_token));
                     set_tenant_slug.set(Some(tenant_value));
@@ -112,16 +110,16 @@ pub fn Register() -> impl IntoView {
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            translate("errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -134,7 +132,7 @@ pub fn Register() -> impl IntoView {
     let on_accept_invite = move |_| {
         if tenant.get().is_empty() || invite_token.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "register.inviteRequired").to_string(),
+                translate("register.inviteRequired").to_string(),
             ));
             set_status.set(None);
             return;
@@ -145,7 +143,6 @@ pub fn Register() -> impl IntoView {
         let set_error = set_error;
         let set_status = set_status;
         let set_email = set_email;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result = rest_post::<InviteAcceptParams, InviteAcceptResponse>(
@@ -164,23 +161,23 @@ pub fn Register() -> impl IntoView {
                     set_email.set(response.email);
                     set_status.set(Some(format!(
                         "{} ({})",
-                        translate(locale_signal.get(), "register.inviteAccepted"),
+                        translate("register.inviteAccepted"),
                         response.role
                     )));
                 }
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "register.inviteExpired").to_string()
+                            translate("register.inviteExpired").to_string()
                         }
                         ApiError::Http(_) => {
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -193,7 +190,7 @@ pub fn Register() -> impl IntoView {
     let on_resend_verification = move |_| {
         if verification_email.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "register.verifyRequired").to_string(),
+                translate("register.verifyRequired").to_string(),
             ));
             set_status.set(None);
             return;
@@ -201,7 +198,7 @@ pub fn Register() -> impl IntoView {
 
         set_error.set(None);
         set_status.set(Some(
-            translate(locale.locale.get(), "register.verifySent").to_string(),
+            translate("register.verifySent").to_string(),
         ));
     };
 
@@ -209,16 +206,16 @@ pub fn Register() -> impl IntoView {
         <section class="grid min-h-screen grid-cols-1 lg:grid-cols-[1.2fr_1fr]">
             <aside class="flex flex-col justify-center gap-6 bg-[radial-gradient(circle_at_top_left,#1e3a8a,#0f172a)] p-12 text-white lg:p-16">
                 <span class="inline-flex w-fit items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
-                    {move || translate(locale.locale.get(), "register.badge")}
+                    {move || translate("register.badge")}
                 </span>
-                <h1 class="text-4xl font-semibold">{move || translate(locale.locale.get(), "register.heroTitle")}</h1>
-                <p class="text-lg text-white/80">{move || translate(locale.locale.get(), "register.heroSubtitle")}</p>
+                <h1 class="text-4xl font-semibold">{move || translate("register.heroTitle")}</h1>
+                <p class="text-lg text-white/80">{move || translate("register.heroSubtitle")}</p>
                 <div class="grid gap-2">
                     <p class="text-sm font-semibold">
-                        {move || translate(locale.locale.get(), "register.heroListTitle")}
+                        {move || translate("register.heroListTitle")}
                     </p>
                     <p class="text-sm text-white/75">
-                        {move || translate(locale.locale.get(), "register.heroListSubtitle")}
+                        {move || translate("register.heroListSubtitle")}
                     </p>
                 </div>
             </aside>
@@ -226,14 +223,14 @@ pub fn Register() -> impl IntoView {
                 <div class="flex flex-col gap-5 rounded-3xl bg-white p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                     <div>
                         <h2 class="text-2xl font-semibold">
-                            {move || translate(locale.locale.get(), "register.title")}
+                            {move || translate("register.title")}
                         </h2>
                         <p class="text-slate-500">
-                            {move || translate(locale.locale.get(), "register.subtitle")}
+                            {move || translate("register.subtitle")}
                         </p>
                     </div>
                     <div class="flex items-center justify-between gap-3 text-sm text-slate-600">
-                        <span>{move || translate(locale.locale.get(), "register.languageLabel")}</span>
+                        <span>{move || translate("register.languageLabel")}</span>
                         <LanguageToggle />
                     </div>
                     <Show when=move || error.get().is_some()>
@@ -250,39 +247,39 @@ pub fn Register() -> impl IntoView {
                         value=tenant
                         set_value=set_tenant
                         placeholder="demo"
-                        label=move || translate(locale.locale.get(), "register.tenantLabel")
+                        label=move || translate("register.tenantLabel")
                     />
                     <Input
                         value=email
                         set_value=set_email
                         placeholder="admin@rustok.io"
-                        label=move || translate(locale.locale.get(), "register.emailLabel")
+                        label=move || translate("register.emailLabel")
                     />
                     <Input
                         value=name
                         set_value=set_name
                         placeholder="Alex Morgan"
-                        label=move || translate(locale.locale.get(), "register.nameLabel")
+                        label=move || translate("register.nameLabel")
                     />
                     <Input
                         value=password
                         set_value=set_password
                         placeholder="••••••••"
                         type_="password"
-                        label=move || translate(locale.locale.get(), "register.passwordLabel")
+                        label=move || translate("register.passwordLabel")
                     />
                     <p class="text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "register.passwordHint")}
+                        {move || translate("register.passwordHint")}
                     </p>
                     <Button on_click=on_submit class="w-full">
-                        {move || translate(locale.locale.get(), "register.submit")}
+                        {move || translate("register.submit")}
                     </Button>
                     <div class="flex justify-between gap-3 text-sm">
                         <a class="text-blue-600 hover:underline" href="/login">
-                            {move || translate(locale.locale.get(), "register.loginLink")}
+                            {move || translate("register.loginLink")}
                         </a>
                         <a class="text-blue-600 hover:underline" href="/reset">
-                            {move || translate(locale.locale.get(), "register.resetLink")}
+                            {move || translate("register.resetLink")}
                         </a>
                     </div>
                 </div>
@@ -290,46 +287,46 @@ pub fn Register() -> impl IntoView {
                 <div class="flex flex-col gap-5 rounded-3xl bg-white p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                     <div>
                         <h3 class="text-lg font-semibold">
-                            {move || translate(locale.locale.get(), "register.inviteTitle")}
+                            {move || translate("register.inviteTitle")}
                         </h3>
                         <p class="text-slate-500">
-                            {move || translate(locale.locale.get(), "register.inviteSubtitle")}
+                            {move || translate("register.inviteSubtitle")}
                         </p>
                     </div>
                     <Input
                         value=invite_token
                         set_value=set_invite_token
                         placeholder="INVITE-2024-0001"
-                        label=move || translate(locale.locale.get(), "register.inviteLabel")
+                        label=move || translate("register.inviteLabel")
                     />
                     <Button
                         on_click=on_accept_invite
                         class="w-full border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                     >
-                        {move || translate(locale.locale.get(), "register.inviteSubmit")}
+                        {move || translate("register.inviteSubmit")}
                     </Button>
                 </div>
 
                 <div class="flex flex-col gap-5 rounded-3xl bg-white p-8 shadow-[0_24px_60px_rgba(15,23,42,0.12)]">
                     <div>
                         <h3 class="text-lg font-semibold">
-                            {move || translate(locale.locale.get(), "register.verifyTitle")}
+                            {move || translate("register.verifyTitle")}
                         </h3>
                         <p class="text-slate-500">
-                            {move || translate(locale.locale.get(), "register.verifySubtitle")}
+                            {move || translate("register.verifySubtitle")}
                         </p>
                     </div>
                     <Input
                         value=verification_email
                         set_value=set_verification_email
                         placeholder="admin@rustok.io"
-                        label=move || translate(locale.locale.get(), "register.verifyLabel")
+                        label=move || translate("register.verifyLabel")
                     />
                     <Button
                         on_click=on_resend_verification
                         class="w-full border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                     >
-                        {move || translate(locale.locale.get(), "register.verifySubmit")}
+                        {move || translate("register.verifySubmit")}
                     </Button>
                 </div>
             </div>

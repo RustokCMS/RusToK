@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::api::{rest_get, rest_post, ApiError};
 use crate::components::ui::{Button, Input};
 use crate::providers::auth::use_auth;
-use crate::providers::locale::{translate, use_locale};
+use crate::providers::locale::translate;
 
 #[derive(Clone, Deserialize)]
 struct SessionItem {
@@ -45,7 +45,6 @@ struct GenericStatus {}
 #[component]
 pub fn Security() -> impl IntoView {
     let auth = use_auth();
-    let locale = use_locale();
 
     let (current_password, set_current_password) = signal(String::new());
     let (new_password, set_new_password) = signal(String::new());
@@ -59,7 +58,6 @@ pub fn Security() -> impl IntoView {
         let tenant_slug = auth.tenant_slug.get();
         let set_sessions = set_sessions;
         let set_error = set_error;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result =
@@ -72,16 +70,16 @@ pub fn Security() -> impl IntoView {
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            translate("errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -95,7 +93,6 @@ pub fn Security() -> impl IntoView {
         let tenant_slug = auth.tenant_slug.get();
         let set_history = set_history;
         let set_error = set_error;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result = rest_get::<HistoryResponse>("/api/auth/history", token, tenant_slug).await;
@@ -107,16 +104,16 @@ pub fn Security() -> impl IntoView {
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            translate("errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -128,7 +125,7 @@ pub fn Security() -> impl IntoView {
     let on_change_password = move |_| {
         if current_password.get().is_empty() || new_password.get().is_empty() {
             set_error.set(Some(
-                translate(locale.locale.get(), "security.passwordRequired").to_string(),
+                translate("security.passwordRequired").to_string(),
             ));
             set_status.set(None);
             return;
@@ -138,7 +135,7 @@ pub fn Security() -> impl IntoView {
         let tenant_slug = auth.tenant_slug.get();
         if token.is_none() {
             set_error.set(Some(
-                translate(locale.locale.get(), "errors.auth.unauthorized").to_string(),
+                translate("errors.auth.unauthorized").to_string(),
             ));
             set_status.set(None);
             return;
@@ -148,7 +145,6 @@ pub fn Security() -> impl IntoView {
         let new_password_value = new_password.get();
         let set_error = set_error;
         let set_status = set_status;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result = rest_post::<ChangePasswordParams, GenericStatus>(
@@ -166,22 +162,22 @@ pub fn Security() -> impl IntoView {
                 Ok(_) => {
                     set_error.set(None);
                     set_status.set(Some(
-                        translate(locale_signal.get(), "security.signOutAll").to_string(),
+                        translate("security.signOutAll").to_string(),
                     ));
                 }
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            translate("errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -196,7 +192,6 @@ pub fn Security() -> impl IntoView {
         let tenant_slug = auth.tenant_slug.get();
         let set_error = set_error;
         let set_status = set_status;
-        let locale_signal = locale.locale;
 
         spawn_local(async move {
             let result = rest_post::<serde_json::Value, GenericStatus>(
@@ -211,22 +206,22 @@ pub fn Security() -> impl IntoView {
                 Ok(_) => {
                     set_error.set(None);
                     set_status.set(Some(
-                        translate(locale_signal.get(), "security.passwordUpdated").to_string(),
+                        translate("security.passwordUpdated").to_string(),
                     ));
                 }
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            translate("errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
-                            translate(locale_signal.get(), "errors.http").to_string()
+                            translate("errors.http").to_string()
                         }
                         ApiError::Network => {
-                            translate(locale_signal.get(), "errors.network").to_string()
+                            translate("errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
-                            translate(locale_signal.get(), "errors.unknown").to_string()
+                            translate("errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
@@ -245,13 +240,13 @@ pub fn Security() -> impl IntoView {
             <header class="mb-6 flex flex-wrap items-start justify-between gap-4">
                 <div>
                     <span class="inline-flex items-center rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
-                        {move || translate(locale.locale.get(), "security.badge")}
+                        {move || translate("security.badge")}
                     </span>
                     <h1 class="mt-2 text-2xl font-semibold">
-                        {move || translate(locale.locale.get(), "security.title")}
+                        {move || translate("security.title")}
                     </h1>
                     <p class="mt-2 text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "security.subtitle")}
+                        {move || translate("security.subtitle")}
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
@@ -259,7 +254,7 @@ pub fn Security() -> impl IntoView {
                         on_click=on_sign_out_all
                         class="border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                     >
-                        {move || translate(locale.locale.get(), "security.signOutAll")}
+                        {move || translate("security.signOutAll")}
                     </Button>
                 </div>
             </header>
@@ -267,30 +262,30 @@ pub fn Security() -> impl IntoView {
             <div class="grid gap-6 lg:grid-cols-2">
                 <div class="grid gap-4 rounded-2xl bg-white p-6 shadow-[0_18px_36px_rgba(15,23,42,0.08)]">
                     <h3 class="text-lg font-semibold">
-                        {move || translate(locale.locale.get(), "security.passwordTitle")}
+                        {move || translate("security.passwordTitle")}
                     </h3>
                     <p class="text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "security.passwordSubtitle")}
+                        {move || translate("security.passwordSubtitle")}
                     </p>
                     <Input
                         value=current_password
                         set_value=set_current_password
                         placeholder="••••••••"
                         type_="password"
-                        label=move || translate(locale.locale.get(), "security.currentPasswordLabel")
+                        label=move || translate("security.currentPasswordLabel")
                     />
                     <Input
                         value=new_password
                         set_value=set_new_password
                         placeholder="••••••••"
                         type_="password"
-                        label=move || translate(locale.locale.get(), "security.newPasswordLabel")
+                        label=move || translate("security.newPasswordLabel")
                     />
                     <p class="text-sm text-slate-500">
-                        {move || translate(locale.locale.get(), "security.passwordHint")}
+                        {move || translate("security.passwordHint")}
                     </p>
                     <Button on_click=on_change_password class="w-full">
-                        {move || translate(locale.locale.get(), "security.passwordSubmit")}
+                        {move || translate("security.passwordSubmit")}
                     </Button>
                     <Show when=move || status.get().is_some()>
                         <div class="rounded-xl bg-emerald-100 px-4 py-2 text-sm text-emerald-700">
@@ -300,8 +295,8 @@ pub fn Security() -> impl IntoView {
                 </div>
 
                 <div class="settings-card">
-                    <h3>{move || translate(locale.locale.get(), "security.sessionsTitle")}</h3>
-                    <p class="section-subtitle">{move || translate(locale.locale.get(), "security.sessionsSubtitle")}</p>
+                    <h3>{move || translate("security.sessionsTitle")}</h3>
+                    <p class="section-subtitle">{move || translate("security.sessionsSubtitle")}</p>
                     <div class="session-list">
                         {move || {
                             sessions
@@ -326,7 +321,7 @@ pub fn Security() -> impl IntoView {
                                             <div>
                                                 <strong>{label}</strong>
                                                 <p class="form-hint">
-                                                    {move || translate(locale.locale.get(), "security.sessionIp")}
+                                                    {move || translate("security.sessionIp")}
                                                     {": "}
                                                     {ip}
                                                 </p>
@@ -344,8 +339,8 @@ pub fn Security() -> impl IntoView {
                 </div>
 
                 <div class="settings-card">
-                    <h3>{move || translate(locale.locale.get(), "security.historyTitle")}</h3>
-                    <p class="section-subtitle">{move || translate(locale.locale.get(), "security.historySubtitle")}</p>
+                    <h3>{move || translate("security.historyTitle")}</h3>
+                    <p class="section-subtitle">{move || translate("security.historySubtitle")}</p>
                     <div class="session-list">
                         {move || {
                             history
@@ -369,14 +364,14 @@ pub fn Security() -> impl IntoView {
                                             <div>
                                                 <strong>{label}</strong>
                                                 <p class="form-hint">
-                                                    {move || translate(locale.locale.get(), "security.sessionIp")}
+                                                    {move || translate("security.sessionIp")}
                                                     {": "}
                                                     {ip}
                                                 </p>
                                             </div>
                                             <span class="status-pill">{event.created_at}</span>
                                             <span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">
-                                                {move || translate(locale.locale.get(), status_key.as_str())}
+                                                {move || translate(status_key.as_str())}
                                             </span>
                                         </div>
                                     }
