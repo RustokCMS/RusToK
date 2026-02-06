@@ -97,3 +97,4 @@ and can consume the same design tokens and shadcn-style component contracts.
 - Build the first shared components (Button, Input, Select, Card, Table).
 - Migrate admin screens first, then storefront screens.
 - Maintain a UI gap log and update it as Leptos libraries evolve.
+- Track blocked Leptos library upgrades in the technical parity doc until upstream fixes are available.

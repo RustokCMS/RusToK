@@ -48,6 +48,12 @@ When a feature is missing on the Leptos side:
    with a library-provided solution when available.
 3. Update this document with the gap and a migration note.
 
+### Current gaps / blockers
+
+| Area | Gap | Impact | Mitigation | Migration trigger |
+| --- | --- | --- | --- | --- |
+| UI primitives (Leptos) | `leptos-shadcn-ui` v0.1.0 fails to compile (pagination + icon imports). | Blocks adoption of shadcn-style primitives in Leptos. | Keep existing custom UI components in `apps/admin` and document parity gaps in UI plan. | Re-test when upstream fixes or a compatible version lands. |
+
 ### Suggested code annotation format
 
 Use a short, consistent marker near the custom implementation:
