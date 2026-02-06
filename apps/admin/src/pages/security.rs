@@ -191,7 +191,7 @@ pub fn Security() -> impl IntoView {
         });
     };
 
-    let on_sign_out_all = move |_| {
+    let on_sign_out_all = move |_: leptos::ev::MouseEvent| {
         let token = auth.token.get();
         let tenant_slug = auth.tenant_slug.get();
         let set_error = set_error;
@@ -256,7 +256,7 @@ pub fn Security() -> impl IntoView {
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
                     <Button
-                        on_click=move |_| {}
+                        on_click=on_sign_out_all
                         class="border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                     >
                         {move || translate(locale.locale.get(), "security.signOutAll")}
@@ -376,7 +376,7 @@ pub fn Security() -> impl IntoView {
                                             </div>
                                             <span class="status-pill">{event.created_at}</span>
                                             <span class="inline-flex items-center rounded-full bg-slate-200 px-2.5 py-1 text-xs text-slate-600">
-                                                {move || translate(locale.locale.get(), status_key.clone())}
+                                                {move || translate(locale.locale.get(), status_key.as_str())}
                                             </span>
                                         </div>
                                     }

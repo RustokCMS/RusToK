@@ -7,6 +7,7 @@ git-fetch-with-cli = true
 ignore = [
     "RUSTSEC-2025-0141",
     "RUSTSEC-2026-0007",
+    "RUSTSEC-2026-0009",
 ]
 
 [licenses]

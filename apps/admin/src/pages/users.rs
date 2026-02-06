@@ -343,8 +343,10 @@ pub fn Users() -> impl IntoView {
                                                             view! {
                                                                 <tr>
                                                                     <td class="border-b border-slate-200 py-2">
-                                                                        <A class="text-blue-600 hover:underline" href=format!("/users/{}", id)>
-                                                                            {email}
+                                                                        <A href=format!("/users/{}", id)>
+                                                                            <span class="text-blue-600 hover:underline">
+                                                                                {email}
+                                                                            </span>
                                                                         </A>
                                                                     </td>
                                                                     <td class="border-b border-slate-200 py-2">
