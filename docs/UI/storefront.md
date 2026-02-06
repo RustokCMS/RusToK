@@ -24,7 +24,8 @@ The Leptos SSR server listens on `http://localhost:3100`. The Next.js app runs o
 
 ## Tailwind styles
 
-The Leptos storefront ships with Tailwind-only styling. For offline or customized
+The Leptos storefront ships with Tailwind-only styling. The CSS pipeline uses
+`tailwind-rs` for the WASM-first, type-safe build. For offline or customized
 themes, build the CSS bundle:
 
 ```bash

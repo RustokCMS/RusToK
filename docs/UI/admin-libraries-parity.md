@@ -12,7 +12,7 @@
 
 | Категория | Next.js admin | Leptos admin | Примечание |
 | --- | --- | --- | --- |
-| CSS/дизайн-токены | TailwindCSS | TailwindCSS | Используется в обеих админках. |
+| CSS/дизайн-токены | TailwindCSS | TailwindCSS (`tailwind-rs`) | Next.js uses TailwindCSS; Leptos uses the WASM-first, type-safe `tailwind-rs`. |
 | CSS pipeline | PostCSS + Autoprefixer | PostCSS + Autoprefixer | Одинаковая цепочка сборки стилей. |
 | UI контракт | shadcn/ui | shadcn-style components | В документации зафиксирован единый shadcn‑style подход для обеих админок. |
 | Каталог аналогов | N/A | N/A | Список библиотек и адаптеров: https://github.com/leptos-rs/awesome-leptos |

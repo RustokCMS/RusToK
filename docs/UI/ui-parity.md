@@ -30,7 +30,7 @@ library *roles* even if the exact implementation differs per runtime:
 - **Forms**: `leptos-forms-rs` for Leptos, with optional validation via validator/garde.
 - **Server state**: `leptos-query` (chosen).
 - **UI primitives**: `leptos-shadcn-ui` (Leptos) ↔ shadcn/ui (Next.js).
-- **Styling**: `tailwind-rs` + `tailwind-rs-leptos` for Leptos, Tailwind for Next.js.
+- **Styling**: `tailwind-rs` (type-safe, WASM-first) + `tailwind-rs-leptos` for Leptos, Tailwind for Next.js.
 - **SEO/metadata**: `leptos-next-metadata` for Leptos; Next.js uses its built-in metadata APIs.
 - **Realtime (optional)**: `leptos-ws-pro`.
 
