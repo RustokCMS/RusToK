@@ -13,12 +13,24 @@ struct SessionItem {
     ip_address: Option<String>,
     created_at: String,
     current: bool,
-    status_key: Option<String>,
 }
 
 #[derive(Deserialize)]
 struct SessionsResponse {
     sessions: Vec<SessionItem>,
+}
+
+#[derive(Clone, Deserialize)]
+struct HistoryItem {
+    user_agent: Option<String>,
+    ip_address: Option<String>,
+    created_at: String,
+    status_key: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct HistoryResponse {
+    sessions: Vec<HistoryItem>,
 }
 
 #[derive(Serialize)]
@@ -40,7 +52,7 @@ pub fn Security() -> impl IntoView {
     let (status, set_status) = signal(Option::<String>::None);
     let (error, set_error) = signal(Option::<String>::None);
     let (sessions, set_sessions) = signal(Vec::<SessionItem>::new());
-    let (history, set_history) = signal(Vec::<SessionItem>::new());
+    let (history, set_history) = signal(Vec::<HistoryItem>::new());
 
     let load_sessions = move || {
         let token = auth.token.get();
@@ -86,8 +98,7 @@ pub fn Security() -> impl IntoView {
         let locale_signal = locale.locale;
 
         spawn_local(async move {
-            let result =
-                rest_get::<SessionsResponse>("/api/auth/history", token, tenant_slug).await;
+            let result = rest_get::<HistoryResponse>("/api/auth/history", token, tenant_slug).await;
             match result {
                 Ok(response) => {
                     set_error.set(None);
