@@ -84,7 +84,12 @@
     "verifySubmit": "Отправить повторно",
     "verifyRequired": "Введите email для отправки.",
     "verifySent": "Письмо подтверждения отправлено.",
-    "verifyTokenPreview": "Токен подтверждения:"
+    "verifyTokenLabel": "Токен подтверждения",
+    "verifyTokenPreview": "Токен подтверждения:",
+    "verifyTokenRequired": "Введите токен для подтверждения.",
+    "verifyTokenInvalid": "Токен подтверждения недействителен или истёк.",
+    "verifyConfirmed": "Email подтверждён.",
+    "verifyConfirm": "Подтвердить email"
   },
   "users": {
     "eyebrow": "Users",

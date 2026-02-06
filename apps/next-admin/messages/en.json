@@ -84,7 +84,12 @@
     "verifySubmit": "Resend verification",
     "verifyRequired": "Enter the email address to resend.",
     "verifySent": "Verification email sent.",
-    "verifyTokenPreview": "Verification token:"
+    "verifyTokenLabel": "Verification token",
+    "verifyTokenPreview": "Verification token:",
+    "verifyTokenRequired": "Enter a verification token to confirm.",
+    "verifyTokenInvalid": "Verification token is invalid or expired.",
+    "verifyConfirmed": "Email verification confirmed.",
+    "verifyConfirm": "Confirm verification"
   },
   "users": {
     "eyebrow": "Users",

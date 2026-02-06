@@ -50,6 +50,16 @@ struct VerificationRequestResponse {
     verification_token: Option<String>,
 }
 
+#[derive(Serialize)]
+struct VerifyConfirmParams {
+    token: String,
+}
+
+#[derive(Deserialize)]
+struct GenericStatusResponse {
+    status: String,
+}
+
 #[component]
 pub fn Register() -> impl IntoView {
     let auth = use_auth();
@@ -61,6 +71,7 @@ pub fn Register() -> impl IntoView {
     let (password, set_password) = signal(String::new());
     let (invite_token, set_invite_token) = signal(String::new());
     let (verification_email, set_verification_email) = signal(String::new());
+    let (verification_token, set_verification_token) = signal(String::new());
     let (error, set_error) = signal(Option::<String>::None);
     let (status, set_status) = signal(Option::<String>::None);
 
@@ -227,6 +238,50 @@ pub fn Register() -> impl IntoView {
         });
     };
 
+    let on_confirm_verification = move |_| {
+        if tenant.get().is_empty() || verification_token.get().is_empty() {
+            set_error.set(Some(translate("register.verifyTokenRequired").to_string()));
+            set_status.set(None);
+            return;
+        }
+
+        let tenant_value = tenant.get().trim().to_string();
+        let token_value = verification_token.get().trim().to_string();
+        let set_error = set_error;
+        let set_status = set_status;
+
+        spawn_local(async move {
+            let result = rest_post::<VerifyConfirmParams, GenericStatusResponse>(
+                "/api/auth/verify/confirm",
+                &VerifyConfirmParams {
+                    token: token_value,
+                },
+                None,
+                Some(tenant_value),
+            )
+            .await;
+
+            match result {
+                Ok(_) => {
+                    set_error.set(None);
+                    set_status.set(Some(translate("register.verifyConfirmed").to_string()));
+                }
+                Err(err) => {
+                    let message = match err {
+                        ApiError::Unauthorized => {
+                            translate("register.verifyTokenInvalid").to_string()
+                        }
+                        ApiError::Http(_) => translate("errors.http").to_string(),
+                        ApiError::Network => translate("errors.network").to_string(),
+                        ApiError::Graphql(_) => translate("errors.unknown").to_string(),
+                    };
+                    set_error.set(Some(message));
+                    set_status.set(None);
+                }
+            }
+        });
+    };
+
     view! {
         <section class="grid min-h-screen grid-cols-1 lg:grid-cols-[1.2fr_1fr]">
             <aside class="flex flex-col justify-center gap-6 bg-[radial-gradient(circle_at_top_left,#1e3a8a,#0f172a)] p-12 text-white lg:p-16">
@@ -352,6 +407,18 @@ pub fn Register() -> impl IntoView {
                         class="w-full border border-indigo-200 bg-transparent text-blue-600 hover:bg-blue-50"
                     >
                         {move || translate("register.verifySubmit")}
+                    </Button>
+                    <Input
+                        value=verification_token
+                        set_value=set_verification_token
+                        placeholder="VERIFY-2024-0001"
+                        label=move || translate("register.verifyTokenLabel")
+                    />
+                    <Button
+                        on_click=on_confirm_verification
+                        class="w-full border border-emerald-200 bg-transparent text-emerald-700 hover:bg-emerald-50"
+                    >
+                        {move || translate("register.verifyConfirm")}
                     </Button>
                 </div>
             </div>
