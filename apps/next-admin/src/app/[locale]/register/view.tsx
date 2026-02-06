@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 type AuthResponse = { access_token: string };
+type InviteAcceptResponse = { email: string; role: string };
 
 export default function RegisterView({ locale }: { locale: string }) {
   const t = useTranslations("auth");
@@ -18,12 +19,16 @@ export default function RegisterView({ locale }: { locale: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [inviteToken, setInviteToken] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInviteLoading, setIsInviteLoading] = useState(false);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
+    setStatus(null);
 
     if (!tenant || !email || !password) {
       setError(t("errorRequired"));
@@ -53,6 +58,40 @@ export default function RegisterView({ locale }: { locale: string }) {
     }
   };
 
+
+  const onAcceptInvite = async (event: FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setStatus(null);
+
+    if (!tenant || !inviteToken) {
+      setError(t("inviteRequired"));
+      return;
+    }
+
+    setIsInviteLoading(true);
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/auth/invite/accept`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Tenant-Slug": tenant },
+        body: JSON.stringify({ token: inviteToken }),
+      });
+
+      if (!response.ok) {
+        setError(response.status === 401 ? t("inviteExpired") : e("http"));
+        return;
+      }
+
+      const payload = (await response.json()) as InviteAcceptResponse;
+      setEmail(payload.email);
+      setStatus(`${t("inviteAccepted")} (${payload.role})`);
+    } catch {
+      setError(e("network"));
+    } finally {
+      setIsInviteLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50">
       <section className="mx-auto max-w-2xl px-6 py-12">
@@ -65,6 +104,11 @@ export default function RegisterView({ locale }: { locale: string }) {
           {error ? (
             <div className="mt-4 rounded border border-rose-200 bg-rose-50 p-3 text-sm text-rose-600">
               {error}
+            </div>
+          ) : null}
+          {status ? (
+            <div className="mt-4 rounded border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+              {status}
             </div>
           ) : null}
           <div className="mt-4 grid gap-4">
@@ -102,6 +146,25 @@ export default function RegisterView({ locale }: { locale: string }) {
               {t("backToLogin")}
             </Link>
           </div>
+        </form>
+
+        <form
+          className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+          onSubmit={onAcceptInvite}
+        >
+          <h2 className="text-lg font-semibold">{t("inviteTitle")}</h2>
+          <p className="mt-2 text-sm text-slate-500">{t("inviteSubtitle")}</p>
+          <div className="mt-4 grid gap-4">
+            <input
+              className="input input-bordered"
+              placeholder="INVITE-2024-ABCDE"
+              value={inviteToken}
+              onChange={(event) => setInviteToken(event.target.value)}
+            />
+          </div>
+          <Button className="mt-6 w-full" type="submit" disabled={isInviteLoading}>
+            {isInviteLoading ? `${t("inviteSubmit")}…` : t("inviteSubmit")}
+          </Button>
         </form>
       </section>
     </main>

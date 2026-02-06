@@ -112,19 +112,25 @@ Then align:
 
 ## Priority delivery plan (2 sprints)
 
-### Sprint 1 (highest risk reduction)
+> Note: route rollout and core endpoint wiring from the earlier plan are complete
+> (`/register`, `/reset`, `/profile`, `/security` in both admin apps). This plan
+> is intentionally trimmed to the remaining Phase 3 scope.
 
-1. Add Next routes: `/{locale}/register`, `/{locale}/reset`, `/{locale}/profile`, `/{locale}/security`.
-2. Unify error mapping matrix (`401`, validation, network, unknown) across both apps.
-3. Finalize component contract for auth pages (Button/Input/Alert/Card).
-4. Wire reset and register endpoints end-to-end (including locale-aware messages).
+### Sprint 1 (scope-closure: invites + verification)
 
-### Sprint 2 (security completion)
+1. Implement invite acceptance end-to-end (backend contract + both admin UIs).
+2. Add invite expiry handling and localized user-facing states.
+3. Implement email verification flow + resend action (backend + both UIs).
+4. Localize verification/invite/reset transactional templates in RU/EN.
 
-1. Sessions and login history API integration for both apps.
-2. Sign-out-all + password change flows with audit events.
-3. Invite acceptance and email verification/resend.
-4. Visual regression checks to enforce parity on phase-3 routes.
+### Sprint 2 (security observability + profile completeness)
+
+1. Emit/store auth-security audit events (login success/fail, password changed,
+   session invalidation, verification changes, invite accepted/expired).
+2. Surface a dedicated audit feed in admin UI (separate from session history).
+3. Complete profile model persistence: avatar, timezone, preferred language,
+   with explicit user-facing vs admin UI language behavior.
+4. Add explicit reset-token-expired UX state with recovery CTA in both apps.
 
 ## Definition of done (Phase 3 admin)
 

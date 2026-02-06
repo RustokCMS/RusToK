@@ -23,6 +23,18 @@ pub struct Claims {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct InviteClaims {
+    pub sub: String,
+    pub tenant_id: Uuid,
+    pub role: UserRole,
+    pub purpose: String,
+    pub iss: String,
+    pub aud: String,
+    pub exp: usize,
+    pub iat: usize,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PasswordResetClaims {
     pub sub: String,
     pub tenant_id: Uuid,
@@ -217,6 +229,27 @@ pub fn decode_password_reset_token(
 
     if claims.purpose != "password_reset" {
         return Err(Error::Unauthorized("Invalid reset token".to_string()));
+    }
+
+    Ok(claims)
+}
+
+pub fn decode_invite_token(config: &AuthConfig, token: &str) -> Result<InviteClaims> {
+    let mut validation = Validation::new(Algorithm::HS256);
+    validation.validate_exp = true;
+    validation.set_issuer(&[config.issuer.as_str()]);
+    validation.set_audience(&[config.audience.as_str()]);
+
+    let claims = decode::<InviteClaims>(
+        token,
+        &DecodingKey::from_secret(config.secret.as_bytes()),
+        &validation,
+    )
+    .map(|data| data.claims)
+    .map_err(|_| Error::Unauthorized("Invalid invite token".to_string()))?;
+
+    if claims.purpose != "invite" {
+        return Err(Error::Unauthorized("Invalid invite token".to_string()));
     }
 
     Ok(claims)

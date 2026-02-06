@@ -37,6 +37,7 @@ pub fn ResetPassword() -> impl IntoView {
     let (new_password, set_new_password) = signal(String::new());
     let (error, set_error) = signal(Option::<String>::None);
     let (status, set_status) = signal(Option::<String>::None);
+    let (token_expired, set_token_expired) = signal(false);
 
     let on_request = move |_| {
         if tenant.get().is_empty() || email.get().is_empty() {
@@ -44,6 +45,7 @@ pub fn ResetPassword() -> impl IntoView {
                 translate(locale.locale.get(), "reset.errorRequired").to_string(),
             ));
             set_status.set(None);
+            set_token_expired.set(false);
             return;
         }
 
@@ -72,6 +74,7 @@ pub fn ResetPassword() -> impl IntoView {
                     set_status.set(Some(
                         translate(locale_signal.get(), "reset.requestSent").to_string(),
                     ));
+                    set_token_expired.set(false);
                 }
                 Err(err) => {
                     let message = match err {
@@ -79,17 +82,21 @@ pub fn ResetPassword() -> impl IntoView {
                             translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
                         }
                         ApiError::Http(_) => {
+                            set_token_expired.set(false);
                             translate(locale_signal.get(), "errors.http").to_string()
                         }
                         ApiError::Network => {
+                            set_token_expired.set(false);
                             translate(locale_signal.get(), "errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
+                            set_token_expired.set(false);
                             translate(locale_signal.get(), "errors.unknown").to_string()
                         }
                     };
                     set_error.set(Some(message));
                     set_status.set(None);
+                    set_token_expired.set(false);
                 }
             }
         });
@@ -101,6 +108,7 @@ pub fn ResetPassword() -> impl IntoView {
                 translate(locale.locale.get(), "reset.tokenRequired").to_string(),
             ));
             set_status.set(None);
+            set_token_expired.set(false);
             return;
         }
 
@@ -129,19 +137,24 @@ pub fn ResetPassword() -> impl IntoView {
                     set_status.set(Some(
                         translate(locale_signal.get(), "reset.updated").to_string(),
                     ));
+                    set_token_expired.set(false);
                 }
                 Err(err) => {
                     let message = match err {
                         ApiError::Unauthorized => {
-                            translate(locale_signal.get(), "errors.auth.unauthorized").to_string()
+                            set_token_expired.set(true);
+                            translate(locale_signal.get(), "reset.tokenExpired").to_string()
                         }
                         ApiError::Http(_) => {
+                            set_token_expired.set(false);
                             translate(locale_signal.get(), "errors.http").to_string()
                         }
                         ApiError::Network => {
+                            set_token_expired.set(false);
                             translate(locale_signal.get(), "errors.network").to_string()
                         }
                         ApiError::Graphql(_) => {
+                            set_token_expired.set(false);
                             translate(locale_signal.get(), "errors.unknown").to_string()
                         }
                     };
@@ -178,6 +191,9 @@ pub fn ResetPassword() -> impl IntoView {
                     </Show>
                     <Show when=move || status.get().is_some()>
                         <div class="alert success">{move || status.get().unwrap_or_default()}</div>
+                    </Show>
+                    <Show when=move || token_expired.get()>
+                        <div class="alert warning">{move || translate(locale.locale.get(), "reset.requestNewLink")}</div>
                     </Show>
                     <Input value=tenant set_value=set_tenant placeholder="demo" label=move || translate(locale.locale.get(), "reset.tenantLabel") />
                     <Input value=email set_value=set_email placeholder="admin@rustok.io" label=move || translate(locale.locale.get(), "reset.emailLabel") />

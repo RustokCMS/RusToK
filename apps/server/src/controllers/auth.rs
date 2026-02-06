@@ -15,8 +15,9 @@ use std::net::SocketAddr;
 use utoipa::ToSchema;
 
 use crate::auth::{
-    decode_password_reset_token, encode_access_token, encode_password_reset_token,
-    generate_refresh_token, hash_password, hash_refresh_token, verify_password, AuthConfig,
+    decode_invite_token, decode_password_reset_token, encode_access_token,
+    encode_password_reset_token, generate_refresh_token, hash_password, hash_refresh_token,
+    verify_password, AuthConfig,
 };
 use crate::extractors::{auth::CurrentUser, tenant::CurrentTenant};
 use crate::models::{
@@ -43,6 +44,18 @@ pub struct RegisterParams {
     pub email: String,
     pub password: String,
     pub name: Option<String>,
+}
+
+#[derive(Deserialize, ToSchema)]
+pub struct AcceptInviteParams {
+    pub token: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct InviteAcceptResponse {
+    pub status: &'static str,
+    pub email: String,
+    pub role: rustok_core::UserRole,
 }
 
 #[derive(Deserialize, ToSchema)]
@@ -334,6 +347,27 @@ async fn me(CurrentUser { user, .. }: CurrentUser) -> Result<Response> {
     format::json(UserResponse::from(user))
 }
 
+#[utoipa::path(post, path = "/api/auth/invite/accept", tag = "auth", request_body = AcceptInviteParams,
+    responses((status = 200, description = "Invite accepted", body = InviteAcceptResponse),(status = 401, description = "Invalid or expired invite token")))]
+async fn accept_invite(
+    State(ctx): State<AppContext>,
+    CurrentTenant(tenant): CurrentTenant,
+    Json(params): Json<AcceptInviteParams>,
+) -> Result<Response> {
+    let config = AuthConfig::from_ctx(&ctx)?;
+    let claims = decode_invite_token(&config, &params.token)?;
+
+    if claims.tenant_id != tenant.id {
+        return Err(Error::Unauthorized("Invalid invite token".into()));
+    }
+
+    format::json(InviteAcceptResponse {
+        status: "ok",
+        email: claims.sub,
+        role: claims.role,
+    })
+}
+
 #[utoipa::path(post, path = "/api/auth/reset/request", tag = "auth", request_body = RequestResetParams,
     responses((status = 200, description = "Reset request accepted", body = ResetRequestResponse)))]
 async fn request_reset(
@@ -528,6 +562,7 @@ pub fn routes() -> Routes {
         .add("/refresh", post(refresh))
         .add("/logout", post(logout))
         .add("/me", get(me))
+        .add("/invite/accept", post(accept_invite))
         .add("/reset/request", post(request_reset))
         .add("/reset/confirm", post(confirm_reset))
         .add("/sessions", get(list_sessions))

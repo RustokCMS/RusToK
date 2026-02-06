@@ -29,6 +29,17 @@ struct AuthUser {
     role: String,
 }
 
+#[derive(Serialize)]
+struct InviteAcceptParams {
+    token: String,
+}
+
+#[derive(Deserialize)]
+struct InviteAcceptResponse {
+    email: String,
+    role: String,
+}
+
 #[component]
 pub fn Register() -> impl IntoView {
     let auth = use_auth();
@@ -121,7 +132,7 @@ pub fn Register() -> impl IntoView {
     };
 
     let on_accept_invite = move |_| {
-        if invite_token.get().is_empty() {
+        if tenant.get().is_empty() || invite_token.get().is_empty() {
             set_error.set(Some(
                 translate(locale.locale.get(), "register.inviteRequired").to_string(),
             ));
@@ -129,10 +140,54 @@ pub fn Register() -> impl IntoView {
             return;
         }
 
-        set_error.set(None);
-        set_status.set(Some(
-            translate(locale.locale.get(), "register.inviteAccepted").to_string(),
-        ));
+        let tenant_value = tenant.get().trim().to_string();
+        let invite_value = invite_token.get().trim().to_string();
+        let set_error = set_error;
+        let set_status = set_status;
+        let set_email = set_email;
+        let locale_signal = locale.locale;
+
+        spawn_local(async move {
+            let result = rest_post::<InviteAcceptParams, InviteAcceptResponse>(
+                "/api/auth/invite/accept",
+                &InviteAcceptParams {
+                    token: invite_value,
+                },
+                None,
+                Some(tenant_value),
+            )
+            .await;
+
+            match result {
+                Ok(response) => {
+                    set_error.set(None);
+                    set_email.set(response.email);
+                    set_status.set(Some(format!(
+                        "{} ({})",
+                        translate(locale_signal.get(), "register.inviteAccepted"),
+                        response.role
+                    )));
+                }
+                Err(err) => {
+                    let message = match err {
+                        ApiError::Unauthorized => {
+                            translate(locale_signal.get(), "register.inviteExpired").to_string()
+                        }
+                        ApiError::Http(_) => {
+                            translate(locale_signal.get(), "errors.http").to_string()
+                        }
+                        ApiError::Network => {
+                            translate(locale_signal.get(), "errors.network").to_string()
+                        }
+                        ApiError::Graphql(_) => {
+                            translate(locale_signal.get(), "errors.unknown").to_string()
+                        }
+                    };
+                    set_error.set(Some(message));
+                    set_status.set(None);
+                }
+            }
+        });
     };
 
     let on_resend_verification = move |_| {

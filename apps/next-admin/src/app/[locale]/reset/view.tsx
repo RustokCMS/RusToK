@@ -15,11 +15,13 @@ export default function ResetView({ locale: _locale }: { locale: string }) {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tokenExpired, setTokenExpired] = useState(false);
 
   const onRequest = async (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     setStatus(null);
+    setTokenExpired(false);
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/auth/reset/request`, {
@@ -30,6 +32,7 @@ export default function ResetView({ locale: _locale }: { locale: string }) {
 
       if (!response.ok) {
         setError(e("http"));
+        setTokenExpired(false);
         return;
       }
 
@@ -42,6 +45,7 @@ export default function ResetView({ locale: _locale }: { locale: string }) {
       }
     } catch {
       setError(e("network"));
+      setTokenExpired(false);
     }
   };
 
@@ -49,6 +53,7 @@ export default function ResetView({ locale: _locale }: { locale: string }) {
     event.preventDefault();
     setError(null);
     setStatus(null);
+    setTokenExpired(false);
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/auth/reset/confirm`, {
@@ -58,13 +63,21 @@ export default function ResetView({ locale: _locale }: { locale: string }) {
       });
 
       if (!response.ok) {
-        setError(e("auth.unauthorized"));
+        if (response.status === 401) {
+          setError(t("resetTokenExpired"));
+          setTokenExpired(true);
+          return;
+        }
+
+        setError(e("http"));
         return;
       }
 
       setStatus(t("passwordUpdated"));
+      setTokenExpired(false);
     } catch {
       setError(e("network"));
+      setTokenExpired(false);
     }
   };
 
@@ -118,6 +131,9 @@ export default function ResetView({ locale: _locale }: { locale: string }) {
           <Button className="mt-4 w-full" type="submit">
             {t("resetConfirmSubmit")}
           </Button>
+          {tokenExpired ? (
+            <p className="mt-3 text-sm text-amber-700">{t("resetTokenExpiredRecovery")}</p>
+          ) : null}
         </form>
 
         {status ? <p className="text-sm text-emerald-700">{status}</p> : null}

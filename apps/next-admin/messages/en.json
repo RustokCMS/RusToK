@@ -69,7 +69,15 @@
     "resetConfirmSubmit": "Update password",
     "resetRequested": "Reset request accepted.",
     "passwordUpdated": "Password updated.",
-    "resetTokenPreview": "Reset token: {token}"
+    "resetTokenPreview": "Reset token: {token}",
+    "resetTokenExpired": "This reset token has expired.",
+    "resetTokenExpiredRecovery": "Request a new reset link and try again.",
+    "inviteTitle": "Have an invite?",
+    "inviteSubtitle": "Accept a pre-approved invitation with role already set.",
+    "inviteSubmit": "Accept invitation",
+    "inviteRequired": "Enter tenant and invitation token.",
+    "inviteAccepted": "Invitation accepted. You can now sign in.",
+    "inviteExpired": "Invitation token is invalid or expired."
   },
   "users": {
     "eyebrow": "Users",
