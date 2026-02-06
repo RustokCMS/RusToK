@@ -12,11 +12,17 @@
 | Каталог аналогов | N/A | N/A | Список библиотек и адаптеров: https://github.com/leptos-rs/awesome-leptos |
 | Метаданные (Next.js) | next/metadata | leptos-next-metadata | https://github.com/cloud-shuttle/leptos-next-metadata |
 | Data fetching | @tanstack/react-query | leptos-query | https://github.com/cloud-shuttle/leptos-query |
+| i18n | next-intl | leptos_i18n | https://github.com/Baptistemontan/leptos_i18n |
 
 ## Требуют поиска и подтверждения
 
 - Формы/валидация (Next.js: react-hook-form + zod).
 - Таблицы (Next.js: @tanstack/react-table).
 - Data fetching (Next.js: @tanstack/react-query).
-- i18n (Next.js: next-intl).
 - State (Next.js: zustand).
+
+## Принципы выбора библиотек
+
+Наш приоритет — **максимальное использование готовых библиотек** для реализации функционала.
+При создании нового функционала **нужно сначала найти и предложить** соответствующую библиотеку/интеграцию.
+Иначе в конце мы получим неработающий самопис, который сложно поддерживать и масштабировать.
