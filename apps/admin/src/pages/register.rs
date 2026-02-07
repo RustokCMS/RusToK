@@ -57,6 +57,7 @@ struct VerifyConfirmParams {
 
 #[derive(Deserialize)]
 struct GenericStatusResponse {
+    #[allow(dead_code)]
     status: String,
 }
 
