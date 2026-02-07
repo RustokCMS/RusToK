@@ -32,6 +32,7 @@
 | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Статус реализации vs документация |
 | [MANIFEST_ADDENDUM.md](docs/MANIFEST_ADDENDUM.md) | Дополнения к манифесту (секции 26-33) |
 | [modules/flex.md](docs/modules/flex.md) | Спецификация Flex модуля (новый концепт) |
+| [modules/module-manifest.md](docs/modules/module-manifest.md) | Манифест модулей и rebuild (WordPress/NodeBB-style) |
 | [templates/module_contract.md](docs/templates/module_contract.md) | Шаблон контракта модуля |
 
 ---
@@ -43,6 +44,8 @@
 - **Stability First:** Мы строим "Танк", а не хрупкую экосистему плагинов.
 - **Compile-Time Safety:** Если компилируется — работает.
 - **Monorepo:** Backend, Admin и Storefront живут вместе.
+- **Rebuild-Modules:** Состав модулей управляется манифестом и пересборкой
+  (WordPress/NodeBB-style админ → rebuild → новый бинарник).
 
 ### 2.2 Core Module, Specific Modules
 

@@ -10,6 +10,10 @@ RusToK compiles modules into the binary but keeps the per-tenant state in the
 their metadata (slug, name, description, version, dependencies). Per-tenant
 status is resolved at runtime.
 
+To make the module set dynamic (WordPress/NodeBB-style), the build uses a
+module manifest that defines which crates are included in the build. A rebuild
+produces a new binary and therefore a new registry set.
+
 Key pieces:
 
 - **Core module contract**: `crates/rustok-core/src/module.rs` defines
@@ -18,6 +22,8 @@ Key pieces:
   module implementations.
 - **Server registry bootstrap**: `apps/server/src/modules/mod.rs` registers
   built-in modules and is attached to the app in `apps/server/src/app.rs`.
+- **Module manifest**: `docs/modules/module-manifest.md` describes the build
+  manifest used to select which modules are compiled into the binary.
 - **GraphQL**: `module_registry` query combines registry metadata with per-tenant
   state, and `toggle_module` updates the state and calls lifecycle hooks.
 - **Route enforcement**: `apps/server/src/guards/module.rs` provides
