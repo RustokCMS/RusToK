@@ -1,11 +1,6 @@
-# Developer Storefront Plan
+# Phase 1 (recovered)
 
-## Принципы
-
-- Мы **не клонируем** библиотеки целиком. Вместо этого делаем **минимальные адаптеры/обёртки** и закрываем пробелы **по мере работы** с админками/витриной.
-- Приоритет — **готовые библиотеки и интеграции**; самопис — только если нет адекватного аналога.
-- Любые отклонения фиксируем в UI‑документах и матрицах паритета.
-- Перед разработкой **проверяем установленные библиотеки** и существующие компоненты, чтобы не писать лишний код.
+Перед разработкой **проверяем установленные библиотеки** и существующие компоненты, чтобы не писать лишний код.
 
 См. базовые источники:
 - [UI parity (admin + storefront)](./ui-parity.md)
@@ -27,27 +22,27 @@
 
 | Работа | Leptos | Next |
 | --- | --- | --- |
-| Базовый layout и навигационный shell админки. | [x] | [x] |
-| Dashboard/главная админки. | [x] | [x] |
-| Страницы аутентификации: login / register / reset. | [x] | [x] |
-| Страница Security. | [x] | [x] |
-| Страница Profile. | [x] | [x] |
-| Users list с фильтрами/поиском и пагинацией (REST + GraphQL запросы). | [x] | [x] |
-| User details (карточка пользователя). | [x] | [ ] |
-| Auth‑guard (защита приватных маршрутов). | [x] | [x] |
-| Базовые UI‑примитивы (PageHeader, кнопки, инпуты) в shadcn‑style. | [x] | [x] |
-| i18n (RU/EN). | [x] | [x] |
+| Базовый layout и навигационный shell админки. | ✅ | ✅ |
+| Dashboard/главная админки. | ✅ | ✅ |
+| Страницы аутентификации: login / register / reset. | ✅ | ✅ |
+| Страница Security. | ✅ | ✅ |
+| Страница Profile. | ✅ | ✅ |
+| Users list с фильтрами/поиском и пагинацией (REST + GraphQL запросы). | ✅ | ✅ |
+| User details (карточка пользователя). | ✅ | ⬜ |
+| Auth‑guard (защита приватных маршрутов). | ✅ | ✅ |
+| Базовые UI‑примитивы (PageHeader, кнопки, инпуты) в shadcn‑style. | ✅ | ✅ |
+| i18n (RU/EN). | ✅ | ✅ |
 
 ### Storefront (Leptos SSR + Next.js)
 
 | Работа | Leptos | Next |
 | --- | --- | --- |
-| Landing‑shell (hero + CTA + основной layout). | [x] | [x] |
-| Блоки контента (карточки/фичи/коллекции). | [x] | [x] |
-| Блоки маркетинга/инфо (alert/статы/история бренда/подписка). | [x] | [x] |
-| i18n / локализация витрины. | [x] | [x] |
-| Tailwind‑стили и базовая тема (DaisyUI/shadcn‑style). | [x] | [x] |
-| SSR‑сервер + отдача CSS‑бандла. | [x] | [ ] |
+| Landing‑shell (hero + CTA + основной layout). | ✅ | ✅ |
+| Блоки контента (карточки/фичи/коллекции). | ✅ | ✅ |
+| Блоки маркетинга/инфо (alert/статы/история бренда/подписка). | ✅ | ✅ |
+| i18n / локализация витрины. | ✅ | ✅ |
+| Tailwind‑стили и базовая тема (DaisyUI/shadcn‑style). | ✅ | ✅ |
+| SSR‑сервер + отдача CSS‑бандла. | ✅ | ⬜ |
 
 ---
 
@@ -55,12 +50,25 @@
 
 | Работа | Leptos | Next |
 | --- | --- | --- |
-| i18n foundation (ключевые неймспейсы и единые ключи). | [ ] | [ ] |
-| Auth wiring (REST: login/me, хранение токена, guard). | [ ] | [ ] |
-| Users list + pagination + filters (GraphQL users query). | [ ] | [ ] |
-| Users detail view (GraphQL user query). | [ ] | [ ] |
-| Users CRUD (create/update/disable + формы и ошибки). | [ ] | [ ] |
-| Shared UI/UX (layout/nav, breadcrumbs, toasts, form patterns). | [ ] | [ ] |
+| i18n foundation: ключевые неймспейсы `app/auth/users/errors`. | ⬜ | ⬜ |
+| i18n foundation: вынос строк в доменные модули/файлы. | ⬜ | ⬜ |
+| i18n foundation: локализация API ошибок (`errors.*`). | ⬜ | ⬜ |
+| Auth wiring: `POST /api/auth/login`. | ⬜ | ⬜ |
+| Auth wiring: `GET /api/auth/me` (bootstrap). | ⬜ | ⬜ |
+| Auth wiring: хранение токена (cookie/localStorage). | ⬜ | ⬜ |
+| Users list: GraphQL `users` (pagination). | ⬜ | ⬜ |
+| Users list: фильтры и поиск. | ⬜ | ⬜ |
+| Users table parity: колонки `email/name/role/status/created_at`. | ⬜ | ⬜ |
+| Users detail view: GraphQL `user(id)`. | ⬜ | ⬜ |
+| Users CRUD: `createUser` mutation. | ⬜ | ⬜ |
+| Users CRUD: `updateUser` mutation. | ⬜ | ⬜ |
+| Users CRUD: `disableUser` mutation. | ⬜ | ⬜ |
+| Users CRUD: формы, ошибки, тосты. | ⬜ | ⬜ |
+| RBAC: права `users.create/users.update/users.manage`. | ⬜ | ⬜ |
+| Shared UI/UX: layout/nav parity. | ⬜ | ⬜ |
+| Shared UI/UX: breadcrumbs. | ⬜ | ⬜ |
+| Shared UI/UX: form patterns. | ⬜ | ⬜ |
+| Shared UI/UX: toasts/alerts. | ⬜ | ⬜ |
 
 ---
 
@@ -68,15 +76,28 @@
 
 | Работа | Leptos | Next |
 | --- | --- | --- |
-| Admin auth middleware/guard (требовать auth на приватных маршрутах). | [ ] | [ ] |
-| Login flow (REST: `POST /api/auth/login`). | [ ] | [ ] |
-| Session bootstrap (REST: `GET /api/auth/me`). | [ ] | [ ] |
-| Token storage + refresh strategy (cookie/localStorage). | [ ] | [ ] |
-| Logout flow (очистка токена/сессии). | [ ] | [ ] |
-| Password reset flow (request + confirm). | [ ] | [ ] |
-| Security settings screen (пароли, сессии, 2FA placeholder). | [ ] | [ ] |
-| RBAC checks for admin-only GraphQL/REST. | [ ] | [ ] |
-| Error mapping для auth (errors.*). | [ ] | [ ] |
+| Login page: tenant slug + email + password. | ⬜ | ⬜ |
+| Login UX: ошибки/валидация, loading/empty states. | ⬜ | ⬜ |
+| Language switch + persistence. | ⬜ | ⬜ |
+| Password reset: request email. | ⬜ | ⬜ |
+| Password reset: token + new password. | ⬜ | ⬜ |
+| Password reset: token expiry UI. | ⬜ | ⬜ |
+| Email verification: verify + resend action. | ⬜ | ⬜ |
+| Registration: sign‑up (email + password + tenant). | ⬜ | ⬜ |
+| Registration: optional name + password strength hints. | ⬜ | ⬜ |
+| Invite onboarding: accept invite + expired invite UX. | ⬜ | ⬜ |
+| Profile page: name/avatar/timezone/language. | ⬜ | ⬜ |
+| Change password: current password + policy hints. | ⬜ | ⬜ |
+| Active sessions list + “sign out all”. | ⬜ | ⬜ |
+| Login history (success/failed, timestamps/IP). | ⬜ | ⬜ |
+| Admin auth middleware/guard (private routes). | ⬜ | ⬜ |
+| Token storage + refresh strategy (cookie/localStorage). | ⬜ | ⬜ |
+| Logout flow (очистка токена/сессии). | ⬜ | ⬜ |
+| RBAC checks for admin-only GraphQL/REST. | ⬜ | ⬜ |
+| RU/EN coverage for auth/profile UI + validation. | ⬜ | ⬜ |
+| Localized email templates: verify/reset/invite. | ⬜ | ⬜ |
+| Admin route map: `/login` `/register` `/reset` `/profile` `/security`. | ⬜ | ⬜ |
+| Audit events: login/password change/session invalidation/invite. | ⬜ | ⬜ |
 
 ---
 
@@ -84,9 +105,28 @@
 
 | Работа | Leptos | Next |
 | --- | --- | --- |
-| Подготовка и аудит: цели, инвентаризация шаблона и текущих админок, UI контракт. | [ ] | [ ] |
-| Карта соответствий (Template → RusToK): страницы, компоненты, токены. | [ ] | [ ] |
-| Интеграция шаблона в Next.js админку: зависимости, layout/nav, страницы, i18n, API‑состояния. | [ ] | [ ] |
-| Интеграция шаблона в Leptos админку: компоненты, layout/nav, страницы, i18n, API‑состояния. | [ ] | [ ] |
-| Паритет и QA: визуальный паритет, поведение, доступность, производительность. | [ ] | [ ] |
-| План внедрения/отката и DoD. | [ ] | [ ] |
+| Подготовка: зафиксировать цели и scope Phase 3. | ⬜ | ⬜ |
+| Инвентаризация шаблона: страницы, layout, компоненты, токены. | ⬜ | ⬜ |
+| Инвентаризация текущих админок: маршруты, состояния, формы/таблицы. | ⬜ | ⬜ |
+| Согласовать UI‑контракт (layout/sidebar/header, базовые компоненты). | ⬜ | ⬜ |
+| Карта соответствий: страницы Template → RusToK. | ⬜ | ⬜ |
+| Карта соответствий: компоненты Template → shadcn/ui/internal. | ⬜ | ⬜ |
+| Карта токенов: цвета/отступы/типографика → дизайн‑токены. | ⬜ | ⬜ |
+| Next.js: установить/синхронизировать зависимости шаблона. | ⬜ | ⬜ |
+| Next.js: подключить layout/nav под контракт. | ⬜ | ⬜ |
+| Next.js: перенести ключевые страницы (Login/Register/Reset/Profile/Security). | ⬜ | ⬜ |
+| Next.js: Users list/details + Dashboard widgets. | ⬜ | ⬜ |
+| Next.js: синхронизировать i18n под новые UI блоки. | ⬜ | ⬜ |
+| Next.js: подключить API-клиенты и состояния (loading/error/empty). | ⬜ | ⬜ |
+| Leptos: создать эквиваленты шаблонных компонентов. | ⬜ | ⬜ |
+| Leptos: выровнять layout/nav с Next.js. | ⬜ | ⬜ |
+| Leptos: перенести страницы тем же приоритетом. | ⬜ | ⬜ |
+| Leptos: синхронизировать i18n. | ⬜ | ⬜ |
+| Leptos: подключить API-слой и состояния. | ⬜ | ⬜ |
+| Паритет: визуальный parity (Login/Users/Profile). | ⬜ | ⬜ |
+| QA: поведение (валидация/ошибки/загрузка). | ⬜ | ⬜ |
+| QA: доступность (контраст, фокус, aria). | ⬜ | ⬜ |
+| QA: производительность (bundle/рендер). | ⬜ | ⬜ |
+| План внедрения: порядок этапов + демонстрации. | ⬜ | ⬜ |
+| План отката: фича‑флаг/релизный переключатель. | ⬜ | ⬜ |
+| Definition of Done (DoD): паритет, локализация, без регрессий, документация. | ⬜ | ⬜ |
