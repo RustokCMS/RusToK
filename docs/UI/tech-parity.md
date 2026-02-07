@@ -35,6 +35,8 @@ feature parity **in behavior and integration**, independent of UI design.
 | SEO | ✅ | ⚠️ | ✅ | ⚠️ | Same metadata, structured data, and robots rules.
 | Auth kit helpers (`leptos-auth`) | ✅ | ✅ | ✅ | ✅ | Use in `apps/admin`, `apps/next-admin`, `apps/storefront`, `apps/next-frontend`.
 | GraphQL kit helpers (`leptos-graphql`) | ✅ | ✅ | ✅ | ✅ | Standardize `/api/graphql` headers and request shapes across all apps.
+| Form kit helpers (`leptos-hook-form`) | ✅ | ✅ | ✅ | ✅ | Standardize form state + errors across admin/storefront.
+| Validation kit helpers (`leptos-zod`) | ✅ | ✅ | ✅ | ✅ | Standardize zod-style validation errors across stacks.
 
 Legend: ✅ implemented, ⚠️ pending, ❌ not planned.
 

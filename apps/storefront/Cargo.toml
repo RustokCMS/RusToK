@@ -10,4 +10,6 @@ tokio.workspace = true
 leptos = { workspace = true, features = ["ssr"] }
 leptos-auth = { workspace = true }
 leptos-graphql = { workspace = true }
+leptos-hook-form = { workspace = true }
+leptos-zod = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

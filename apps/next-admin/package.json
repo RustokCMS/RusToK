@@ -21,6 +21,8 @@
     "graphql-request": "^7.1.0",
     "leptos-auth": "file:../../packages/leptos-auth",
     "leptos-graphql": "file:../../packages/leptos-graphql",
+    "leptos-hook-form": "file:../../packages/leptos-hook-form",
+    "leptos-zod": "file:../../packages/leptos-zod",
     "lucide-react": "^0.414.0",
     "next": "^14.2.5",
     "next-auth": "^4.24.7",
