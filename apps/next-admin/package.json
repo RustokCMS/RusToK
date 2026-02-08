@@ -7,7 +7,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "node -e \"const path=require('path');const fs=require('fs');const{spawnSync}=require('child_process');const cwd=process.cwd();const initCwd=process.env.INIT_CWD||cwd;const candidates=[cwd,path.resolve(cwd,'apps/next-admin'),initCwd,path.resolve(initCwd,'apps/next-admin')];const appDir=candidates.find((dir)=>fs.existsSync(path.join(dir,'next.config.mjs'))&&fs.existsSync(path.join(dir,'package.json')))||cwd;const result=spawnSync('next',['lint'],{stdio:'inherit',cwd:appDir});process.exit(result.status??1);\"",
+    "lint": "node -e \"const path=require('path');const fs=require('fs');const{spawnSync}=require('child_process');const cwd=process.cwd();const initCwd=process.env.INIT_CWD||cwd;const isAppDir=(dir)=>dir&&fs.existsSync(path.join(dir,'next.config.mjs'))&&fs.existsSync(path.join(dir,'package.json'));const findAppDir=(start)=>{let dir=path.resolve(start);while(true){if(isAppDir(dir))return dir;const parent=path.dirname(dir);if(parent===dir)break;dir=parent;}return null;};const candidates=[findAppDir(cwd),findAppDir(initCwd),path.resolve(cwd,'apps/next-admin'),path.resolve(initCwd,'apps/next-admin')].filter(Boolean);const appDir=candidates.find((dir)=>isAppDir(dir))||cwd;const result=spawnSync('next',['lint'],{stdio:'inherit',cwd:appDir});process.exit(result.status??1);\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
