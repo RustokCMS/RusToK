@@ -222,6 +222,9 @@ jobs:
       - name: Lint
         working-directory: ${{ matrix.app }}
         run: npm run lint
+      - name: Typecheck
+        working-directory: ${{ matrix.app }}
+        run: npm run typecheck
       - name: Build
         working-directory: ${{ matrix.app }}
         run: npm run build
