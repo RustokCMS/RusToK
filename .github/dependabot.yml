@@ -8,3 +8,35 @@ updates:
     groups:
       minor-updates:
         update-types: ["minor", "patch"]
+  - package-ecosystem: "npm"
+    directory: "/apps/next-frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      minor-updates:
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "npm"
+    directory: "/apps/next-admin"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      minor-updates:
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "npm"
+    directory: "/apps/storefront"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      minor-updates:
+        update-types: ["minor", "patch"]
+  - package-ecosystem: "npm"
+    directory: "/apps/admin"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      minor-updates:
+        update-types: ["minor", "patch"]
