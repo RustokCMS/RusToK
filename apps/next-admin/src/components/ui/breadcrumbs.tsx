@@ -19,8 +19,9 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
       <ol className="flex flex-wrap items-center gap-2">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
+          const key = `${item.label}-${item.href ?? "current"}`;
           return (
-            <li key={`${item.label}-${index}`} className="flex items-center gap-2">
+            <li key={key} className="flex items-center gap-2">
               {item.href && !isLast ? (
                 <Link className="text-slate-500 hover:text-slate-700" href={item.href}>
                   {item.label}
