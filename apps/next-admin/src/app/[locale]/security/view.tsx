@@ -14,7 +14,7 @@ type SessionItem = {
   created_at: string;
 };
 
-export default function SecurityView({ locale: _locale }: { locale: string }) {
+export default function SecurityView() {
   const t = useTranslations("security");
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
   const { token, tenant } = useMemo(() => getClientAuth(), []);

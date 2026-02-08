@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { getClientAuth } from "../../../lib/client-auth";
 
-export default function ProfileView({ locale: _locale }: { locale: string }) {
+export default function ProfileView() {
   const t = useTranslations("profile");
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
   const { token, tenant } = useMemo(() => getClientAuth(), []);

@@ -86,7 +86,7 @@ async function fetchGraphqlUser(id: string) {
     }
 
     return { data: payload.data?.user ?? null };
-  } catch (error) {
+  } catch {
     return { error: { kind: "network" } satisfies FetchError };
   }
 }

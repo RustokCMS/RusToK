@@ -63,7 +63,7 @@ export default function LoginForm({ locale }: LoginFormProps) {
       document.cookie = `rustok-admin-token=${payload.access_token}; path=/`;
       document.cookie = `rustok-admin-tenant=${tenant}; path=/`;
       router.push(`/${locale}`);
-    } catch (error) {
+    } catch {
       setError(tErrors("network"));
     } finally {
       setIsLoading(false);

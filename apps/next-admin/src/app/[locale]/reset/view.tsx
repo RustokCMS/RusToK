@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 
-export default function ResetView({ locale: _locale }: { locale: string }) {
+export default function ResetView() {
   const t = useTranslations("auth");
   const e = useTranslations("errors");
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";

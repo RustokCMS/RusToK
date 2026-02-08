@@ -91,7 +91,7 @@ async function fetchRestUser() {
 
     const data = (await response.json()) as RestUser;
     return { data };
-  } catch (error) {
+  } catch {
     return { error: { kind: "network" } satisfies FetchError };
   }
 }
@@ -148,7 +148,7 @@ async function fetchGraphqlUsers(options: {
     }
 
     return { data: payload.data?.users };
-  } catch (error) {
+  } catch {
     return { error: { kind: "network" } satisfies FetchError };
   }
 }
