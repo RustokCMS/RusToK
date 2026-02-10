@@ -150,29 +150,30 @@ impl RusToKModule for CommerceModule {
 
 ## 7. Health Checks
 
-### ⚠️ PARTIAL: Базовый endpoint, нет агрегации
+### ✅ РЕАЛИЗОВАНО: liveness/readiness/modules + агрегация
 
-**Текущая реализация (`apps/server/src/controllers/health.rs`):**
+**Реализованные endpoints (`apps/server/src/controllers/health.rs`):**
 
-```rust
-pub async fn health() -> Result<Response> {
-    format::json(serde_json::json!({
-        "status": "ok",
-        "app": "rustok",
-    }))
-}
-```
-
-**Что предлагала документация:**
-
+- `/health` — базовая проверка процесса и версии
 - `/health/live` — liveness probe
-- `/health/ready` — readiness probe
-- `/health/modules` — агрегация по модулям
+- `/health/ready` — расширенный readiness probe
+- `/health/modules` — агрегированный статус модулей
 
-**TODO:**
+**Readiness контракт (детализированный JSON):**
 
-1. Добавить `/health/live` и `/health/ready`
-2. Добавить `/health/modules` с вызовом `module.health()` для каждого модуля
+- Общий `status`: `ok | degraded | unhealthy`
+- `checks`: системные зависимости (`database`, `cache_backend`, `event_transport`, `search_backend`)
+- `modules`: health по зарегистрированным модулям
+- Для каждой проверки: `name`, `kind`, `criticality`, `status`, `latency_ms`, `reason`
+- `degraded_reasons`: причины деградации/недоступности
+
+**Надёжность checks:**
+
+- Timeout на каждую проверку (fail-fast)
+- In-process circuit breaker (failure threshold + cooldown)
+- Разделение на критичные/некритичные зависимости:
+  - critical failure → `unhealthy`
+  - non-critical failure → `degraded`
 
 ---
 
@@ -223,7 +224,7 @@ Flex — это **новый концепт** из архитектурного 
 | # | Область | Задача | Приоритет |
 |---|---------|--------|-----------|
 | 1 | RBAC | Добавить `fn permissions()` в `RusToKModule` | Medium |
-| 2 | Health | Добавить `/health/live`, `/health/ready`, `/health/modules` | Medium |
+| 2 | Health | Поддерживать readiness-контракт и обновлять критичность зависимостей при изменениях инфраструктуры | Medium |
 | 3 | Migrations | Формализовать naming convention | Low |
 | 4 | Iggy | Реализовать consumer, DLQ, replay | Low (Phase 2) |
 | 5 | Flex | Создать модуль согласно спецификации | Low (Phase 3) |

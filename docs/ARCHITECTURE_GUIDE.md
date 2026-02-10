@@ -224,9 +224,11 @@ mYYYYMMDD_<module>_<nnn>_<description>.rs
 | `/health/ready` | Readiness probe |
 | `/health/modules` | Агрегированный health по модулям |
 
-### 7.2 TODO
+### 7.2 Status / TODO
 
-- ⬜ TODO: Health checks для каждого модуля
+- ✅ Реализованы `/health/live`, `/health/ready`, `/health/modules`.
+- ✅ Реализована агрегация readiness по критичным/некритичным зависимостям и модулям.
+- ✅ Readiness-ответ унифицирован: `status`, `checks`, `modules`, `degraded_reasons`, latency и reason per-check.
 - ⬜ TODO: Structured logging + correlation IDs
 - ⬜ TODO: Prometheus metrics endpoint
 
