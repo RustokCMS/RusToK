@@ -58,7 +58,7 @@ impl ModuleLifecycleService {
                 .list()
                 .into_iter()
                 .filter(|module| enabled_set.contains(module.slug()))
-                .filter(|module| module.dependencies().iter().any(|dep| *dep == module_slug))
+                .filter(|module| module.dependencies().contains(&module_slug))
                 .map(|module| module.slug().to_string())
                 .collect();
 
