@@ -57,12 +57,14 @@ jobs:
   audit:
     name: Security Audit
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
     steps:
       - uses: actions/checkout@v4
-      - uses: rustsec/audit-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+      - name: Run cargo audit
+        run: cargo audit
 
   deny:
     name: Cargo Deny
@@ -238,7 +240,7 @@ jobs:
           if [[ "${{ needs.fmt.result }}" != "success" ]] || \
              [[ "${{ needs.clippy.result }}" != "success" ]] || \
              [[ "${{ needs.check.result }}" != "success" ]] || \
-             ([[ "${{ needs.audit.result }}" != "success" ]] && [[ "${{ needs.audit.result }}" != "skipped" ]]) || \
+             [[ "${{ needs.audit.result }}" != "success" ]] || \
              [[ "${{ needs.deny.result }}" != "success" ]] || \
              [[ "${{ needs.typos.result }}" != "success" ]] || \
              [[ "${{ needs.doc.result }}" != "success" ]] || \
