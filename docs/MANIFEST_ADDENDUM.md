@@ -84,7 +84,7 @@ RusToK использует **гибридный подход** к контен�
 | Events | Emit/consume + payload contracts |
 | Index schemas | Read model таблицы |
 | Permissions | RBAC permissions list |
-| API stubs | REST + GraphQL endpoints |
+| API stubs | GraphQL-стабы для UI + REST-стабы для integrations/service flows |
 | Integration tests | Cross-module scenarios |
 
 ### 28.3 Implementation

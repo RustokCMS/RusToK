@@ -44,18 +44,18 @@
 
 #### Что такое RusToK в одном абзаце
 RusToK — это headless-платформа на Rust для e-commerce и контента.  
-Она хранит данные по арендаторам (tenant), отдаёт API (REST + GraphQL), использует модульную архитектуру и события между модулями.  
+Она хранит данные по арендаторам (tenant), использует модульную архитектуру и события между модулями, а API разделяет по назначению клиентов.  
 Главная идея: безопасные записи (write path) + быстрые чтения (read path/index), чтобы система держала высокую нагрузку.
 
 #### Что платформа делает
 - Управляет tenants (магазины/сайты) и изолирует их данные.
-- Даёт API для админки, storefront и внешних интеграций.
+- Даёт GraphQL API для админки и storefront UI, а REST API — для интеграций и служебных сценариев.
 - Позволяет включать/отключать модули через manifest + rebuild.
 - Публикует доменные события, на которых строятся read-модели и интеграции.
 
 #### Для кого это
 - **Backend/Platform команды**: ядро, модули, API, миграции.
-- **Frontend команды**: admin/storefront через стабильные API.
+- **Frontend команды**: admin/storefront через стабильный GraphQL-контракт.
 - **DevOps/SRE**: деплой, мониторинг, очереди, кэш, поиск.
 - **Product/Analyst**: понимание границ модулей и бизнес-флоу.
 
@@ -198,17 +198,18 @@ RusToK — это headless-платформа на Rust для e-commerce и к�
 
 ## 4. API ARCHITECTURE
 
-### 4.1 REST + GraphQL in Parallel
+### 4.1 API boundaries by client type
 
-RusToK develops REST and GraphQL APIs simultaneously for platform and domain endpoints, keeping both available for flexibility:
+RusToK использует разные API-стили по типу клиента и сценарию:
 
-- **REST (Axum):** Authentication, Health, Admin endpoints.
-- **GraphQL:** Modular schema (MergedObject) for domain operations.
-- **Alloy GraphQL:** Management of scripts/triggers and manual runs through the same schema.
+- **GraphQL (UI-only):** admin/storefront фронтенды работают через единый GraphQL endpoint.
+- **REST (integration/service):** внешние интеграции, webhook-коллбеки, batch/service automation и compatibility flows.
+- **Alloy GraphQL:** управление scripts/triggers и ручными запусками для UI-инструментов в той же GraphQL-схеме.
 
 ### 4.2 Documentation
 
 - **OpenAPI:** Generated via `utoipa` and served at `/swagger`.
+- **API Boundary Policy:** `docs/api-architecture.md` (GraphQL for UI; REST for integrations/service flows).
 
 ---
 
@@ -240,7 +241,8 @@ rustok/
     │       ├── app.rs         # Loco hooks & routes
     │       └── main.rs
     ├── admin/                 # Admin UI (Leptos CSR)
-    ├── storefront/            # Storefront UI (Next.js)
+    ├── storefront/            # Storefront UI (Leptos SSR)
+    ├── next-frontend/        # Optional storefront UI (Next.js)
     └── mcp/                   # MCP server (stdio)
 ```
 
