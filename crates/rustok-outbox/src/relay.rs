@@ -158,7 +158,7 @@ impl OutboxRelay {
         let claimed = entity::Entity::find()
             .filter(entity::Column::Id.is_in(candidate_ids))
             .filter(entity::Column::ClaimedBy.eq(worker_id))
-            .filter(entity::Column::ClaimedAt.eq(now))
+            .filter(entity::Column::ClaimedAt.is_not_null())
             .all(&txn)
             .await?;
 

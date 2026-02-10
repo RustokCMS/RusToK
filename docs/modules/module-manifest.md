@@ -41,9 +41,10 @@ content = { crate = "rustok-content", source = "crates-io", version = "0.1" }
 commerce = { crate = "rustok-commerce", source = "git", git = "ssh://git/commerce.git", rev = "abc123" }
 blog = { crate = "rustok-blog", source = "path", path = "../modules/rustok-blog" }
 forum = { crate = "rustok-forum", source = "crates-io", version = "0.1", features = ["comments"] }
+pages = { crate = "rustok-pages", source = "path", path = "../modules/rustok-pages" }
 
 [settings]
-default_enabled = ["content", "commerce"]
+default_enabled = ["content", "commerce", "pages"]
 ```
 
 ### Поля
@@ -112,10 +113,11 @@ UI шаги:
 {
   "manifest_ref": "main",
   "requested_by": "admin@rustok",
-  "reason": "install module: forum",
+  "reason": "install module: pages",
   "modules": {
     "content": { "source": "crates-io", "crate": "rustok-content", "version": "0.1" },
-    "forum": { "source": "git", "crate": "rustok-forum", "git": "ssh://git/forum.git", "rev": "abc123" }
+    "forum": { "source": "git", "crate": "rustok-forum", "git": "ssh://git/forum.git", "rev": "abc123" },
+    "pages": { "source": "path", "crate": "rustok-pages", "path": "../modules/rustok-pages" }
   }
 }
 ```

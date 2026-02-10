@@ -160,7 +160,8 @@ API для admin rebuild, пайплайн сборки и rollback).
 ### 7.2 Включение/выключение на tenant-е
 
 - Факт включения хранится в таблице `tenant_modules`.
-- GraphQL `toggle_module` меняет статус и вызывает хуки `on_enable/on_disable`.
+- GraphQL `toggle_module` делегирует orchestration в `ModuleLifecycleService` (server service).
+- Сервис выполняет транзакционную смену статуса, вызывает `on_enable/on_disable` и при ошибке hook делает rollback в предыдущее состояние.
 
 ### 7.3 Зависимости
 
@@ -170,7 +171,7 @@ API для admin rebuild, пайплайн сборки и rollback).
 
 ### 7.4 Hooks и настройки
 
-- `on_enable`/`on_disable` вызываются после изменения статуса в БД.
+- `on_enable`/`on_disable` вызываются после изменения статуса в БД только если состояние действительно изменилось (идемпотентность повторного toggle).
 - В `ModuleContext` передаются `db`, `tenant_id` и `settings`.
 - Настройки модуля хранатся в `tenant_modules.settings`.
 

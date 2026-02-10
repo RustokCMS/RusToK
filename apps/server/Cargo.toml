@@ -47,6 +47,7 @@ utoipa = { workspace = true, features = ["axum_extras", "uuid", "chrono", "yaml"
 migration = { path = "migration" }
 
 [dev-dependencies]
+sea-orm-migration.workspace = true
 loco-rs = { workspace = true, features = ["testing"] }
 serial_test = "3.1"
 

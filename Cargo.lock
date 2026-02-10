@@ -4917,6 +4917,7 @@ dependencies = [
  "rustok-telemetry",
  "rustok-tenant",
  "sea-orm",
+ "sea-orm-migration",
  "serde",
  "serde_json",
  "serial_test",
