@@ -27,6 +27,7 @@
 |----------|-------------|
 | [MODULE_MATRIX.md](docs/modules/MODULE_MATRIX.md) | Полная карта модулей, зависимости, типы |
 | [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md) | Все таблицы БД с колонками и связями |
+| [I18N_ARCHITECTURE.md](docs/I18N_ARCHITECTURE.md) | **NEW** Comprehensive i18n/multi-language guide |
 | [ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md) | Архитектурные принципы и решения |
 | [ROADMAP.md](docs/ROADMAP.md) | Фазы разработки и стратегия |
 | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Статус реализации vs документация |
@@ -35,11 +36,26 @@
 | [modules/module-manifest.md](docs/modules/module-manifest.md) | Манифест модулей и rebuild (WordPress/NodeBB-style) |
 | [templates/module_contract.md](docs/templates/module_contract.md) | Шаблон контракта модуля |
 | [CODE_AUDIT_VERIFICATION.md](CODE_AUDIT_VERIFICATION.md) | Результаты проверки реализации и согласование чеклистов |
+| [TESTING_PROGRESS.md](TESTING_PROGRESS.md) | Testing coverage progress and test suites |
+| [rbac-enforcement.md](docs/rbac-enforcement.md) | RBAC permission system documentation |
 
 ### 🧭 Governance Update (2026-02-11)
 
-- Для завершённых critical tasks статус в `IMPLEMENTATION_CHECKLIST.md` и `PROGRESS_TRACKER.md` должен быть синхронизирован.
-- Документация новых модулей (например, `rustok-test-utils`) должна совпадать с фактическим поведением API helper-функций.
+**Phase 1 Complete** ✅ (6/6 issues resolved, 31% test coverage achieved!)
+
+- ✅ Event schema versioning implemented
+- ✅ Transactional event publishing with outbox pattern  
+- ✅ Test utilities crate (`rustok-test-utils`) complete
+- ✅ Cache stampede protection in tenant resolver
+- ✅ RBAC enforcement extractors and middleware
+- ✅ Unit test coverage 31% (exceeded 30% goal)
+
+**Documentation Status**:
+- ✅ New: I18N_ARCHITECTURE.md - Complete multi-language guide
+- ✅ Updated: DATABASE_SCHEMA.md with i18n reference
+- ✅ Updated: TESTING_PROGRESS.md with 226 tests tracked
+- ✅ New: docs/rbac-enforcement.md - Permission system guide
+- ✅ Для завершённых critical tasks статус в `IMPLEMENTATION_CHECKLIST.md` и `PROGRESS_TRACKER.md` синхронизирован
 
 ---
 
