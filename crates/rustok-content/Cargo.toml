@@ -17,6 +17,7 @@ slug = "0.1"
 utoipa = { workspace = true, features = ["uuid", "chrono"] }
 thiserror.workspace = true
 uuid.workspace = true
+validator.workspace = true
 
 [dev-dependencies]
 tokio.workspace = true
