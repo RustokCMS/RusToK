@@ -10,7 +10,10 @@ static DB_LOCK: tokio::sync::OnceCell<Arc<Mutex<()>>> = tokio::sync::OnceCell::c
 
 /// Sets up an in-memory SQLite database for testing.
 ///
-/// This creates a fresh SQLite database in memory and runs all migrations.
+/// This creates a fresh SQLite database in memory.
+///
+/// Note: this helper does **not** run migrations automatically.
+/// Use `setup_test_db_with_migrations::<M>()` when schema is required.
 /// The database is isolated per test.
 ///
 /// # Example
@@ -35,9 +38,9 @@ pub async fn setup_test_db() -> DatabaseConnection {
         .await
         .expect("Failed to connect to test database");
 
-    // Run migrations - this should be customized based on which modules are being tested
-    // For now, we just return the connected database
-    // In a real implementation, you'd call Migrator::up(&db, None).await
+    // Intentionally no automatic migrations here.
+    // Tests can opt in to module-specific migrations via
+    // `setup_test_db_with_migrations::<M>()`.
 
     db
 }
@@ -104,10 +107,7 @@ where
     Fut: std::future::Future<Output = R>,
 {
     let db = setup_test_db().await;
-    let txn = db
-        .begin()
-        .await
-        .expect("Failed to begin transaction");
+    let txn = db.begin().await.expect("Failed to begin transaction");
 
     let result = f(&txn).await;
 
@@ -123,11 +123,12 @@ mod tests {
     async fn test_setup_test_db() {
         let db = setup_test_db().await;
         // Just verify we can connect
-        let result: Result<i32, DbErr> = sea_orm::query::Select::new(sea_orm::query::SelectStatement::new())
-            .from(sea_orm::sea_query::Alias::new("sqlite_master"))
-            .one(&db)
-            .await
-            .map(|_| 1);
+        let result: Result<i32, DbErr> =
+            sea_orm::query::Select::new(sea_orm::query::SelectStatement::new())
+                .from(sea_orm::sea_query::Alias::new("sqlite_master"))
+                .one(&db)
+                .await
+                .map(|_| 1);
         assert!(result.is_ok() || result.is_err()); // Just checking connection works
     }
 }

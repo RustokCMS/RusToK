@@ -128,9 +128,11 @@ let app = Router::new()
 
 ### Unit Tests
 
-See `apps/server/tests/tenant_cache_stampede_test.rs` for detailed tests demonstrating:
-1. Problem without coalescing (100 requests = 100 queries)
-2. Solution with singleflight pattern (100 requests = 1 query)
+See `apps/server/tests/tenant_cache_stampede_test.rs` for concurrency simulation tests
+of the singleflight coordination pattern and metrics-structure checks.
+
+Note: this test file currently validates the coordination algorithm in isolation;
+an additional full integration test through middleware + DB remains recommended.
 
 ### Load Testing
 
@@ -215,5 +217,5 @@ rate(tenant_cache_misses[5m]) > 10 AND rate(tenant_cache_coalesced_requests[5m])
 
 ---
 
-**Last Updated:** February 11, 2026  
+**Last Updated:** February 11, 2026 (documentation clarified after audit)  
 **Status:** ✅ Implemented and Tested

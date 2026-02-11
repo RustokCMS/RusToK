@@ -34,6 +34,13 @@
 | [modules/flex.md](docs/modules/flex.md) | Спецификация Flex модуля (новый концепт) |
 | [modules/module-manifest.md](docs/modules/module-manifest.md) | Манифест модулей и rebuild (WordPress/NodeBB-style) |
 | [templates/module_contract.md](docs/templates/module_contract.md) | Шаблон контракта модуля |
+| [CODE_AUDIT_VERIFICATION.md](CODE_AUDIT_VERIFICATION.md) | Результаты проверки реализации и согласование чеклистов |
+
+### 🧭 Governance Update (2026-02-11)
+
+- Для завершённых critical tasks статус в `IMPLEMENTATION_CHECKLIST.md` и `PROGRESS_TRACKER.md` должен быть синхронизирован.
+- Документация новых модулей (например, `rustok-test-utils`) должна совпадать с фактическим поведением API helper-функций.
+- Для cache stampede protection текущие тесты считаются алгоритмическими (singleflight simulation); интеграционный middleware+DB тест остаётся обязательным next step.
 
 ---
 

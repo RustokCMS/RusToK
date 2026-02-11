@@ -4,7 +4,7 @@ Test utilities for the RusToK platform. This crate provides fixtures, mocks, and
 
 ## Features
 
-- **Database utilities** - Setup test databases with migrations
+- **Database utilities** - Setup test databases (with optional explicit migrations)
 - **Mock event bus** - Record and verify event publishing
 - **Test fixtures** - Builder patterns for users, tenants, nodes, products
 - **Helper functions** - Common testing utilities and macros
@@ -28,8 +28,17 @@ use rustok_test_utils::setup_test_db;
 #[tokio::test]
 async fn test_with_database() {
     let db = setup_test_db().await;
-    // Use db for testing...
+    // In-memory DB only (without automatic migrations).
 }
+```
+
+
+For schema-aware tests use explicit migrations:
+
+```rust,ignore
+use rustok_test_utils::db::setup_test_db_with_migrations;
+
+// let db = setup_test_db_with_migrations::<YourMigrator>().await;
 ```
 
 ### Mock Event Bus

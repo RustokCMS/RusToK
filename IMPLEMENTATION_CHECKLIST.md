@@ -23,10 +23,10 @@ Total Progress: 4/22 (18%)
 
 ### Testing
 
-- [ ] **Day 1-2:** Create `rustok-test-utils` crate
-  - [ ] Add `fixtures` module with sample data
-  - [ ] Add `db::setup_test_db()` helper
-  - [ ] Add `events::mock_event_bus()` helper
+- [x] **Day 1-2:** Create `rustok-test-utils` crate
+  - [x] Add `fixtures` module with sample data
+  - [x] Add `db::setup_test_db()` helper
+  - [x] Add `events::mock_event_bus()` helper
   
 - [ ] **Day 3-5:** Add unit tests for `rustok-content`
   - [ ] Test `NodeService::create_node()`
@@ -51,52 +51,58 @@ Total Progress: 4/22 (18%)
   # Target: 30%+ coverage
   ```
 
+**Status:** 🟨 **PARTIAL** (test-utils crate completed; remaining testing tasks pending)
+
 ### Transaction Safety
 
-- [ ] **Day 1-2:** Extend `OutboxTransport`
-  - [ ] Add `write_to_outbox()` method accepting transaction
-  - [ ] Add `publish_in_tx()` to `EventTransport` trait
-  - [ ] Update migration for `sys_events` table
+- [x] **Day 1-2:** Extend `OutboxTransport`
+  - [x] Add `write_to_outbox()` method accepting transaction
+  - [x] Add `publish_in_tx()` to `EventTransport` trait
+  - [x] Update migration for `sys_events` table
   
-- [ ] **Day 3-4:** Create `TransactionalEventBus`
-  - [ ] Wrap `OutboxTransport` with convenient API
-  - [ ] Add error handling
-  - [ ] Add tests
+- [x] **Day 3-4:** Create `TransactionalEventBus`
+  - [x] Wrap `OutboxTransport` with convenient API
+  - [x] Add error handling
+  - [x] Add tests
   
-- [ ] **Day 5-7:** Refactor services
-  - [ ] Update `NodeService` to use transactional bus
-  - [ ] Update `CatalogService` to use transactional bus
-  - [ ] Update other services
-  - [ ] Add integration tests for atomicity
+- [x] **Day 5-7:** Refactor services
+  - [x] Update `NodeService` to use transactional bus
+  - [x] Update `CatalogService` to use transactional bus
+  - [x] Update other services
+  - [x] Add integration tests for atomicity
   
-- [ ] **Verification:**
+- [x] **Verification:**
   ```bash
   # Test that events are written in same transaction
   cargo test test_transactional_event_publishing
   ```
 
+**Status:** ✅ **COMPLETE** (2026-02-11)
+
 ### Event Schema Versioning
 
-- [ ] **Day 1:** Update `EventEnvelope`
-  - [ ] Add `schema_version: u16` field
-  - [ ] Add `event_type: String` field
-  - [ ] Update `EventEnvelope::new()` to populate fields
+- [x] **Day 1:** Update `EventEnvelope`
+  - [x] Add `schema_version: u16` field
+  - [x] Add `event_type: String` field
+  - [x] Update `EventEnvelope::new()` to populate fields
   
-- [ ] **Day 2:** Update `DomainEvent`
-  - [ ] Add `schema_version()` method
-  - [ ] Document version policy in docstring
-  - [ ] Add tests
+- [x] **Day 2:** Update `DomainEvent`
+  - [x] Add `schema_version()` method
+  - [x] Document version policy in docstring
+  - [x] Add tests
   
-- [ ] **Day 3:** Update storage
-  - [ ] Update Outbox entity to store version
-  - [ ] Update Iggy serialization to include version
-  - [ ] Add migration
+- [x] **Day 3:** Update storage
+  - [x] Update Outbox entity to store version
+  - [x] Update Iggy serialization to include version
+  - [x] Add migration
   
-- [ ] **Verification:**
+- [x] **Verification:**
   ```bash
   # Verify version is stored
   psql $DATABASE_URL -c "SELECT event_type, schema_version FROM sys_events LIMIT 5;"
   ```
+
+**Status:** ✅ **COMPLETE** (2026-02-11)
 
 ### Tenant Cache Stampede Protection ✅
 

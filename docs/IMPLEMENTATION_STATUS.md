@@ -1,7 +1,7 @@
 # RusToK: Документация vs Реализация — Сравнительный Анализ
 
 > **Дата анализа:** 2026-02-06  
-> **Последнее обновление:** 2026-02-06  
+> **Последнее обновление:** 2026-02-11  
 > **Цель:** Определить, что из предложений уже реализовано, а что остаётся TODO
 
 ---
@@ -19,6 +19,12 @@
 | Health Checks | ✅ | - | - |
 | Flex Module | - | - | ✅ NEW |
 | Migrations Convention | - | - | 1 item |
+
+### Изменения 2026-02-11
+
+- ✅ Синхронизирован checklist по закрытым critical задачам (event versioning, transactional publishing, test-utils, tenant cache).
+- ✅ Уточнена документация `rustok-test-utils`: `setup_test_db()` создаёт in-memory DB без автоматических миграций; для схемы используется `setup_test_db_with_migrations::<M>()`.
+- ✅ Уточнён статус тестов по tenant cache stampede: текущие тесты покрывают алгоритм singleflight, а интеграционный middleware+DB тест остаётся next step.
 
 ### Изменения 2026-02-06
 
