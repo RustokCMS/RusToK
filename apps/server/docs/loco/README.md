@@ -1,6 +1,6 @@
-# Loco.rs context pack (for contributors and AI agents)
+# Loco.rs docs index for RusToK
 
-Цель папки — дать **актуальный контекст по Loco.rs** рядом с сервером, чтобы не "додумывать" интеграции.
+Этот документ — **навигационный индекс** по Loco-документации в репозитории.
 
 ## ⚠️ Для AI-агентов: читать в первую очередь
 
@@ -16,39 +16,22 @@
 
 ## Что это
 
-Это не полная копия внешней документации, а практичный reference для этого репозитория:
+1. [Upstream Loco.rs snapshot (`./upstream/`)](./upstream/)
+   - Это pinned-копия официальной документации Loco.rs.
+   - Версия источника зафиксирована в [`./upstream/VERSION`](./upstream/VERSION).
 
-- как устроен сервер в `apps/server`;
-- какие паттерны считаются корректными в Loco-проектах;
-- какие команды и точки входа использовать в RusToK.
+> **Правило для AI-агентов и контрибьюторов:** при вопросах по Loco **сначала сверяться с `upstream/`**, и только потом с локальными заметками ниже.
 
-## Рекомендуемый workflow для изменений в сервере
+## Repo-specific notes (только отличия RusToK от default Loco)
 
-1. Начинать с чтения:
-   - `apps/server/src/app.rs`
-   - `apps/server/src/controllers/`
-   - `apps/server/src/models/`
-   - `apps/server/migration/`
-2. Для изменений схемы БД:
-   - создать migration через Loco-подход;
-   - проверить, что migration подключена в `migration/src/lib.rs`;
-   - обновить связанные модели/DTO/валидаторы.
-3. Для новых endpoint'ов:
-   - сначала контракты (request/response/errors),
-   - затем контроллер,
-   - затем интеграция с auth/permission,
-   - затем документация в `docs/`.
+- Серверная реализация живёт в `apps/server` и может вводить проектные ограничения поверх дефолтных возможностей Loco.
+- При проектировании изменений приоритет у реального кода и текущих модулей (`app.rs`, `controllers/`, `models/`, `migration/`).
+- Краткие изменения локальных практик ведутся в [`changes.md`](./changes.md).
 
-## Команды (локально)
+## Обновление upstream snapshot
 
 ```bash
-cd apps/server
-
-# Применить миграции
-cargo loco db migrate
-
-# Запустить сервер
-cargo loco start
+scripts/docs/sync_loco_docs.sh
 ```
 
 ## Что важно для AI-агентов

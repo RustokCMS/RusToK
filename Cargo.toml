@@ -76,7 +76,7 @@ leptos-shadcn-pagination = { path = "crates/leptos-shadcn-pagination" }
 leptos-use = "*"
 leptos_i18n = "*"
 leptos-next-metadata = "*"
-leptos-query = "*"
+leptos_query = "*"
 tailwind-rs = "*"
 
 # Logging
@@ -113,4 +113,5 @@ rustok-forum = { path = "crates/rustok-forum" }
 rustok-tenant = { path = "crates/rustok-tenant" }
 rustok-rbac = { path = "crates/rustok-rbac" }
 rustok-telemetry = { path = "crates/rustok-telemetry" }
+rustok-test-utils = { path = "crates/rustok-test-utils" }
 alloy-scripting = { path = "crates/alloy-scripting" }
