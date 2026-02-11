@@ -70,8 +70,10 @@ leptos-auth = { path = "crates/leptos-auth" }
 leptos-graphql = { path = "crates/leptos-graphql" }
 leptos-hook-form = { path = "crates/leptos-hook-form" }
 leptos-zod = { path = "crates/leptos-zod" }
-leptos-table = { path = "crates/leptos-table" }
+leptos-struct-table = "*"
 leptos-zustand = { path = "crates/leptos-zustand" }
+leptos-shadcn-pagination = { path = "crates/leptos-shadcn-pagination" }
+leptos-use = "*"
 
 # Logging
 tracing = "0.1"
