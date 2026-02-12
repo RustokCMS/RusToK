@@ -14,6 +14,7 @@ pub mod resilience;
 pub mod scripting;
 pub mod state_machine;
 pub mod tenant_validation;
+pub mod tracing;
 pub mod types;
 pub use auth::{
     AuthError, AuthService, AuthTokens, RegisterInput, User, UserRepository, UsersMigration,

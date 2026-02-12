@@ -83,16 +83,47 @@ impl EventBus {
         receiver
     }
 
+    #[tracing::instrument(
+        name = "eventbus.publish",
+        skip(self, event),
+        fields(
+            event.type = %event.event_type(),
+            tenant_id = %tenant_id,
+            actor_id = tracing::field::Empty,
+            event.id = tracing::field::Empty,
+            otel.kind = "producer"
+        )
+    )]
     pub fn publish(
         &self,
         tenant_id: Uuid,
         actor_id: Option<Uuid>,
         event: DomainEvent,
     ) -> crate::Result<()> {
+        let span = tracing::Span::current();
+        
+        if let Some(actor_id) = actor_id {
+            span.record("actor_id", &tracing::field::display(actor_id));
+        }
+        
         let envelope = EventEnvelope::new(tenant_id, actor_id, event);
+        span.record("event.id", &tracing::field::display(envelope.id));
+        
         self.publish_envelope(envelope)
     }
 
+    #[tracing::instrument(
+        name = "eventbus.publish_envelope",
+        skip(self, envelope),
+        fields(
+            event.type = %envelope.event.event_type(),
+            event.id = %envelope.id,
+            tenant_id = %envelope.tenant_id,
+            backpressure.enabled = self.backpressure.is_some(),
+            receiver_count = self.sender.receiver_count(),
+            otel.kind = "producer"
+        )
+    )]
     pub fn publish_envelope(&self, envelope: EventEnvelope) -> crate::Result<()> {
         // Check backpressure if enabled
         if let Some(backpressure) = &self.backpressure {
@@ -117,6 +148,7 @@ impl EventBus {
         match self.sender.send(envelope) {
             Ok(_) => {
                 self.stats.events_published.fetch_add(1, Ordering::Relaxed);
+                tracing::debug!("Event published successfully");
             }
             Err(error) => {
                 // Release backpressure slot on send failure
