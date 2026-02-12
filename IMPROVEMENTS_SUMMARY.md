@@ -42,10 +42,10 @@
 - ✅ Backpressure Control
 - ✅ EventBus Consistency Audit
 
-### 🔄 Sprint 2 (Weeks 2-3) — IN PROGRESS
+### 🔄 Sprint 2 (Weeks 2-3) — IN PROGRESS (75%)
 - [x] Tenant Cache с moka (2d) ✅ DONE
 - [x] Circuit Breaker (3d) ✅ DONE
-- [ ] Type-Safe State Machines (4d)
+- [x] Type-Safe State Machines (4d) ✅ DONE
 - [ ] Error Handling standardization (2d)
 
 ### 📋 Sprint 3 (Week 4) — PLANNED

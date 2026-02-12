@@ -10,7 +10,7 @@ Sprint 1: ✅ COMPLETE (4/4 tasks)
 - Backpressure Control
 - EventBus Consistency Audit
 
-Sprint 2: 🔄 IN PROGRESS (2/4 tasks complete)
+Sprint 2: 🔄 IN PROGRESS (3/4 tasks complete)
 - ✅ Task 2.1: Simplified Tenant Cache with moka (COMPLETE)
   - Code: apps/server/src/middleware/tenant_cache_v2.rs (400 lines)
   - Tests: apps/server/tests/tenant_cache_v2_test.rs
@@ -28,17 +28,19 @@ Sprint 2: 🔄 IN PROGRESS (2/4 tasks complete)
   - Improvement: 30s → 0.1ms fail-fast (99.997%)
   - Commit: 6b4ea23
 
-- [ ] Task 2.3: Type-Safe State Machines (NEXT)
-- [ ] Task 2.4: Error Handling Standardization
+- ✅ Task 2.3: Type-Safe State Machines (COMPLETE)
+  - Core: crates/rustok-core/src/state_machine/ (framework + guards)
+  - Content: crates/rustok-content/src/state_machine.rs (380 lines, 6 tests)
+  - Commerce: crates/rustok-commerce/src/state_machine.rs (550 lines, 8 tests)
+  - Docs: docs/STATE_MACHINE_GUIDE.md (16KB)
+  - Benefit: Compile-time safety, zero runtime overhead
+  - Commit: c77b07c
+
+- [ ] Task 2.4: Error Handling Standardization (NEXT)
 
 === NEXT STEPS ===
 
-1. Type-Safe State Machines (Task 2.3)
-   - Files: rustok-commerce/order/state_machine.rs, rustok-content/node/state_machine.rs
-   - Estimate: 4 days
-   - ROI: MEDIUM-HIGH
-
-2. Error Handling Standardization (Task 2.4)
+1. Error Handling Standardization (Task 2.4)
    - Files: rustok-core/error.rs, module error.rs files
    - Estimate: 2 days
    - ROI: MEDIUM
@@ -51,8 +53,8 @@ Code Quality: Improved significantly
   - Tenant cache: 724 → 400 lines (-45%)
   - Circuit breaker: +600 lines (new resilience module)
 Sprint 1 Complete: 100% (4/4)
-Sprint 2 Progress: 50% (2/4)
-Overall Progress: 38% (6/16 tasks)
+Sprint 2 Progress: 75% (3/4)
+Overall Progress: 44% (7/16 tasks)
 
 === COMMITS ===
 
@@ -61,6 +63,8 @@ Overall Progress: 38% (6/16 tasks)
 3. 0bc2e7a - docs: mark Sprint 2 Task 2.1 as complete
 4. 518cb2e - chore: add architecture progress tracker
 5. 6b4ea23 - feat: implement Sprint 2 Task 2.2 - Circuit Breaker Pattern
+6. b15cc02 - docs: mark Sprint 2 Task 2.2 as complete
+7. c77b07c - feat: implement Sprint 2 Task 2.3 - Type-Safe State Machines
 
 === RESOURCES ===
 
@@ -69,3 +73,4 @@ Summary: IMPROVEMENTS_SUMMARY.md
 Start Here: ARCHITECTURE_REVIEW_START_HERE.md
 Tenant Cache: docs/TENANT_CACHE_V2_MIGRATION.md
 Circuit Breaker: docs/CIRCUIT_BREAKER_GUIDE.md
+State Machines: docs/STATE_MACHINE_GUIDE.md
