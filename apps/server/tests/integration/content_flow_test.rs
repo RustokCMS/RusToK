@@ -14,9 +14,9 @@ use std::time::Duration;
 
 /// Test the complete node lifecycle from creation to publication
 #[tokio::test]
-#[ignore] // Requires test server to be running
 async fn test_complete_node_lifecycle() {
-    let app = spawn_test_app().await;
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
     
     // 1. Create a node
     let node = app

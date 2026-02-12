@@ -15,10 +15,10 @@ use rustok_core::events::types::DomainEvent;
 
 /// Test event propagation from publication to consumption
 #[tokio::test]
-#[ignore] // Requires test server to be running
 async fn test_event_propagation() {
-    let app = spawn_test_app().await;
-    
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
+
     // Create event listener
     let events = Arc::new(Mutex::new(Vec::new()));
     app.subscribe_to_events();
