@@ -1,0 +1,183 @@
+# RusToK Alert Rules
+#
+# Service Level Objectives (SLOs) and alerting rules for monitoring
+# RusToK system health and performance.
+
+groups:
+  - name: rustok_alerts
+    interval: 30s
+    rules:
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(rustok_http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(rustok_http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: rustok-server
+        annotations:
+          summary: "High error rate detected ({{ $value | humanizePercentage }})"
+          description: "Error rate is above 5% for the last 5 minutes. Investigation required."
+
+      # Slow Requests Alert (P95)
+      - alert: SlowRequestsP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(rustok_http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: rustok-server
+        annotations:
+          summary: "Slow requests detected (P95 > 500ms)"
+          description: "95th percentile latency is {{ $value | humanizeDuration }}. Performance degradation detected."
+
+      # Slow Requests Alert (P99)
+      - alert: SlowRequestsP99
+        expr: |
+          histogram_quantile(0.99, sum(rate(rustok_http_request_duration_seconds_bucket[5m])) by (le)) > 1.0
+        for: 5m
+        labels:
+          severity: critical
+          service: rustok-server
+        annotations:
+          summary: "Very slow requests detected (P99 > 1s)"
+          description: "99th percentile latency is {{ $value | humanizeDuration }}. Immediate attention required."
+
+      # Circuit Breaker Open Alert
+      - alert: CircuitBreakerOpen
+        expr: rustok_circuit_breaker_state == 1
+        for: 2m
+        labels:
+          severity: critical
+          service: rustok-server
+        annotations:
+          summary: "Circuit breaker is OPEN for {{ $labels.name }} - {{ $labels.service }}"
+          description: "Circuit breaker has been open for more than 2 minutes. Service may be degraded."
+
+      # Circuit Breaker High Rejection Rate
+      - alert: CircuitBreakerHighRejectionRate
+        expr: |
+          rate(rustok_circuit_breaker_rejected_total[5m]) /
+          rate(rustok_circuit_breaker_requests_total[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: rustok-server
+        annotations:
+          summary: "High circuit breaker rejection rate ({{ $value | humanizePercentage }})"
+          description: "More than 50% of requests are being rejected by circuit breaker {{ $labels.name }}."
+
+      # EventBus Events Dropped Alert
+      - alert: EventBusEventsDropped
+        expr: rate(rustok_eventbus_events_dropped_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: rustok-server
+        annotations:
+          summary: "EventBus is dropping events at high rate ({{ $value | humanize }} events/sec)"
+          description: "Events are being dropped, which may lead to data inconsistency. Check event processing."
+
+      # EventBus No Subscribers Alert
+      - alert: EventBusNoSubscribers
+        expr: rustok_eventbus_subscribers == 0
+        for: 5m
+        labels:
+          severity: info
+          service: rustok-server
+        annotations:
+          summary: "EventBus has no subscribers"
+          description: "EventBus has been without subscribers for 5 minutes. Event processing may be stalled."
+
+      # Low Cache Hit Rate Alert
+      - alert: LowCacheHitRate
+        expr: |
+          rate(rustok_tenant_cache_hits[5m]) /
+          (rate(rustok_tenant_cache_hits[5m]) + rate(rustok_tenant_cache_misses[5m])) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: rustok-server
+        annotations:
+          summary: "Low tenant cache hit rate ({{ $value | humanizePercentage }})"
+          description: "Cache hit rate is below 50% for 10 minutes. Consider increasing cache size or TTL."
+
+      # High Error Rate by Module Alert
+      - alert: HighModuleErrorRate
+        expr: |
+          sum by (module) (rate(rustok_errors_total{severity="critical"}[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: rustok-server
+        annotations:
+          summary: "High error rate in module {{ $labels.module }}"
+          description: "Module {{ $labels.module }} is generating {{ $value | humanize }} critical errors/sec."
+
+      # High Module Error Rate - Critical
+      - alert: CriticalModuleErrorRate
+        expr: |
+          sum by (module) (rate(rustok_errors_total{severity="critical"}[5m])) > 20
+        for: 2m
+        labels:
+          severity: critical
+          service: rustok-server
+        annotations:
+          summary: "Critical error rate in module {{ $labels.module }}"
+          description: "Module {{ $labels.module }} is generating {{ $value | humanize }} critical errors/sec. Immediate investigation required."
+
+      # Service Not Responding Alert
+      - alert: ServiceNotResponding
+        expr: up{job="rustok-server"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: rustok-server
+        annotations:
+          summary: "RusToK server is not responding"
+          description: "The RusToK server has been down for 1 minute. Check service status and logs."
+
+  - name: rustok_slo_alerts
+    interval: 30s
+    rules:
+      # SLO: Availability (99.9% target = 0.1% error budget)
+      # Alerts when error budget is exhausted (> 0.1% error rate)
+      - alert: SLOAvailabilityBudgetExhausted
+        expr: |
+          sum(rate(rustok_http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(rustok_http_requests_total[5m])) > 0.001
+        for: 10m
+        labels:
+          severity: critical
+          slo_type: availability
+          slo_target: "99.9%"
+        annotations:
+          summary: "Availability SLO breached - error budget exhausted"
+          description: "Error rate ({{ $value | humanizePercentage }}) exceeds 0.1% budget. SLO target: 99.9% availability."
+
+      # SLO: Latency (P95 < 500ms)
+      - alert: SLOLatencyP95Breached
+        expr: |
+          histogram_quantile(0.95, sum(rate(rustok_http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          slo_type: latency
+          slo_target: "P95 < 500ms"
+        annotations:
+          summary: "Latency SLO breached - P95 latency too high"
+          description: "P95 latency ({{ $value | humanizeDuration }}) exceeds 500ms target. SLO target: P95 < 500ms."
+
+      # SLO: Latency (P99 < 1s)
+      - alert: SLOLatencyP99Breached
+        expr: |
+          histogram_quantile(0.99, sum(rate(rustok_http_request_duration_seconds_bucket[5m])) by (le)) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+          slo_type: latency
+          slo_target: "P99 < 1s"
+        annotations:
+          summary: "Latency SLO breached - P99 latency too high"
+          description: "P99 latency ({{ $value | humanizeDuration }}) exceeds 1s target. SLO target: P99 < 1s."
