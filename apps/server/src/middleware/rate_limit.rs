@@ -2,7 +2,6 @@
 ///
 /// Implements a sliding window rate limiter to protect endpoints from abuse.
 /// Supports per-IP and per-user rate limiting with configurable limits.
-
 use axum::{
     extract::{Request, State},
     http::{HeaderMap, StatusCode},
@@ -81,7 +80,7 @@ impl RateLimiter {
     }
 
     /// Check if a request should be rate limited
-    /// 
+    ///
     /// FIXED: Improved locking strategy - use read lock first, write lock only when needed
     pub async fn check_rate_limit(&self, key: &str) -> Result<RateLimitInfo, StatusCode> {
         if !self.config.enabled {
@@ -89,7 +88,7 @@ impl RateLimiter {
         }
 
         let now = Instant::now();
-        
+
         // First, try to check with read lock (allows concurrent reads)
         {
             let requests = self.requests.read().await;
@@ -98,7 +97,9 @@ impl RateLimiter {
                 if now.duration_since(counter.window_start) <= self.config.window {
                     // Check if limit exceeded
                     if counter.count >= self.config.max_requests {
-                        let retry_after = self.config.window
+                        let retry_after = self
+                            .config
+                            .window
                             .saturating_sub(now.duration_since(counter.window_start))
                             .as_secs();
 
@@ -118,10 +119,12 @@ impl RateLimiter {
 
         // Now acquire write lock to increment or create counter
         let mut requests = self.requests.write().await;
-        let counter = requests.entry(key.to_string()).or_insert_with(|| RequestCounter {
-            count: 0,
-            window_start: now,
-        });
+        let counter = requests
+            .entry(key.to_string())
+            .or_insert_with(|| RequestCounter {
+                count: 0,
+                window_start: now,
+            });
 
         // Reset window if expired
         if now.duration_since(counter.window_start) > self.config.window {
@@ -131,7 +134,9 @@ impl RateLimiter {
 
         // Double-check limit (race condition protection)
         if counter.count >= self.config.max_requests {
-            let retry_after = self.config.window
+            let retry_after = self
+                .config
+                .window
                 .saturating_sub(now.duration_since(counter.window_start))
                 .as_secs();
 
@@ -150,9 +155,7 @@ impl RateLimiter {
 
         // FIXED: Correct calculation of reset time
         let reset_at = counter.window_start + self.config.window;
-        let reset_secs = reset_at
-            .saturating_duration_since(now)
-            .as_secs();
+        let reset_secs = reset_at.saturating_duration_since(now).as_secs();
 
         Ok(RateLimitInfo {
             limit: self.config.max_requests,
@@ -166,13 +169,15 @@ impl RateLimiter {
         let mut requests = self.requests.write().await;
         let now = Instant::now();
 
-        requests.retain(|_, counter| {
-            now.duration_since(counter.window_start) <= self.config.window
-        });
+        requests
+            .retain(|_, counter| now.duration_since(counter.window_start) <= self.config.window);
 
-        debug!(retained = requests.len(), "Cleaned up expired rate limit entries");
+        debug!(
+            retained = requests.len(),
+            "Cleaned up expired rate limit entries"
+        );
     }
-    
+
     /// Get current statistics (useful for monitoring)
     pub async fn get_stats(&self) -> RateLimitStats {
         let requests = self.requests.read().await;
@@ -252,6 +257,17 @@ fn extract_client_id(headers: &HeaderMap) -> String {
     "ip:unknown".to_string()
 }
 
+fn insert_header_if_valid(headers: &mut axum::http::HeaderMap, key: &'static str, value: String) {
+    match axum::http::HeaderValue::from_str(&value) {
+        Ok(header_value) => {
+            headers.insert(key, header_value);
+        }
+        Err(error) => {
+            tracing::warn!(%key, %value, %error, "Skipping invalid rate limit header value");
+        }
+    }
+}
+
 /// Axum middleware for rate limiting
 pub async fn rate_limit_middleware(
     State(limiter): State<Arc<RateLimiter>>,
@@ -269,18 +285,9 @@ pub async fn rate_limit_middleware(
 
             // Add rate limit headers
             let headers = response.headers_mut();
-            headers.insert(
-                "x-ratelimit-limit",
-                info.limit.to_string().parse().unwrap(),
-            );
-            headers.insert(
-                "x-ratelimit-remaining",
-                info.remaining.to_string().parse().unwrap(),
-            );
-            headers.insert(
-                "x-ratelimit-reset",
-                info.reset.to_string().parse().unwrap(),
-            );
+            insert_header_if_valid(headers, "x-ratelimit-limit", info.limit.to_string());
+            insert_header_if_valid(headers, "x-ratelimit-remaining", info.remaining.to_string());
+            insert_header_if_valid(headers, "x-ratelimit-reset", info.reset.to_string());
 
             Ok(response)
         }
@@ -290,15 +297,10 @@ pub async fn rate_limit_middleware(
             *response.status_mut() = status;
 
             let headers = response.headers_mut();
-            headers.insert(
+            insert_header_if_valid(
+                headers,
                 "retry-after",
-                limiter
-                    .config
-                    .window
-                    .as_secs()
-                    .to_string()
-                    .parse()
-                    .unwrap(),
+                limiter.config.window.as_secs().to_string(),
             );
 
             Err(response)
@@ -419,24 +421,22 @@ mod tests {
             assert_eq!(requests.len(), 0);
         }
     }
-    
+
     #[tokio::test]
     async fn test_concurrent_requests() {
         use tokio::task::JoinSet;
-        
+
         let config = RateLimitConfig::new(100, 60);
         let limiter = Arc::new(RateLimiter::new(config));
-        
+
         let mut tasks = JoinSet::new();
-        
+
         // Spawn 50 concurrent requests
         for i in 0..50 {
             let limiter = limiter.clone();
-            tasks.spawn(async move {
-                limiter.check_rate_limit(&format!("client-{}", i)).await
-            });
+            tasks.spawn(async move { limiter.check_rate_limit(&format!("client-{}", i)).await });
         }
-        
+
         // All should succeed (different clients)
         while let Some(result) = tasks.join_next().await {
             assert!(result.unwrap().is_ok());
