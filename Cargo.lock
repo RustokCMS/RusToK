@@ -1062,6 +1062,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "chrono-humanize"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "799627e6b4d27827a814e837b9d8a504832086081806d45b1afa34dc982b023b"
+dependencies = [
+ "chrono",
+]
+
+[[package]]
 name = "chrono-tz"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2554,6 +2563,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "gloo-storage"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fbc8031e8c92758af912f9bc08fbbadd3c6f3cfcbf6b64cdf3d6a81f0139277a"
+dependencies = [
+ "gloo-utils",
+ "js-sys",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
 name = "gloo-timers"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3682,6 +3706,19 @@ name = "leptos-auth"
 version = "0.1.0"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "leptos-chartistry"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "777b6bb2100427b4e5f6c64ec659a27c253b69f4a78ccd58f4bcc5d39c6dcffb"
+dependencies = [
+ "chrono",
+ "leptos 0.8.15",
+ "leptos-use 0.18.0",
+ "log",
+ "web-sys",
 ]
 
 [[package]]
@@ -6607,10 +6644,13 @@ name = "rustok-admin"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
+ "chrono-humanize",
  "console_error_panic_hook",
  "console_log",
+ "gloo-storage",
  "leptos 0.8.15",
  "leptos-auth",
+ "leptos-chartistry",
  "leptos-graphql",
  "leptos-hook-form",
  "leptos-next-metadata",
@@ -6626,6 +6666,7 @@ dependencies = [
  "reqwest 0.13.2",
  "serde",
  "serde_json",
+ "serde_urlencoded",
  "tailwind-rs",
  "thiserror 2.0.18",
  "uuid",
@@ -6657,6 +6698,7 @@ dependencies = [
  "chrono",
  "rust_decimal",
  "rustok-core",
+ "rustok-outbox",
  "rustok-test-utils",
  "sea-orm",
  "sea-orm-migration",
@@ -6665,6 +6707,7 @@ dependencies = [
  "thiserror 2.0.18",
  "tokio",
  "tracing",
+ "unicode-normalization",
  "utoipa",
  "uuid",
 ]
@@ -6703,6 +6746,7 @@ dependencies = [
  "moka",
  "once_cell",
  "redis 1.0.3",
+ "regex",
  "rhai",
  "rustok-outbox",
  "rustok-telemetry",
@@ -6961,6 +7005,7 @@ dependencies = [
  "rustok-commerce",
  "rustok-content",
  "rustok-core",
+ "rustok-outbox",
  "sea-orm",
  "sea-orm-migration",
  "serde",
@@ -10103,6 +10148,15 @@ name = "xmlwriter"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec7a2a501ed189703dba8b08142f057e887dfc4b2cc4db2d343ac6376ba3e0b9"
+
+[[package]]
+name = "xtask"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "toml 0.8.23",
+]
 
 [[package]]
 name = "xxhash-rust"

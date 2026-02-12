@@ -96,6 +96,9 @@ Most platforms are either **fast but complex** (Go/C++) or **productive but slow
 - 📦 **Single Binary** — Deploy one file, no dependency management
 - 🔄 **Zero-Downtime Deploys** — Graceful shutdown and health checks
 - 🔎 **CQRS-lite Read Models** — Denormalized index tables for fast storefront queries
+- 🔧 **Circuit Breaker Pattern** — Fail-fast resilience (30s → 0.1ms, -99.997% latency)
+- 🎯 **Type-Safe State Machines** — Compile-time guarantees for business logic
+- 📊 **Rich Error Handling** — RFC 7807 compatible API errors with structured context
 
 ---
 
@@ -314,7 +317,7 @@ cargo loco generate controller products --api
 
 ## 📚 Documentation
 
-### Architecture & Design (NEW!)
+### Architecture & Design
 
 | Document | Description |
 |----------|-------------|
@@ -324,11 +327,27 @@ cargo loco generate controller products --api
 | [ARCHITECTURE_GUIDE.md](docs/ARCHITECTURE_GUIDE.md) | Архитектурные принципы и решения |
 | [ROADMAP.md](docs/ROADMAP.md) | Фазы разработки (Forge → Blueprint → Construction) |
 | [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) | Статус реализации vs документация |
-| [BACKEND_FIXES_2026-02-11.md](docs/BACKEND_FIXES_2026-02-11.md) | Backend compilation fixes and TransactionalEventBus migration |
-| [ARCHITECTURE_REVIEW_2026-02-12.md](docs/ARCHITECTURE_REVIEW_2026-02-12.md) | **NEW** Complete architecture review with security analysis |
-| [SPRINT_1_COMPLETION.md](docs/SPRINT_1_COMPLETION.md) | **NEW** Sprint 1 P0 fixes completion report |
-| [EVENTBUS_CONSISTENCY_AUDIT.md](docs/EVENTBUS_CONSISTENCY_AUDIT.md) | **NEW** EventBus consistency audit (100% pass) |
-| [IMPLEMENTATION_PROGRESS.md](docs/IMPLEMENTATION_PROGRESS.md) | **NEW** Sprint progress tracking with metrics |
+
+### Architecture Improvements (Sprint 2 ✅)
+
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE_IMPROVEMENT_PLAN.md](ARCHITECTURE_IMPROVEMENT_PLAN.md) | **Master Plan** — Full roadmap with 16 tasks (50% done) |
+| [IMPROVEMENTS_SUMMARY.md](IMPROVEMENTS_SUMMARY.md) | **Quick Summary** — Sprint progress and metrics |
+| [SPRINT_2_COMPLETED.md](SPRINT_2_COMPLETED.md) | 🎉 **Sprint 2 Complete** — All 4 tasks done (8KB) |
+| [TENANT_CACHE_V2_MIGRATION.md](docs/TENANT_CACHE_V2_MIGRATION.md) | Tenant Cache V2 with moka (724→400 LOC, -45%) |
+| [CIRCUIT_BREAKER_GUIDE.md](docs/CIRCUIT_BREAKER_GUIDE.md) | Circuit Breaker + Retry + Timeout (10KB guide) |
+| [STATE_MACHINE_GUIDE.md](docs/STATE_MACHINE_GUIDE.md) | Type-Safe State Machines (16KB guide) |
+| [ERROR_HANDLING_GUIDE.md](docs/ERROR_HANDLING_GUIDE.md) | Rich Error Context + RFC 7807 (14KB guide) |
+
+### Previous Sprints
+
+| Document | Description |
+|----------|-------------|
+| [ARCHITECTURE_REVIEW_2026-02-12.md](docs/ARCHITECTURE_REVIEW_2026-02-12.md) | Complete architecture review (Score: 8.7/10 → 9.0/10) |
+| [SPRINT_1_COMPLETION.md](docs/SPRINT_1_COMPLETION.md) | Sprint 1 P0 fixes completion report |
+| [EVENTBUS_CONSISTENCY_AUDIT.md](docs/EVENTBUS_CONSISTENCY_AUDIT.md) | EventBus consistency audit (100% pass) |
+| [BACKEND_FIXES_2026-02-11.md](docs/BACKEND_FIXES_2026-02-11.md) | Backend compilation fixes and TransactionalEventBus |
 
 ### Implementation Guides
 

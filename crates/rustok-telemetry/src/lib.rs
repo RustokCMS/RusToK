@@ -1,3 +1,5 @@
+pub mod otel;
+
 use once_cell::sync::OnceCell;
 use prometheus::{IntGauge, Encoder, TextEncoder, Registry};
 use std::sync::Arc;
