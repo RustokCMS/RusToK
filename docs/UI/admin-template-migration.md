@@ -262,6 +262,7 @@ Definition of Done для атомарности в RusTok:
 - И нейтральный список методов установки/запуска: Docker Compose, VPS+Docker, Kubernetes (k8s), Railway/Fly/Render, а также ручная установка и one-command install-скрипт (план).
 - Сверка паритета библиотек Next Starter ↔ Leptos: [`docs/UI/admin-libraries-parity.md`](./admin-libraries-parity.md) (включая gap-лог и явные замены).
 - Snapshot каталога Rust/UI компонентов для внутреннего парсинга/решений: [`docs/UI/rust-ui-component-catalog.md`](./rust-ui-component-catalog.md).
+- Инструкция для исполнителя-агента: [`docs/UI/agent-execution-guide.md`](./agent-execution-guide.md).
 - PR workflow: если текущий PR был обновлен вне Codex и не поддерживает апдейт из сессии, создаем **новый PR** с отдельным коммитом и ссылкой на предыдущий.
 
 ### 3.0 Dependency policy (обязательное правило для агентов и разработчиков)
