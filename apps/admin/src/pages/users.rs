@@ -112,25 +112,25 @@ pub fn Users() -> impl IntoView {
         let st = status_filter.get();
         let p = page.get();
 
-        let mut params = Vec::new();
+        let mut params: Vec<(&str, String)> = Vec::new();
         if !s.is_empty() {
-            params.push(format!("search={}", s));
+            params.push(("search", s));
         }
         if !r.is_empty() {
-            params.push(format!("role={}", r));
+            params.push(("role", r));
         }
         if !st.is_empty() {
-            params.push(format!("status={}", st));
+            params.push(("status", st));
         }
         if p > 1 {
-            params.push(format!("page={}", p));
+            params.push(("page", p.to_string()));
         }
 
-        let search_string = if params.is_empty() {
-            String::new()
-        } else {
-            format!("?{}", params.join("&"))
-        };
+        let search_string = serde_urlencoded::to_string(params)
+            .ok()
+            .filter(|encoded| !encoded.is_empty())
+            .map(|encoded| format!("?{}", encoded))
+            .unwrap_or_default();
 
         // Update URL without reloading page
         navigate(&format!("/users{}", search_string), Default::default());

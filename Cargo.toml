@@ -81,6 +81,10 @@ leptos_i18n = "*"
 leptos-next-metadata = "*"
 leptos_query = "*"
 tailwind-rs = "*"
+leptos-chartistry = "0.2"
+gloo-storage = "0.3.0"
+serde_urlencoded = "0.7.1"
+chrono-humanize = "0.2.3"
 
 # Logging
 tracing = "0.1"

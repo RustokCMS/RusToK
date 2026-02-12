@@ -22,6 +22,10 @@ leptos_i18n = { workspace = true }
 leptos-next-metadata = { workspace = true }
 leptos_query = { workspace = true }
 tailwind-rs = { workspace = true }
+leptos-chartistry = { workspace = true }
+gloo-storage = { workspace = true }
+serde_urlencoded = { workspace = true }
+chrono-humanize = { workspace = true }
 console_error_panic_hook = "0.1"
 console_log = "1"
 log = "0.4"
@@ -47,4 +51,8 @@ normal = [
   "leptos-next-metadata",
   "leptos_query",
   "tailwind-rs",
+  "leptos-chartistry",
+  "gloo-storage",
+  "serde_urlencoded",
+  "chrono-humanize",
 ]
