@@ -221,51 +221,15 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/rustok_test
-      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/rustok_test
-      TEST_SERVER_URL: http://localhost:3000
-      TEST_AUTH_TOKEN: test_token
-      TEST_TENANT_ID: test-tenant
-      TEST_USER_ID: 00000000-0000-0000-0000-000000000000
+      RUSTOK_ENVIRONMENT: test
+      RUST_BACKTRACE: 1
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      
-      # Start the test server in the background
-      - name: Start test server
-        run: |
-          cd apps/server
-          cargo build --release
-          cargo run --release &
-          echo $! > /tmp/test_server.pid
-          
-          # Wait for server to be ready
-          for i in {1..30}; do
-            if curl -s http://localhost:3000/health > /dev/null; then
-              echo "Server is ready!"
-              break
-            fi
-            if [ $i -eq 30 ]; then
-              echo "Server failed to start"
-              exit 1
-            fi
-            sleep 1
-          done
-      
-      # Run integration tests
-      - name: Run integration tests
-        run: cargo test --package rustok-server --test integration -- --nocapture
+      - run: cargo test --package rustok-server --test '*' --test-threads=1
         env:
-          RUST_BACKTRACE: full
-      
-      # Cleanup (always run)
-      - name: Stop test server
-        if: always()
-        run: |
-          if [ -f /tmp/test_server.pid ]; then
-            kill $(cat /tmp/test_server.pid) || true
-            rm /tmp/test_server.pid
-          fi
+          RUST_LOG: debug
 
   next-apps:
     name: Next.js (${{ matrix.app }})

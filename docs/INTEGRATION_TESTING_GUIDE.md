@@ -1,207 +1,356 @@
 # Integration Testing Guide
 
-This guide explains how to run and write integration tests for the RusToK platform.
+This guide explains how to write and run integration tests for the RusToK platform.
 
 ## Overview
 
-Integration tests verify that different components of the system work together correctly. They test complete workflows including:
+RusToK provides a comprehensive testing infrastructure through the `rustok-test-utils` crate. This includes:
 
-- Order lifecycle (create → submit → pay → ship)
-- Content lifecycle (create → translate → publish → search)
-- Event propagation (publish → persist → relay → consume)
+- **Test Server**: Automatically spawn a test server for HTTP-level integration tests
+- **Test Fixtures**: Reusable test data builders for entities
+- **Mock Event Bus**: In-memory event bus for testing event-driven flows
+- **Database Utilities**: Test database setup with migrations
 
-## Test Structure
+## Test Server
 
-Integration tests are located in:
-```
-apps/server/tests/integration/
-```
+The `TestServer` type provides a complete HTTP server for integration testing.
 
-Key files:
-- `order_flow_test.rs` - Order-related workflows
-- `content_flow_test.rs` - Content/node workflows  
-- `event_flow_test.rs` - Event system workflows
-
-## Test Utilities
-
-The `rustok-test-utils` crate provides helper functions and fixtures:
-
-- `TestApp` - Main test application wrapper
-- `spawn_test_app()` - Create a test application instance
-- Fixtures for test data (products, nodes, users, etc.)
-- Event capture and verification helpers
-
-## Running Tests
-
-### Locally
-
-1. **Start dependencies**: Ensure PostgreSQL is running
-2. **Set environment variables**:
-   ```bash
-   export DATABASE_URL="postgres://postgres:password@localhost:5432/rustok_test"
-   export TEST_DATABASE_URL="postgres://postgres:password@localhost:5432/rustok_test"
-   export TEST_SERVER_URL="http://localhost:3000"
-   export TEST_AUTH_TOKEN="test_token"
-   export TEST_TENANT_ID="test-tenant"
-   ```
-
-3. **Start the server**:
-   ```bash
-   cd apps/server
-   cargo run --release
-   ```
-
-4. **Run integration tests** (in another terminal):
-   ```bash
-   cargo test --package rustok-server --test integration
-   ```
-
-### In CI/CD
-
-The CI/CD pipeline automatically runs integration tests in the `integration-tests` job:
-
-1. Starts PostgreSQL service
-2. Builds and starts the test server
-3. Runs all integration tests
-4. Cleans up resources
-
-## Writing Tests
-
-### Test Structure Example
+### Basic Usage
 
 ```rust
-use rustok_test_utils::*;
+use rustok_test_utils::TestServer;
 
 #[tokio::test]
-async fn test_order_flow() {
-    // Setup
-    let app = spawn_test_app().await;
-    
-    // Create product
-    let product = app.create_product(test_product_input()).await.unwrap();
-    
-    // Create order
-    let order = app.create_order(test_order_input(product.id)).await.unwrap();
-    
-    // Submit order
-    let submitted = app.submit_order(order.id).await.unwrap();
-    
-    // Verify state
-    assert_eq!(submitted.status, OrderStatus::PendingPayment);
-    
-    // Process payment
-    let payment = app.process_payment(order.id, test_payment_input()).await.unwrap();
-    assert!(payment.success);
-    
-    // Verify final state
-    let final_order = app.get_order(order.id).await.unwrap();
-    assert_eq!(final_order.status, OrderStatus::Paid);
+async fn test_http_api() {
+    // Spawn a test server
+    let server = TestServer::spawn().await.unwrap();
+
+    // Make HTTP requests to the server
+    let client = reqwest::Client::new();
+    let response = client
+        .get(format!("{}/health", server.base_url))
+        .send()
+        .await
+        .unwrap();
+
+    assert!(response.status().is_success());
 }
 ```
 
-### Best Practices
+### Using with TestApp
 
-1. **Test complete workflows**: Test from creation to final state
-2. **Verify events**: Check that domain events are emitted correctly
-3. **Test edge cases**: Include validation errors and failure scenarios
-4. **Use fixtures**: Leverage test utilities for common test data
-5. **Clean up**: Tests should clean up after themselves
+The `TestApp` wrapper provides convenient methods for API operations:
 
-## Test Coverage
+```rust
+use rustok_test_utils::{TestServer, spawn_test_app_with_url};
 
-Current integration test coverage includes:
+#[tokio::test]
+async fn test_order_flow() {
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
 
-### Order Flow (6 tests)
-- Complete order lifecycle
-- Multiple items
-- Validation scenarios
-- Payment failures
-- Order retrieval and search
-- State transitions
+    // Create a product
+    let product = app
+        .create_product(CreateProductInput {
+            sku: "TEST-001".to_string(),
+            title: "Test Product".to_string(),
+            price: 1000,
+            ..Default::default()
+        })
+        .await
+        .unwrap();
 
-### Content Flow (9 tests)
-- Complete node lifecycle
-- Different content types
-- Translations
-- Search functionality
-- Validation
-- State transitions
-- Retrieval
-- Slug uniqueness
-- Body formats
+    // Create an order
+    let order = app
+        .create_order(CreateOrderInput {
+            customer_id: test_customer_id(),
+            items: vec![OrderItemInput {
+                product_id: product.id,
+                quantity: 2,
+                price: Some(1000),
+            }],
+        })
+        .await
+        .unwrap();
 
-### Event Flow (13 tests)
-- Event propagation
-- Outbox persistence
-- Event relay
-- Event ordering
-- Correlation IDs
-- Error handling
-- Cross-module events
-- Tenant isolation
-- Event validation
-- Payload size limits
-- Event replay
-- Deduplication
-- Batching
+    assert_eq!(order.status, OrderStatus::Draft);
+}
+```
 
-## Environment Variables
+### TestApp Methods
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `TEST_DATABASE_URL` | Test database connection | `postgres://postgres:password@localhost:5432/rustok_test` |
-| `TEST_SERVER_URL` | Test server base URL | `http://localhost:3000` |
-| `TEST_AUTH_TOKEN` | Authentication token | `test_token` |
-| `TEST_TENANT_ID` | Tenant identifier | `test-tenant` |
-| `TEST_USER_ID` | User ID for test operations | Random UUID |
+The `TestApp` provides the following operation methods:
 
-## Troubleshooting
+#### Content/Node Operations
+- `create_node(input)` - Create a content node
+- `get_node(node_id)` - Retrieve a node
+- `publish_node(node_id)` - Publish a node
+- `add_translation(node_id, locale, input)` - Add translation
+- `search_nodes(query)` - Search for nodes
 
-### Server not starting
-- Check PostgreSQL is running
-- Verify database credentials
-- Check for port conflicts
+#### Commerce/Product Operations
+- `create_product(input)` - Create a product
+- `get_product(product_id)` - Retrieve a product
 
-### Tests timing out
-- Increase timeout in `TestApp::new()`
-- Check server logs for errors
-- Ensure all dependencies are available
+#### Commerce/Order Operations
+- `create_order(input)` - Create an order
+- `get_order(order_id)` - Retrieve an order
+- `submit_order(order_id)` - Submit an order
+- `process_payment(order_id, input)` - Process payment
+- `search_orders(query)` - Search for orders
 
-### Event not captured
-- Verify event subscription is set up
-- Check event filtering logic
-- Ensure events are being published correctly
+#### Event Operations
+- `get_events_for_node(node_id)` - Get events for a node
+- `get_events_for_order(order_id)` - Get events for an order
+- `get_outbox_events()` - Get all outbox events
+- `get_relayed_events()` - Get count of relayed events
+
+## Test Fixtures
+
+The `rustok_test_utils` crate provides builder patterns for creating test data:
+
+```rust
+use rustok_test_utils::fixtures::{ProductFixture, OrderFixture};
+
+#[tokio::test]
+async fn test_with_fixtures() {
+    // Create a test product
+    let product = ProductFixture::new()
+        .with_sku("FIX-001")
+        .with_title("Fixture Product")
+        .with_price(1500)
+        .build();
+
+    // Create a test order
+    let order = OrderFixture::new()
+        .with_customer_id(Uuid::new_v4())
+        .with_item(product.id, 2, 1500)
+        .build();
+}
+```
+
+### Available Fixtures
+
+- `UserFixture` - Build test users
+- `TenantFixture` - Build test tenants
+- `ProductFixture` - Build test products
+- `OrderFixture` - Build test orders
+- `NodeFixture` - Build test content nodes
+- `EventFixture` - Build test domain events
+
+## Database Testing
+
+For tests that need database access without HTTP:
+
+```rust
+use rustok_test_utils::setup_test_db;
+
+#[tokio::test]
+async fn test_with_database() {
+    let db = setup_test_db().await;
+
+    // Use db for direct database operations
+    // Note: This uses in-memory SQLite by default
+}
+```
+
+### Using Migrations
+
+For tests that need a specific schema:
+
+```rust
+use rustok_test_utils::setup_test_db_with_migrations;
+use migration::Migrator;
+
+#[tokio::test]
+async fn test_with_migrations() {
+    let db = setup_test_db_with_migrations::<Migrator>().await;
+
+    // Database has all migrations applied
+}
+```
+
+## Mock Event Bus
+
+For testing event-driven behavior:
+
+```rust
+use rustok_test_utils::mock_event_bus;
+
+#[tokio::test]
+async fn test_events() {
+    let event_bus = mock_event_bus();
+    let tenant_id = Uuid::new_v4();
+
+    // Publish an event
+    event_bus.publish(tenant_id, None, DomainEvent::NodeCreated { .. }).unwrap();
+
+    // Verify event was captured
+    assert_eq!(event_bus.event_count(), 1);
+    assert!(event_bus.has_event_of_type("NodeCreated"));
+}
+```
+
+## Security Context Helpers
+
+Create security contexts for different user roles:
+
+```rust
+use rustok_test_utils::helpers::{admin_context, customer_context};
+
+#[tokio::test]
+async fn test_permissions() {
+    let admin = admin_context();
+    let customer = customer_context();
+
+    // Test with different roles
+    assert!(matches!(admin.role, UserRole::Admin));
+    assert!(matches!(customer.role, UserRole::Customer));
+}
+```
+
+## Running Tests
+
+### Run All Tests
+
+```bash
+cargo test --workspace
+```
+
+### Run Integration Tests Only
+
+```bash
+cargo test --package rustok-server --test '*'
+```
+
+### Run Specific Test
+
+```bash
+cargo test --package rustok-server test_complete_order_flow
+```
+
+### Run Tests with Output
+
+```bash
+RUST_LOG=debug cargo test --package rustok-server
+```
 
 ## CI/CD Integration
 
-The integration tests are automatically run in GitHub Actions:
+Integration tests run automatically in CI/CD via the `integration-tests` job in `.github/workflows/ci.yml`.
 
-```yaml
-integration-tests:
-  name: Integration Tests
-  runs-on: ubuntu-latest
-  needs: build-server
-  services:
-    postgres:
-      image: postgres:16
-  steps:
-    - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@stable
-    - name: Start test server
-      run: |
-        cd apps/server
-        cargo build --release
-        cargo run --release &
-        # Wait for server readiness
-    - name: Run integration tests
-      run: cargo test --package rustok-server --test integration
+The CI job:
+1. Spins up a PostgreSQL database
+2. Runs all integration tests
+3. Runs tests sequentially to avoid port conflicts
+4. Enables debug logging for troubleshooting
+
+## Best Practices
+
+### 1. Use TestServer for HTTP Tests
+
+Always use `TestServer` for HTTP-level integration tests instead of expecting an external server.
+
+### 2. Isolate Tests
+
+Each test should be independent:
+- Use unique identifiers (UUIDs)
+- Clean up after each test
+- Avoid shared state between tests
+
+### 3. Use Test Fixtures
+
+Use fixtures for consistent test data:
+```rust
+// Good
+let product = ProductFixture::new().build();
+
+// Avoid - inconsistent
+let product = Product {
+    id: Uuid::new_v4(),
+    sku: "random-sku".to_string(),
+    // ...
+};
 ```
 
-## Future Improvements
+### 4. Test Both Success and Failure Cases
 
-- Add test database migrations
-- Mock external services (payment gateway, email, etc.)
-- Performance regression testing
-- Parallel test execution
-- Test coverage reporting
-- Automated test data seeding
+```rust
+// Test success
+let result = service.create_order(input).await;
+assert!(result.is_ok());
+
+// Test failure
+let result = service.create_order(invalid_input).await;
+assert!(result.is_err());
+```
+
+### 5. Verify Side Effects
+
+```rust
+// Create order
+let order = create_order().await;
+
+// Verify events were emitted
+let events = get_events_for_order(order.id).await;
+assert!(events.iter().any(|e| matches!(e, OrderCreated { .. })));
+
+// Verify inventory was updated
+let product = get_product(product_id).await;
+assert_eq!(product.inventory, initial - order_quantity);
+```
+
+## Troubleshooting
+
+### Port Already in Use
+
+If you get a port conflict error:
+```rust
+// TestServer automatically finds an available port
+// If you manually specify a port, ensure it's not in use
+```
+
+### Database Connection Errors
+
+Ensure the test database is running:
+```bash
+docker-compose up -d postgres
+```
+
+### Slow Tests
+
+If tests are slow:
+- Use in-memory SQLite for unit tests
+- Only use PostgreSQL when necessary
+- Increase test parallelization (if tests are isolated)
+
+## Migration from External Server Tests
+
+If you have tests that expect an external server:
+
+**Before:**
+```rust
+#[tokio::test]
+#[ignore] // Requires external server
+async fn test_order() {
+    let app = spawn_test_app().await;
+    // ...
+}
+```
+
+**After:**
+```rust
+#[tokio::test]
+async fn test_order() {
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
+    // ...
+}
+```
+
+## Additional Resources
+
+- [SPRINT_4_PROGRESS.md](../SPRINT_4_PROGRESS.md) - Sprint 4 implementation details
+- [SPRINT_4_START.md](../SPRINT_4_START.md) - Sprint 4 planning
+- [crates/rustok-test-utils/](../crates/rustok-test-utils/) - Test utilities implementation
+- [apps/server/tests/integration/](../apps/server/tests/integration/) - Example integration tests

@@ -19,7 +19,8 @@ use std::time::Duration;
 /// Test the complete order flow from product creation to payment
 #[tokio::test]
 async fn test_complete_order_flow() {
-    let app = spawn_test_app().await;
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
     
     // 1. Create a product
     let product = app
@@ -123,7 +124,8 @@ async fn test_complete_order_flow() {
 /// Test order creation with multiple items
 #[tokio::test]
 async fn test_order_with_multiple_items() {
-    let app = spawn_test_app().await;
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
     
     // Create multiple products
     let product1 = app
@@ -175,7 +177,8 @@ async fn test_order_with_multiple_items() {
 /// Test order validation (negative quantity, missing product, etc.)
 #[tokio::test]
 async fn test_order_validation() {
-    let app = spawn_test_app().await;
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
     
     // Test with non-existent product
     let result = app
@@ -218,7 +221,8 @@ async fn test_order_validation() {
 /// Test order payment failure scenarios
 #[tokio::test]
 async fn test_order_payment_failure() {
-    let app = spawn_test_app().await;
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
     
     let product = app
         .create_product(test_product_input())
@@ -271,7 +275,8 @@ async fn test_order_payment_failure() {
 /// Test order retrieval and search
 #[tokio::test]
 async fn test_order_retrieval_and_search() {
-    let app = spawn_test_app().await;
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
     
     // Create multiple orders
     let product = app
@@ -345,7 +350,8 @@ async fn test_order_retrieval_and_search() {
 /// Test order lifecycle state transitions
 #[tokio::test]
 async fn test_order_lifecycle_state_transitions() {
-    let app = spawn_test_app().await;
+    let server = TestServer::spawn().await.unwrap();
+    let app = spawn_test_app_with_url(server.base_url.clone()).await;
     
     let product = app
         .create_product(test_product_input())
