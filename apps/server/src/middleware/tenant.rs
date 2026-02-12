@@ -34,17 +34,17 @@ const TENANT_NEGATIVE_CACHE_TTL: Duration = Duration::from_secs(60);
 const TENANT_CACHE_MAX_CAPACITY: u64 = 1_000;
 
 #[derive(Debug, Clone, Copy)]
-enum TenantIdentifierKind {
+pub enum TenantIdentifierKind {
     Uuid,
     Slug,
     Host,
 }
 
 #[derive(Debug, Clone)]
-struct ResolvedTenantIdentifier {
-    value: String,
-    kind: TenantIdentifierKind,
-    uuid: Uuid,
+pub struct ResolvedTenantIdentifier {
+    pub value: String,
+    pub kind: TenantIdentifierKind,
+    pub uuid: Uuid,
 }
 
 #[derive(Clone)]
@@ -96,7 +96,7 @@ impl TenantCacheKeyBuilder {
 }
 
 impl TenantIdentifierKind {
-    fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             TenantIdentifierKind::Uuid => "uuid",
             TenantIdentifierKind::Slug => "slug",
@@ -539,7 +539,7 @@ pub async fn resolve(
     Ok(next.run(req).await)
 }
 
-fn resolve_identifier(
+pub fn resolve_identifier(
     req: &Request<Body>,
     settings: &RustokSettings,
 ) -> Result<ResolvedTenantIdentifier, StatusCode> {

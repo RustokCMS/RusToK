@@ -10,6 +10,7 @@ pub mod module;
 pub mod permissions;
 pub mod rbac;
 pub mod registry;
+pub mod resilience;
 pub mod scripting;
 pub mod tenant_validation;
 pub mod types;
@@ -34,6 +35,10 @@ pub use module::{HealthStatus, ModuleContext, RusToKModule};
 pub use permissions::{Action, Permission, Resource};
 pub use rbac::{PermissionScope, Rbac, SecurityContext};
 pub use registry::ModuleRegistry;
+pub use resilience::{
+    CircuitBreaker, CircuitBreakerConfig, CircuitBreakerError, CircuitState, RetryPolicy,
+    RetryStrategy,
+};
 pub use scripting::ScriptingContext;
 pub use types::{UserRole, UserStatus};
 
