@@ -197,6 +197,10 @@
 
 ## 3. Technical Guidelines
 
+Для развертывания и подключения админки к отдельному серверу см. пошаговый quickstart:
+- [`docs/UI/admin-server-connection-quickstart.md`](./admin-server-connection-quickstart.md)
+
+
 ## 3.1 Submodule Status & Integration Assessment (2026-02)
 
 Провели попытку подтянуть шаблонный submodule:
