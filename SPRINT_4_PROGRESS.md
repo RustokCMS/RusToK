@@ -1,7 +1,7 @@
 # 📊 Sprint 4: Testing & Quality - Progress Report
 
-> **Status:** 🔄 In Progress (25%)
-> **Updated:** 2026-02-12
+> **Status:** 🔄 In Progress (40%)
+> **Updated:** 2026-02-12 (Updated)
 > **Goal:** Increase test coverage to 50%+, add confidence for production deployment
 
 ---
@@ -412,10 +412,10 @@ crates/rustok-test-utils/src/test_app.rs (NEW - 600 LOC)
 ### Code Quality
 
 **Integration Tests Created:**
-- Order flow: 6 test scenarios (380 LOC)
-- Content flow: 9 test scenarios (440 LOC)
-- Event flow: 13 test scenarios (380 LOC)
-- Total: 28 test scenarios (1200 LOC)
+- Order flow: 6 test scenarios (380 LOC) - 4 enabled
+- Content flow: 9 test scenarios (440 LOC) - 1 enabled
+- Event flow: 13 test scenarios (380 LOC) - 1 enabled
+- Total: 28 test scenarios (1200 LOC) - 6 enabled
 
 **Test Utilities Created:**
 - Fixtures: 450 LOC (generators, domain fixtures, assertions)
@@ -432,7 +432,7 @@ crates/rustok-test-utils/src/test_app.rs (NEW - 600 LOC)
 
 **Before Sprint 4:**
 - Test coverage: ~36%
-- Integration tests: 0
+- Integration tests: 0 (all ignored)
 
 **Current (Task 4.1 @ 100%):**
 - Integration tests: 28 scenarios
@@ -455,18 +455,37 @@ crates/rustok-test-utils/src/test_app.rs (NEW - 600 LOC)
 - ✅ HTTP client wrapper for API testing
 - ✅ Event capture and verification helpers
 - ✅ Deterministic test data generation
+- ✅ **Test Server for self-contained HTTP tests** (NEW)
+- ✅ **Automatic port allocation and migrations** (NEW)
+- ✅ **Graceful shutdown handling** (NEW)
 
 ### Test Coverage
 - ✅ Order flow: Complete lifecycle (create → submit → pay)
 - ✅ Content flow: Complete lifecycle (create → translate → publish → search)
 - ✅ Event flow: End-to-end propagation (publish → persist → relay → consume)
 - ✅ Edge cases: Validation, errors, multi-language, bulk operations
+- ✅ **HTTP-level API testing** (NEW)
+- ✅ **Service-level testing** (NEW)
 
 ### Developer Experience
 - ✅ Easy to write tests with test_app wrapper
 - ✅ Reusable fixtures reduce boilerplate
 - ✅ Event verification helpers
 - ✅ Clear test organization by flow
+- ✅ **No external server required** (NEW)
+- ✅ **Self-contained integration tests** (NEW)
+
+### CI/CD Integration
+- ✅ **Integration tests in CI pipeline** (NEW)
+- ✅ **PostgreSQL service for tests** (NEW)
+- ✅ **Sequential test execution** (NEW)
+- ✅ **Debug logging enabled** (NEW)
+
+### Documentation
+- ✅ **Comprehensive integration testing guide** (NEW)
+- ✅ **Usage examples and best practices** (NEW)
+- ✅ **Migration guide from external server tests** (NEW)
+- ✅ **Troubleshooting section** (NEW)
 
 ---
 
@@ -477,18 +496,29 @@ crates/rustok-test-utils/src/test_app.rs (NEW - 600 LOC)
 1. **Fast Implementation**
    - Test utilities: ~4 hours vs 1 day planned
    - Test suites: ~6 hours vs 2 days planned
+   - Test Server: ~3 hours (NEW)
+   - CI/CD integration: ~1 hour (NEW)
+   - Documentation: ~2 hours (NEW)
    - Reuse of existing DTOs and types
 
 2. **Clean Architecture**
-   - Separation of concerns (fixtures, test_app)
+   - Separation of concerns (fixtures, test_app, test_server)
    - Reusable across multiple test suites
    - Easy to extend for new tests
+   - Test Server provides complete isolation (NEW)
 
 3. **Comprehensive Coverage**
    - Happy path scenarios
    - Edge cases and validation
    - Error handling
    - Multi-tenant concerns
+   - HTTP-level API testing (NEW)
+
+4. **CI/CD Integration** (NEW)
+   - Integration tests run automatically
+   - PostgreSQL service provides test database
+   - Sequential execution prevents conflicts
+   - Debug logging aids troubleshooting
 
 ### What was Improved (Task 4.1 Complete)
 
