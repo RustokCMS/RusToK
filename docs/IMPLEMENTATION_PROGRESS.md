@@ -252,8 +252,8 @@
 3. ✅ ~~Task 1.3: EventDispatcher Rate Limiting~~ (Complete - 832eeaa)
 4. ✅ ~~Task 1.4: EventBus Consistency Audit~~ (Complete - PASSED)
 
-### 🚀 Sprint 2 (Next - P1 Simplification):
-1. Simplified tenant resolver with moka
+### 🚀 Sprint 2 (In Progress - P1 Simplification):
+1. 🚧 **Task 2.1:** Simplified tenant resolver with moka (IN PROGRESS)
 2. Circuit breaker implementation
 3. Type-safe state machines
 4. Error handling policy
@@ -321,5 +321,61 @@
 
 ---
 
-**Last Updated:** 2026-02-12 (Sprint 1 Complete)  
-**Next Review:** Sprint 2 kickoff
+## 🚧 Sprint 2: Simplification (In Progress)
+
+### Task 2.1: Simplified Tenant Resolver with Moka (🚧 In Progress)
+
+**Date Started:** 2026-02-12  
+**Status:** 🚧 In Progress
+
+#### Objective:
+Replace complex manual tenant caching infrastructure (~700 lines) with simplified moka-based resolver (~250 lines).
+
+#### Deliverables Completed:
+- ✅ Created `apps/server/src/middleware/tenant_v2.rs` (250 lines)
+  - TenantResolver with moka cache
+  - TenantKey enum (Uuid/Slug/Host)
+  - Automatic cache stampede protection
+  - Simple invalidation API
+  - Built-in unit tests (5 test cases)
+  
+- ✅ Created migration guide `docs/TENANT_RESOLVER_V2_MIGRATION.md`
+  - Detailed architecture comparison
+  - API migration guide
+  - 3-phase rollout plan
+  - Testing strategy
+  - FAQ section
+
+#### Files Modified:
+- `apps/server/src/middleware/tenant_v2.rs` (NEW - 250 lines)
+- `apps/server/src/middleware/mod.rs` (+1 line)
+- `docs/TENANT_RESOLVER_V2_MIGRATION.md` (NEW - comprehensive guide)
+
+#### Benefits:
+- **70% code reduction** (~700 → ~250 lines)
+- **Automatic cache stampede protection** via moka's `try_get_with()`
+- **Simpler maintenance** - no custom coalescing logic
+- **Better tested** - moka is a well-established library
+- **No Redis dependency** for basic caching (optional)
+
+#### Next Steps for Task 2.1:
+1. Add integration tests for concurrent requests
+2. Add load tests comparing V1 vs V2 performance
+3. Deploy in shadow mode (feature flag)
+4. Monitor for 3 days
+5. Enable by default after validation
+6. Remove V1 after 1 week stable operation
+
+#### Impact:
+- **Simplification:** Major reduction in codebase complexity
+- **Reliability:** Battle-tested cache library vs custom code
+- **Performance:** Expected equal or better than V1
+
+#### Related:
+- [REFACTORING_ROADMAP.md](./REFACTORING_ROADMAP.md) - Sprint 2, Task 2.1
+- [TENANT_RESOLVER_V2_MIGRATION.md](./TENANT_RESOLVER_V2_MIGRATION.md) - Migration guide
+
+---
+
+**Last Updated:** 2026-02-12 (Sprint 2 Task 2.1 in progress)  
+**Next Review:** After Task 2.1 completion
