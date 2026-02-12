@@ -84,7 +84,7 @@ Most platforms are either **fast but complex** (Go/C++) or **productive but slow
 - 🛠️ **CLI Generators** — `cargo loco generate model/controller/migration`
 - 📝 **Type-Safe Everything** — From database to frontend, one language
 - 🧪 **Testing Built-in** — Unit, integration, and E2E test support
-- 🎨 **Storefront UI Stack** — Leptos SSR + Next.js starters with Tailwind + DaisyUI
+- 🎨 **Storefront UI Stack** — Leptos SSR + Next.js starters with Tailwind-based UI
 - 📚 **Auto-generated Docs** — OpenAPI/GraphQL schema documentation
 
 ### Performance & Reliability
@@ -278,7 +278,7 @@ cd apps/next-frontend
 npm install
 npm run dev
 
-# (Optional) Build Tailwind + DaisyUI styles
+# (Optional) Build storefront CSS
 cd apps/storefront
 npm install
 npm run build:css
@@ -450,60 +450,16 @@ Write → Event Bus → Indexers → Read Models
 
 ## 🗺️ Roadmap
 
-**Phase 1: Foundation ✅**
+Текущий roadmap и приоритеты поддерживаются в отдельном документе:
 
-- Project scaffolding
-- CI/CD pipeline
-- Loco.rs integration
-- Basic GraphQL API
-- Database migrations
+- [docs/ROADMAP.md](docs/ROADMAP.md)
 
-**Phase 2: Core (Current)**
+Коротко по направлению развития:
 
-- Multi-tenant data isolation
-- User authentication (JWT)
-- Role-based permissions
-- Admin panel foundation
-- Module registry system
-
-**Phase 3: Commerce Module**
-
-- Product catalog
-- Categories & attributes
-- Shopping cart
-- Order management
-- Inventory tracking
-
-**Phase 4: Storefront**
-
-- Leptos SSR setup (Tailwind + DaisyUI)
-- Product pages
-- Cart & checkout flow
-- SEO optimization
-- Performance tuning
-
-**Phase 5: Content**
-
-- Blog module
-- Page builder basics
-- Media library
-- SEO fields
-
-**Phase 6: Advanced**
-
-- Payment integrations
-- Email notifications
-- Search (MeiliSearch)
-- Caching layer
-- Admin dashboard widgets
-
-**Phase 7: Ecosystem**
-
-- Plugin marketplace concept
-- Theme system
-- CLI improvements
-- Documentation site
-- Docker images
+1. Core platform: auth, tenants, RBAC, module registry.
+2. Admin UX: auth + navigation + RBAC guards, затем data workflows.
+3. Domain modules: commerce, content, community.
+4. Storefront and integrations.
 
 ---
 
