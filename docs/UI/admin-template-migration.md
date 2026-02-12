@@ -69,6 +69,29 @@
 
 > Важно: модуль не меняет ядро напрямую; он подключается через контракт и capability-checks.
 
+### Наши самописные модули (куда класть новый функционал)
+
+Чтобы не разрасталась случайная обвязка в приложениях, новый функционал кладем в **наши модули/пакеты**, а не в ad-hoc слой внутри `apps/*`.
+
+Базовый приоритет размещения:
+
+- `crates/rustok-core` — auth/tenant/rbac/infra-правила.
+- `crates/rustok-content` / `crates/rustok-blog` / `crates/rustok-commerce` / `crates/rustok-forum` — доменная логика.
+- `crates/rustok-index` — read models, индексные проекции и быстрые выборки.
+- `crates/leptos-auth` / `crates/leptos-graphql` / `crates/leptos-hook-form` / `crates/leptos-table` / `crates/leptos-zod` / `crates/leptos-zustand` — shared frontend runtime-библиотеки.
+
+Что остается в `apps/next-admin` и `apps/admin`:
+
+- только composition/screen layer (layout, route wiring, page composition);
+- без дублирования доменной бизнес-логики и без локальных "временных" API-клиентов вне shared-пакетов.
+
+**Правило module-first delivery:**
+
+1. Сначала определить целевой модуль (backend crate и/или shared frontend crate).
+2. Реализовать/расширить API-контракт внутри модуля.
+3. Подключить модуль в Next и Leptos экранах (параллельно).
+4. Зафиксировать в changelog/плане, в какой модуль легла функциональность.
+
 ### "Атомарность заранее" без догматизма
 
 Структура, которая обычно живет дольше всего:
