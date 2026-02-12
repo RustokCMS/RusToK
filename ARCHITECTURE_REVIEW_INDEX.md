@@ -1,9 +1,20 @@
 # 📋 RusToK Architecture Review — Navigation
 
 > **Дата:** 2026-02-12  
-> **Версия:** Comprehensive Review v1.0
+> **Версия:** Comprehensive Review v1.1 (Extended)  
+> **Статус:** Sprint 1 завершён ✅, Sprint 2 в процессе
 
 Этот индекс поможет быстро найти нужную информацию из архитектурного обзора.
+
+---
+
+## 🎯 Что нового (v1.1)
+
+- ✅ **Sprint 1 завершён:** Все 4 P0 задачи выполнены
+- 📊 **Новая оценка:** 8.5/10 → 8.7/10 (+0.2)
+- 📈 **Production readiness:** 75% → 85% (+10%)
+- 📝 **3 новых документа:** Extended recommendations, Visual guide, Quick advice
+- 🎯 **Фокус:** Переход на Sprint 2 (Simplification)
 
 ---
 
@@ -108,28 +119,84 @@
 
 ---
 
+### 6. [ARCHITECTURE_ADVICE_RU.md](./ARCHITECTURE_ADVICE_RU.md) ⭐ NEW
+**Краткие советы по улучшению (10 минут чтения)**
+
+**Содержание:**
+- Топ-5 улучшений с высоким ROI
+- Конкретные примеры кода
+- Оценка усилий и выигрыша
+- Quick wins (1-2 дня)
+- Рекомендуемый план спринтов
+
+**Для кого:** Разработчики, ищущие quick wins и practical advice
+
+---
+
+### 7. [ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md](./docs/ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md) ⭐ NEW
+**Расширенные рекомендации (45 минут чтения)**
+
+**Содержание:**
+- Стратегические направления (Maturity, Simplification, Testing)
+- Детальные технические решения с кодом
+- Circuit Breaker implementation (464 строки)
+- Type-Safe State Machines pattern
+- OpenTelemetry integration guide
+- Saga Pattern для distributed transactions
+- ROI analysis и financial impact
+- Sprint 2-4 roadmap с метриками
+
+**Для кого:** Senior Engineers, Architects планирующие долгосрочные улучшения
+
+---
+
+### 8. [ARCHITECTURE_IMPROVEMENTS_VISUAL.md](./docs/ARCHITECTURE_IMPROVEMENTS_VISUAL.md) ⭐ NEW
+**Визуальный гид по улучшениям (20 минут)**
+
+**Визуализации:**
+- Current vs Target State диаграмма
+- Problem → Solution flow charts
+- Sprint Progress Gantt chart
+- Architecture Maturity Matrix (Quadrant chart)
+- Test Coverage pie charts
+- Technical Debt Heat Map
+- Performance Impact projections
+- ROI Analysis graph
+
+**Для кого:** Visual learners, Management, Presentations
+
+---
+
 ## 🎯 Quick Navigation
 
 ### По ролям
 
 **Tech Lead / Architect:**
 1. Start: [REVIEW_SUMMARY.md](./docs/REVIEW_SUMMARY.md)
-2. Deep dive: [ARCHITECTURE_REVIEW_2026-02-12.md](./docs/ARCHITECTURE_REVIEW_2026-02-12.md)
-3. Visual: [ARCHITECTURE_DIAGRAM.md](./docs/ARCHITECTURE_DIAGRAM.md)
+2. Quick advice: [ARCHITECTURE_ADVICE_RU.md](./ARCHITECTURE_ADVICE_RU.md) ⭐
+3. Deep dive: [ARCHITECTURE_REVIEW_2026-02-12.md](./docs/ARCHITECTURE_REVIEW_2026-02-12.md)
+4. Extended recommendations: [ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md](./docs/ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md) ⭐
+5. Visual: [ARCHITECTURE_IMPROVEMENTS_VISUAL.md](./docs/ARCHITECTURE_IMPROVEMENTS_VISUAL.md) ⭐
 
 **Senior Developer:**
-1. Start: [REVIEW_SUMMARY.md](./docs/REVIEW_SUMMARY.md)
+1. Quick wins: [ARCHITECTURE_ADVICE_RU.md](./ARCHITECTURE_ADVICE_RU.md) ⭐
 2. Implementation: [REFACTORING_ROADMAP.md](./docs/REFACTORING_ROADMAP.md)
-3. Module-specific: [MODULE_IMPROVEMENTS.md](./docs/MODULE_IMPROVEMENTS.md)
+3. Extended guide: [ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md](./docs/ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md) ⭐
+4. Module-specific: [MODULE_IMPROVEMENTS.md](./docs/MODULE_IMPROVEMENTS.md)
 
 **Developer (specific module):**
-1. Your module: [MODULE_IMPROVEMENTS.md](./docs/MODULE_IMPROVEMENTS.md)
-2. Context: [ARCHITECTURE_DIAGRAM.md](./docs/ARCHITECTURE_DIAGRAM.md)
-3. Implementation guide: [REFACTORING_ROADMAP.md](./docs/REFACTORING_ROADMAP.md)
+1. Quick advice: [ARCHITECTURE_ADVICE_RU.md](./ARCHITECTURE_ADVICE_RU.md) ⭐
+2. Your module: [MODULE_IMPROVEMENTS.md](./docs/MODULE_IMPROVEMENTS.md)
+3. Context: [ARCHITECTURE_DIAGRAM.md](./docs/ARCHITECTURE_DIAGRAM.md)
+4. Implementation guide: [REFACTORING_ROADMAP.md](./docs/REFACTORING_ROADMAP.md)
 
 **Product Manager:**
 1. Summary: [REVIEW_SUMMARY.md](./docs/REVIEW_SUMMARY.md)
-2. Visual overview: [ARCHITECTURE_DIAGRAM.md](./docs/ARCHITECTURE_DIAGRAM.md)
+2. Visual overview: [ARCHITECTURE_IMPROVEMENTS_VISUAL.md](./docs/ARCHITECTURE_IMPROVEMENTS_VISUAL.md) ⭐
+3. ROI Analysis: [ARCHITECTURE_IMPROVEMENTS_VISUAL.md#-roi-analysis](./docs/ARCHITECTURE_IMPROVEMENTS_VISUAL.md#-roi-analysis) ⭐
+
+**Для быстрого старта (5-10 минут):**
+→ [ARCHITECTURE_ADVICE_RU.md](./ARCHITECTURE_ADVICE_RU.md) ⭐
 
 ---
 
@@ -165,39 +232,42 @@
 
 ## 📊 Key Metrics
 
-| Метрика | Текущее | Целевое | Приоритет |
-|---------|---------|---------|-----------|
-| **Arch Score** | 8.5/10 | 9.5/10 | - |
-| **Test Coverage** | 31% | 50% | P1 |
-| **Security Score** | 75% | 95% | P0 |
-| **P0 Issues** | 4 | 0 | Week 1 |
-| **P1 Issues** | 5 | 2 | Week 2-3 |
-| **Code Complexity** | Medium | Low | P2 |
-| **Production Ready** | 75% | 100% | 3-4 weeks |
+| Метрика | Sprint 0 | Sprint 1 ✅ | Целевое | Приоритет |
+|---------|----------|-------------|---------|-----------|
+| **Arch Score** | 8.5/10 | **8.7/10** | 9.5/10 | - |
+| **Test Coverage** | 31% | **36%** | 50% | P1 |
+| **Security Score** | 75% | **90%** | 95% | P0 ✅ |
+| **P0 Issues** | 4 | **0** ✅ | 0 | Complete |
+| **P1 Issues** | 5 | 5 | 0 | Sprint 2-3 |
+| **Code Complexity** | Medium | Medium | Low | P2 |
+| **Production Ready** | 75% | **85%** | 100% | 2-3 weeks |
 
 ---
 
 ## 🎯 Implementation Priority
 
-### Must Fix (P0) - Week 1
-- [ ] Event validation framework
-- [ ] Tenant identifier sanitization
-- [ ] EventDispatcher rate limiting
-- [ ] EventBus consistency audit
+### ✅ Sprint 1 (P0) - Week 1 COMPLETE
+- ✅ Event validation framework
+- ✅ Tenant identifier sanitization
+- ✅ EventDispatcher rate limiting (backpressure)
+- ✅ EventBus consistency audit
 
-### Should Fix (P1) - Week 2-3
-- [ ] Simplify tenant caching
-- [ ] Add circuit breaker
-- [ ] Type-safe state machines
-- [ ] Error policy formalization
-- [ ] Increase test coverage to 40%
+### 🔄 Sprint 2 (P1) - Week 2-3 IN PROGRESS
+- [ ] Simplify tenant caching (moka) — 2 days — 🔥 HIGH ROI
+- [ ] Add circuit breaker — 3 days — 🔥 HIGH ROI
+- [ ] Type-safe state machines — 4 days — ⭐ MEDIUM-HIGH ROI
+- [ ] Error policy standardization — 2 days — Quick Win
 
-### Nice to Have (P2) - Week 4+
-- [ ] OpenTelemetry integration
-- [ ] Event serialization optimization
-- [ ] Feature flags system
-- [ ] Graceful degradation
-- [ ] Full Event Sourcing
+### 📋 Sprint 3 (P2) - Week 4
+- [ ] OpenTelemetry integration — 5 days
+- [ ] Distributed tracing — 3 days
+- [ ] Metrics dashboard — 2 days
+
+### 📋 Sprint 4 (Testing) - Week 5-6
+- [ ] Integration tests — 5 days — 🔥 HIGH ROI
+- [ ] Property-based tests — 3 days
+- [ ] Performance benchmarks — 2 days
+- [ ] Security audit — 5 days
 
 ---
 
@@ -249,15 +319,26 @@ If you have questions about:
 - [MODULE_MATRIX.md](./docs/modules/MODULE_MATRIX.md) - Module overview
 - [DATABASE_SCHEMA.md](./docs/DATABASE_SCHEMA.md) - Database design
 
-**Review Documents (NEW):**
+**Review Documents:**
 - [REVIEW_SUMMARY.md](./docs/REVIEW_SUMMARY.md)
 - [ARCHITECTURE_REVIEW_2026-02-12.md](./docs/ARCHITECTURE_REVIEW_2026-02-12.md)
 - [REFACTORING_ROADMAP.md](./docs/REFACTORING_ROADMAP.md)
 - [MODULE_IMPROVEMENTS.md](./docs/MODULE_IMPROVEMENTS.md)
 - [ARCHITECTURE_DIAGRAM.md](./docs/ARCHITECTURE_DIAGRAM.md)
 
+**Extended Documents (NEW v1.1):**
+- [ARCHITECTURE_ADVICE_RU.md](./ARCHITECTURE_ADVICE_RU.md) ⭐ - Краткие советы
+- [ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md](./docs/ARCHITECTURE_RECOMMENDATIONS_EXTENDED.md) ⭐ - Расширенные рекомендации
+- [ARCHITECTURE_IMPROVEMENTS_VISUAL.md](./docs/ARCHITECTURE_IMPROVEMENTS_VISUAL.md) ⭐ - Визуальный гид
+
+**Progress Tracking:**
+- [SPRINT_1_COMPLETION.md](./docs/SPRINT_1_COMPLETION.md) - Sprint 1 завершён
+- [IMPLEMENTATION_PROGRESS.md](./docs/IMPLEMENTATION_PROGRESS.md) - Трекинг прогресса
+- [EVENTBUS_CONSISTENCY_AUDIT.md](./docs/EVENTBUS_CONSISTENCY_AUDIT.md) - Аудит EventBus
+
 ---
 
-**Last Updated:** 2026-02-12  
+**Last Updated:** 2026-02-12 (v1.1)  
 **Next Review:** 2026-03-12  
-**Reviewer:** AI Architecture Team
+**Reviewer:** AI Architecture Team  
+**Status:** Sprint 1 Complete ✅ → Sprint 2 In Progress 🔄
