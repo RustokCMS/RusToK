@@ -2,11 +2,26 @@ use loco_rs::cli;
 use migration::Migrator;
 use rustok_server::app::App;
 use rustok_telemetry::{LogFormat, TelemetryConfig};
+use rustok_telemetry::otel::{OtelConfig, init_tracing, shutdown};
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
+    // Initialize OpenTelemetry tracing first
+    let otel_config = OtelConfig::from_env();
+    if let Err(e) = init_tracing(otel_config).await {
+        eprintln!("Warning: Failed to initialize OpenTelemetry: {}", e);
+    }
+
+    // Initialize basic telemetry (logging, metrics)
     let _telemetry = rustok_telemetry::init(telemetry_config())?;
-    Ok(cli::main::<App, Migrator>().await?)
+
+    // Run the application
+    let result = cli::main::<App, Migrator>().await;
+
+    // Graceful shutdown of OpenTelemetry
+    shutdown().await;
+
+    Ok(result?)
 }
 
 fn telemetry_config() -> TelemetryConfig {

@@ -49,41 +49,31 @@ Sprint 2: ✅ COMPLETE (4/4 tasks)
 Sprint 2: ✅ COMPLETE! All 4 tasks done.
 
 Sprint 3 (Week 4) - Observability:
-- ✅ Task 3.1: OpenTelemetry Integration (COMPLETE)
-  - Code: crates/rustok-telemetry/src/otel.rs (309 LOC)
-  - Tests: crates/rustok-telemetry/tests/otel_test.rs (149 LOC)
-  - Docs: OBSERVABILITY_QUICKSTART.md (7KB)
-  - Reduction: 5d → 4h (98% faster)
-  - Commit: (in progress)
 
-- ✅ Task 3.2: Distributed Tracing (COMPLETE)
-  - Code: crates/rustok-core/src/tracing.rs (243 LOC)
-  - Docs: docs/DISTRIBUTED_TRACING_GUIDE.md (17KB)
-  - Reduction: 3d → 3h (96% faster)
-  - Commit: (in progress)
+✅ Task 3.1: OpenTelemetry Integration (COMPLETE)
+- Core: crates/rustok-telemetry/src/otel.rs (240 lines)
+- Server: apps/server/src/main.rs (OTel init + shutdown)
+- Tests: crates/rustok-telemetry/tests/otel_test.rs (5+ tests)
+- Docs: docs/OPENTELEMETRY_GUIDE.md (10KB)
+- Features: OTLP export, context propagation, configurable sampling
+- Infrastructure: docker-compose.observability.yml (Jaeger, Prometheus, Grafana)
 
-- ✅ Task 3.3: Metrics Dashboard (COMPLETE)
-  - Code: crates/rustok-telemetry/src/metrics.rs (262 LOC)
-  - Dashboards: grafana/dashboards/rustok-advanced.json (27KB)
-  - Alerts: prometheus/alerts/rustok-alerts.yml (7KB)
-  - Docs: docs/METRICS_DASHBOARD_GUIDE.md (16KB)
-  - Reduction: 2d → 3h (94% faster)
-  - Commit: (in progress)
+Remaining:
+2. Distributed Tracing (3 days, HIGH ROI) - IN PROGRESS
+3. Metrics Dashboard (2 days, MEDIUM ROI)
 
 === KEY METRICS ===
 
-Architecture Score: 8.7/10 → 9.3/10 (Sprint 3 complete)
-Production Ready: 85% → 96% (Sprint 3 complete)
+Architecture Score: 9.0/10 → target 9.5/10
+Production Ready: 92% → target 100%
 Code Quality: Improved significantly
   - Tenant cache: 724 → 400 lines (-45%)
   - Circuit breaker: +600 lines (new resilience module)
-  - OpenTelemetry: +458 LOC (observability foundation)
-  - Distributed tracing: +243 LOC (instrumentation)
-  - Metrics dashboard: +262 LOC (monitoring)
-Sprint 1 Complete: 100% (4/4 tasks)
-Sprint 2 Complete: 100% (4/4 tasks)
-Sprint 3 Complete: 100% (3/3 tasks)
-Overall Progress: 69% (11/16 tasks)
+  - OpenTelemetry: Full distributed tracing integration
+Sprint 1 Complete: 100% (4/4)
+Sprint 2 Complete: 100% (4/4)
+Sprint 3 Progress: 33% (1/3 tasks)
+Overall Progress: 56% (9/16 tasks)
 
 === COMMITS ===
 
@@ -106,3 +96,4 @@ Tenant Cache: docs/TENANT_CACHE_V2_MIGRATION.md
 Circuit Breaker: docs/CIRCUIT_BREAKER_GUIDE.md
 State Machines: docs/STATE_MACHINE_GUIDE.md
 Error Handling: docs/ERROR_HANDLING_GUIDE.md
+OpenTelemetry: docs/OPENTELEMETRY_GUIDE.md
