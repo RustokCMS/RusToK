@@ -168,12 +168,8 @@ impl ServerHandler for RusToKMcpServer {
 /// Serve the MCP server over stdio
 pub async fn serve_stdio(config: McpServerConfig) -> Result<()> {
     let server = RusToKMcpServer::new(config.registry);
-    let _service = server.serve();
-
-    // Serve over stdio transport
-    // The serve() method returns a RunningService that handles the protocol
-    // We need to keep the service running
-    loop {
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-    }
+    
+    // Serve over stdio transport using rmcp's stdio transport
+    // The server runs until stdin is closed or an error occurs
+    stdio::serve(server).await.map_err(|e| anyhow::anyhow!("MCP server error: {}", e))
 }

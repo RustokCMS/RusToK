@@ -1,7 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId, Throughput};
-use rustok_core::ids::TenantId;
+use uuid::Uuid;
 use std::collections::HashMap;
 use std::sync::Arc;
+
+// TenantId is a type alias for Uuid
+type TenantId = Uuid;
 
 /// Simulate tenant cache operations
 mod tenant_cache_sim {

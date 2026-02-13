@@ -1,7 +1,11 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion, BenchmarkId, Throughput};
-use rustok_core::ids::{TenantId, EventId};
+use uuid::Uuid;
 use std::sync::Arc;
 use std::time::Duration;
+
+// Type aliases for benchmarking
+type TenantId = Uuid;
+type EventId = Uuid;
 
 /// Simplified event types for benchmarking
 #[derive(Clone, Debug)]
