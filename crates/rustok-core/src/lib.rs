@@ -3,6 +3,7 @@ pub mod cache;
 pub mod context;
 pub mod error;
 pub mod events;
+pub mod health;
 pub mod i18n;
 pub mod id;
 pub mod migrations;
@@ -16,6 +17,7 @@ pub mod security;
 pub mod state_machine;
 pub mod tenant_validation;
 pub mod tracing;
+pub mod typed_error;
 pub mod types;
 pub use auth::{
     AuthError, AuthService, AuthTokens, RegisterInput, User, UserRepository, UsersMigration,
@@ -32,6 +34,10 @@ pub use events::{
     event_schema, DispatcherConfig, DomainEvent, EventBus, EventBusStats, EventDispatcher,
     EventEnvelope, EventHandler, EventSchema, EventTransport, FieldSchema, HandlerBuilder,
     HandlerResult, MemoryTransport, ReliabilityLevel, RunningDispatcher, EVENT_SCHEMAS,
+};
+pub use health::{
+    checks::{DatabaseHealthCheck, FnHealthCheck},
+    HealthCheck, HealthRegistry, HealthResult, HealthStatus, OverallHealth,
 };
 pub use i18n::{extract_locale_from_header, translate, Locale};
 pub use id::generate_id;
@@ -52,6 +58,10 @@ pub use security::{
     SecurityCategory, SecurityConfig, SecurityFinding, SecurityHeaders, SecurityHeadersConfig,
     Severity, SsrfProtection, ValidationResult,
 };
+pub use typed_error::{
+    domain_err, ErrorCategory, ErrorCode, DomainError, ErrorResponseBody, IntoTypedResult,
+    TypedResult,
+};
 pub use types::{UserRole, UserStatus};
 
 pub mod prelude {
@@ -61,11 +71,17 @@ pub mod prelude {
         EventEnvelope, EventHandler, EventSchema, EventTransport, FieldSchema, HandlerBuilder,
         HandlerResult, MemoryTransport, ReliabilityLevel, RunningDispatcher, EVENT_SCHEMAS,
     };
+    pub use crate::health::{
+        HealthCheck, HealthRegistry, HealthResult, HealthStatus, OverallHealth,
+    };
     pub use crate::id::generate_id;
     pub use crate::module::HealthStatus;
     pub use crate::permissions::{Action, Permission, Resource};
     pub use crate::rbac::{PermissionScope, Rbac, SecurityContext};
     pub use crate::resilience::{CircuitBreaker, CircuitBreakerConfig, CircuitBreakerError};
+    pub use crate::typed_error::{
+        domain_err, ErrorCode, DomainError, TypedResult,
+    };
     pub use crate::types::{UserRole, UserStatus};
     #[cfg(feature = "redis-cache")]
     pub use crate::RedisCacheBackend;
