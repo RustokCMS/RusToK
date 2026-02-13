@@ -1,4 +1,4 @@
-// Comprehensive unit tests for CatalogService  
+// Comprehensive unit tests for CatalogService
 // These tests verify product CRUD, variants, translations,
 // pricing, and publishing workflows.
 
@@ -8,7 +8,7 @@ use rustok_commerce::dto::{
 use rustok_commerce::entities::product::ProductStatus;
 use rustok_commerce::services::CatalogService;
 use rustok_commerce::CommerceError;
-use rustok_test_utils::{db::setup_test_db, mock_transactional_event_bus, helpers::unique_slug};
+use rustok_test_utils::{db::setup_test_db, helpers::unique_slug, mock_transactional_event_bus};
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
@@ -575,7 +575,9 @@ async fn test_update_nonexistent_product() {
         metadata: None,
     };
 
-    let result = service.update_product(fake_id, actor_id, update_input).await;
+    let result = service
+        .update_product(fake_id, actor_id, update_input)
+        .await;
 
     assert!(result.is_err());
     match result.unwrap_err() {

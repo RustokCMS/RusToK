@@ -16,10 +16,10 @@ async fn test_product_creation_triggers_event() {
     let db = setup_test_db().await;
     let event_bus = mock_transactional_event_bus();
     let service = CatalogService::new(db.clone(), event_bus);
-    
+
     let tenant_id = Uuid::new_v4();
     let actor_id = Uuid::new_v4();
-    
+
     // Create a product
     let input = CreateProductInput {
         translations: vec![ProductTranslationInput {
@@ -45,25 +45,25 @@ async fn test_product_creation_triggers_event() {
         publish: false,
         metadata: serde_json::json!({}),
     };
-    
+
     let result = service.create_product(tenant_id, actor_id, input).await;
     assert!(result.is_ok());
     let product = result.unwrap();
-    
+
     // Verify that a ProductCreated event was published
     assert_eq!(event_bus.event_count(), 1);
     assert!(event_bus.has_event_of_type("ProductCreated"));
-    
+
     // Get the events and verify details
     let events = event_bus.events_of_type("ProductCreated");
     assert_eq!(events.len(), 1);
-    
+
     if let DomainEvent::ProductCreated { product_id, .. } = &events[0] {
         assert_eq!(*product_id, product.id);
     } else {
         panic!("Expected ProductCreated event");
     }
-    
+
     println!("✅ Product creation → Event publishing flow verified");
 }
 
@@ -73,10 +73,10 @@ async fn test_product_update_triggers_event() {
     let db = setup_test_db().await;
     let event_bus = mock_event_bus();
     let service = CatalogService::new(db.clone(), event_bus);
-    
+
     let tenant_id = Uuid::new_v4();
     let actor_id = Uuid::new_v4();
-    
+
     // Create a product first
     let input = CreateProductInput {
         translations: vec![ProductTranslationInput {
@@ -102,16 +102,19 @@ async fn test_product_update_triggers_event() {
         publish: false,
         metadata: serde_json::json!({}),
     };
-    
-    let product = service.create_product(tenant_id, actor_id, input).await.unwrap();
-    
+
+    let product = service
+        .create_product(tenant_id, actor_id, input)
+        .await
+        .unwrap();
+
     // Clear the first event (ProductCreated)
     event_bus.clear();
-    
+
     // Update the product
     use rustok_commerce::dto::UpdateProductInput;
     use rustok_commerce::entities::product::ProductStatus;
-    
+
     let update_input = UpdateProductInput {
         translations: Some(vec![ProductTranslationInput {
             locale: "en".to_string(),
@@ -124,25 +127,25 @@ async fn test_product_update_triggers_event() {
         status: Some(ProductStatus::Active),
         metadata: None,
     };
-    
+
     let result = service
         .update_product(product.id, actor_id, update_input)
         .await;
     assert!(result.is_ok());
-    
+
     // Verify that a ProductUpdated event was published
     assert_eq!(event_bus.event_count(), 1);
     assert!(event_bus.has_event_of_type("ProductUpdated"));
-    
+
     let events = event_bus.events_of_type("ProductUpdated");
     assert_eq!(events.len(), 1);
-    
+
     if let DomainEvent::ProductUpdated { product_id, .. } = &events[0] {
         assert_eq!(*product_id, product.id);
     } else {
         panic!("Expected ProductUpdated event");
     }
-    
+
     println!("✅ Product update → Event publishing flow verified");
 }
 
@@ -152,10 +155,10 @@ async fn test_product_publishing_triggers_event() {
     let db = setup_test_db().await;
     let event_bus = mock_event_bus();
     let service = CatalogService::new(db.clone(), event_bus);
-    
+
     let tenant_id = Uuid::new_v4();
     let actor_id = Uuid::new_v4();
-    
+
     // Create a draft product
     let mut input = CreateProductInput {
         translations: vec![ProductTranslationInput {
@@ -181,29 +184,32 @@ async fn test_product_publishing_triggers_event() {
         publish: false,
         metadata: serde_json::json!({}),
     };
-    
-    let product = service.create_product(tenant_id, actor_id, input).await.unwrap();
-    
+
+    let product = service
+        .create_product(tenant_id, actor_id, input)
+        .await
+        .unwrap();
+
     // Clear the first event (ProductCreated)
     event_bus.clear();
-    
+
     // Publish the product
     let result = service.publish_product(product.id, actor_id).await;
     assert!(result.is_ok());
-    
+
     // Verify that a ProductPublished event was published
     assert_eq!(event_bus.event_count(), 1);
     assert!(event_bus.has_event_of_type("ProductPublished"));
-    
+
     let events = event_bus.events_of_type("ProductPublished");
     assert_eq!(events.len(), 1);
-    
+
     if let DomainEvent::ProductPublished { product_id, .. } = &events[0] {
         assert_eq!(*product_id, product.id);
     } else {
         panic!("Expected ProductPublished event");
     }
-    
+
     println!("✅ Product publishing → Event publishing flow verified");
 }
 
@@ -213,10 +219,10 @@ async fn test_product_deletion_triggers_event() {
     let db = setup_test_db().await;
     let event_bus = mock_event_bus();
     let service = CatalogService::new(db.clone(), event_bus);
-    
+
     let tenant_id = Uuid::new_v4();
     let actor_id = Uuid::new_v4();
-    
+
     // Create a product first
     let input = CreateProductInput {
         translations: vec![ProductTranslationInput {
@@ -242,29 +248,32 @@ async fn test_product_deletion_triggers_event() {
         publish: false,
         metadata: serde_json::json!({}),
     };
-    
-    let product = service.create_product(tenant_id, actor_id, input).await.unwrap();
-    
+
+    let product = service
+        .create_product(tenant_id, actor_id, input)
+        .await
+        .unwrap();
+
     // Clear the first event (ProductCreated)
     event_bus.clear();
-    
+
     // Delete the product
     let result = service.delete_product(product.id, actor_id).await;
     assert!(result.is_ok());
-    
+
     // Verify that a ProductDeleted event was published
     assert_eq!(event_bus.event_count(), 1);
     assert!(event_bus.has_event_of_type("ProductDeleted"));
-    
+
     let events = event_bus.events_of_type("ProductDeleted");
     assert_eq!(events.len(), 1);
-    
+
     if let DomainEvent::ProductDeleted { product_id, .. } = &events[0] {
         assert_eq!(*product_id, product.id);
     } else {
         panic!("Expected ProductDeleted event");
     }
-    
+
     println!("✅ Product deletion → Event publishing flow verified");
 }
 
@@ -274,10 +283,10 @@ async fn test_variant_creation_triggers_event() {
     let db = setup_test_db().await;
     let event_bus = mock_event_bus();
     let service = CatalogService::new(db.clone(), event_bus);
-    
+
     let tenant_id = Uuid::new_v4();
     let actor_id = Uuid::new_v4();
-    
+
     // Create a product with multiple variants
     let input = CreateProductInput {
         translations: vec![ProductTranslationInput {
@@ -317,26 +326,33 @@ async fn test_variant_creation_triggers_event() {
         publish: false,
         metadata: serde_json::json!({}),
     };
-    
-    let product = service.create_product(tenant_id, actor_id, input).await.unwrap();
-    
+
+    let product = service
+        .create_product(tenant_id, actor_id, input)
+        .await
+        .unwrap();
+
     // Verify that a ProductCreated event was published
     assert_eq!(event_bus.event_count(), 3); // 1 ProductCreated + 2 VariantCreated
     assert!(event_bus.has_event_of_type("ProductCreated"));
-    
+
     // Get the events and verify details
     let product_events = event_bus.events_of_type("ProductCreated");
     assert_eq!(product_events.len(), 1);
-    
+
     if let DomainEvent::ProductCreated { product_id, .. } = &product_events[0] {
         assert_eq!(*product_id, product.id);
     } else {
         panic!("Expected ProductCreated event");
     }
-    
+
     // Verify that VariantCreated events were published for each variant
     let variant_events = event_bus.events_of_type("VariantCreated");
-    assert_eq!(variant_events.len(), 2, "Should have 2 variant creation events");
-    
+    assert_eq!(
+        variant_events.len(),
+        2,
+        "Should have 2 variant creation events"
+    );
+
     println!("✅ Product with variants → Event publishing flow verified");
 }

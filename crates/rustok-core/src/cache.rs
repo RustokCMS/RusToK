@@ -106,7 +106,7 @@ impl CacheBackend for InMemoryCacheBackend {
 impl CacheBackend for RedisCacheBackend {
     async fn health(&self) -> Result<()> {
         let client = self.client.clone();
-        
+
         self.circuit_breaker
             .call(async move {
                 let mut conn = client
@@ -138,7 +138,7 @@ impl CacheBackend for RedisCacheBackend {
     async fn get(&self, key: &str) -> Result<Option<Vec<u8>>> {
         let client = self.client.clone();
         let redis_key = self.key(key);
-        
+
         self.circuit_breaker
             .call(async move {
                 let mut conn = client
@@ -166,7 +166,7 @@ impl CacheBackend for RedisCacheBackend {
         let client = self.client.clone();
         let redis_key = self.key(&key);
         let ttl_secs = self.ttl.as_secs();
-        
+
         self.circuit_breaker
             .call(async move {
                 let mut conn = client
@@ -196,7 +196,7 @@ impl CacheBackend for RedisCacheBackend {
     async fn invalidate(&self, key: &str) -> Result<()> {
         let client = self.client.clone();
         let redis_key = self.key(key);
-        
+
         self.circuit_breaker
             .call(async move {
                 let mut conn = client

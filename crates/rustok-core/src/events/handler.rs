@@ -172,7 +172,7 @@ impl EventDispatcher {
         );
 
         let handler_count = matching_handlers.len();
-        
+
         if config.fail_fast {
             for handler in matching_handlers {
                 let envelope = envelope.clone();
@@ -195,7 +195,7 @@ impl EventDispatcher {
 
         // For concurrent execution, track handler completion
         let completion_count = Arc::new(AtomicUsize::new(0));
-        
+
         for handler in matching_handlers {
             let envelope = envelope.clone();
             let config = config.clone();
@@ -206,7 +206,7 @@ impl EventDispatcher {
             tokio::spawn(async move {
                 let _permit = permit;
                 let _ = Self::handle_with_retry(handler, envelope, &config).await;
-                
+
                 // Release backpressure slot when all handlers complete
                 let completed = count.fetch_add(1, Ordering::Relaxed) + 1;
                 if completed == handler_count {

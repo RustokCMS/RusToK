@@ -371,7 +371,6 @@ impl DomainEvent {
                 | Self::TagDetached { .. }
         )
     }
-
 }
 
 impl ValidateEvent for DomainEvent {
@@ -382,7 +381,11 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // CONTENT EVENTS
             // ════════════════════════════════════════════════════════════════
-            Self::NodeCreated { node_id, kind, author_id } => {
+            Self::NodeCreated {
+                node_id,
+                kind,
+                author_id,
+            } => {
                 validators::validate_not_nil_uuid("node_id", node_id)?;
                 validators::validate_not_empty("kind", kind)?;
                 validators::validate_max_length("kind", kind, 64)?;
@@ -402,7 +405,9 @@ impl ValidateEvent for DomainEvent {
                 validators::validate_max_length("locale", locale, 10)?;
                 Ok(())
             }
-            Self::NodePublished { node_id, kind } | Self::NodeUnpublished { node_id, kind } | Self::NodeDeleted { node_id, kind } => {
+            Self::NodePublished { node_id, kind }
+            | Self::NodeUnpublished { node_id, kind }
+            | Self::NodeDeleted { node_id, kind } => {
                 validators::validate_not_nil_uuid("node_id", node_id)?;
                 validators::validate_not_empty("kind", kind)?;
                 validators::validate_max_length("kind", kind, 64)?;
@@ -418,7 +423,9 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // CATEGORY EVENTS
             // ════════════════════════════════════════════════════════════════
-            Self::CategoryCreated { category_id } | Self::CategoryUpdated { category_id } | Self::CategoryDeleted { category_id } => {
+            Self::CategoryCreated { category_id }
+            | Self::CategoryUpdated { category_id }
+            | Self::CategoryDeleted { category_id } => {
                 validators::validate_not_nil_uuid("category_id", category_id)?;
                 Ok(())
             }
@@ -430,7 +437,16 @@ impl ValidateEvent for DomainEvent {
                 validators::validate_not_nil_uuid("tag_id", tag_id)?;
                 Ok(())
             }
-            Self::TagAttached { tag_id, target_type, target_id } | Self::TagDetached { tag_id, target_type, target_id } => {
+            Self::TagAttached {
+                tag_id,
+                target_type,
+                target_id,
+            }
+            | Self::TagDetached {
+                tag_id,
+                target_type,
+                target_id,
+            } => {
                 validators::validate_not_nil_uuid("tag_id", tag_id)?;
                 validators::validate_not_empty("target_type", target_type)?;
                 validators::validate_max_length("target_type", target_type, 64)?;
@@ -441,7 +457,11 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // MEDIA EVENTS
             // ════════════════════════════════════════════════════════════════
-            Self::MediaUploaded { media_id, mime_type, size } => {
+            Self::MediaUploaded {
+                media_id,
+                mime_type,
+                size,
+            } => {
                 validators::validate_not_nil_uuid("media_id", media_id)?;
                 validators::validate_not_empty("mime_type", mime_type)?;
                 validators::validate_max_length("mime_type", mime_type, 255)?;
@@ -475,7 +495,9 @@ impl ValidateEvent for DomainEvent {
                 }
                 Ok(())
             }
-            Self::UserLoggedIn { user_id } | Self::UserUpdated { user_id } | Self::UserDeleted { user_id } => {
+            Self::UserLoggedIn { user_id }
+            | Self::UserUpdated { user_id }
+            | Self::UserDeleted { user_id } => {
                 validators::validate_not_nil_uuid("user_id", user_id)?;
                 Ok(())
             }
@@ -483,9 +505,9 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // COMMERCE EVENTS - Products
             // ════════════════════════════════════════════════════════════════
-            Self::ProductCreated { product_id } 
-            | Self::ProductUpdated { product_id } 
-            | Self::ProductPublished { product_id } 
+            Self::ProductCreated { product_id }
+            | Self::ProductUpdated { product_id }
+            | Self::ProductPublished { product_id }
             | Self::ProductDeleted { product_id } => {
                 validators::validate_not_nil_uuid("product_id", product_id)?;
                 Ok(())
@@ -494,9 +516,18 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // COMMERCE EVENTS - Variants
             // ════════════════════════════════════════════════════════════════
-            Self::VariantCreated { variant_id, product_id } 
-            | Self::VariantUpdated { variant_id, product_id } 
-            | Self::VariantDeleted { variant_id, product_id } => {
+            Self::VariantCreated {
+                variant_id,
+                product_id,
+            }
+            | Self::VariantUpdated {
+                variant_id,
+                product_id,
+            }
+            | Self::VariantDeleted {
+                variant_id,
+                product_id,
+            } => {
                 validators::validate_not_nil_uuid("variant_id", variant_id)?;
                 validators::validate_not_nil_uuid("product_id", product_id)?;
                 Ok(())
@@ -505,7 +536,13 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // COMMERCE EVENTS - Inventory
             // ════════════════════════════════════════════════════════════════
-            Self::InventoryUpdated { variant_id, product_id, location_id, old_quantity, new_quantity } => {
+            Self::InventoryUpdated {
+                variant_id,
+                product_id,
+                location_id,
+                old_quantity,
+                new_quantity,
+            } => {
                 validators::validate_not_nil_uuid("variant_id", variant_id)?;
                 validators::validate_not_nil_uuid("product_id", product_id)?;
                 validators::validate_not_nil_uuid("location_id", location_id)?;
@@ -513,7 +550,12 @@ impl ValidateEvent for DomainEvent {
                 validators::validate_range("new_quantity", *new_quantity as i64, 0, i64::MAX)?;
                 Ok(())
             }
-            Self::InventoryLow { variant_id, product_id, remaining, threshold } => {
+            Self::InventoryLow {
+                variant_id,
+                product_id,
+                remaining,
+                threshold,
+            } => {
                 validators::validate_not_nil_uuid("variant_id", variant_id)?;
                 validators::validate_not_nil_uuid("product_id", product_id)?;
                 validators::validate_range("remaining", *remaining as i64, 0, i64::MAX)?;
@@ -530,7 +572,13 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // COMMERCE EVENTS - Pricing
             // ════════════════════════════════════════════════════════════════
-            Self::PriceUpdated { variant_id, product_id, currency, old_amount, new_amount } => {
+            Self::PriceUpdated {
+                variant_id,
+                product_id,
+                currency,
+                old_amount,
+                new_amount,
+            } => {
                 validators::validate_not_nil_uuid("variant_id", variant_id)?;
                 validators::validate_not_nil_uuid("product_id", product_id)?;
                 validators::validate_currency_code("currency", currency)?;
@@ -544,14 +592,23 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // COMMERCE EVENTS - Orders
             // ════════════════════════════════════════════════════════════════
-            Self::OrderPlaced { order_id, customer_id, total, currency } => {
+            Self::OrderPlaced {
+                order_id,
+                customer_id,
+                total,
+                currency,
+            } => {
                 validators::validate_not_nil_uuid("order_id", order_id)?;
                 validators::validate_optional_uuid("customer_id", customer_id)?;
                 validators::validate_range("total", *total, 0, i64::MAX)?;
                 validators::validate_currency_code("currency", currency)?;
                 Ok(())
             }
-            Self::OrderStatusChanged { order_id, old_status, new_status } => {
+            Self::OrderStatusChanged {
+                order_id,
+                old_status,
+                new_status,
+            } => {
                 validators::validate_not_nil_uuid("order_id", order_id)?;
                 validators::validate_not_empty("old_status", old_status)?;
                 validators::validate_max_length("old_status", old_status, 50)?;
@@ -580,13 +637,19 @@ impl ValidateEvent for DomainEvent {
             // ════════════════════════════════════════════════════════════════
             // INDEX EVENTS
             // ════════════════════════════════════════════════════════════════
-            Self::ReindexRequested { target_type, target_id } => {
+            Self::ReindexRequested {
+                target_type,
+                target_id,
+            } => {
                 validators::validate_not_empty("target_type", target_type)?;
                 validators::validate_max_length("target_type", target_type, 64)?;
                 validators::validate_optional_uuid("target_id", target_id)?;
                 Ok(())
             }
-            Self::IndexUpdated { index_name, target_id } => {
+            Self::IndexUpdated {
+                index_name,
+                target_id,
+            } => {
                 validators::validate_not_empty("index_name", index_name)?;
                 validators::validate_max_length("index_name", index_name, 64)?;
                 validators::validate_not_nil_uuid("target_id", target_id)?;
@@ -600,7 +663,8 @@ impl ValidateEvent for DomainEvent {
                 validators::validate_not_nil_uuid("tenant_id", tenant_id)?;
                 Ok(())
             }
-            Self::LocaleEnabled { tenant_id, locale } | Self::LocaleDisabled { tenant_id, locale } => {
+            Self::LocaleEnabled { tenant_id, locale }
+            | Self::LocaleDisabled { tenant_id, locale } => {
                 validators::validate_not_nil_uuid("tenant_id", tenant_id)?;
                 validators::validate_not_empty("locale", locale)?;
                 validators::validate_max_length("locale", locale, 10)?;

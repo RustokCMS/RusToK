@@ -2,10 +2,12 @@
 // These tests verify inventory management, stock tracking,
 // low stock alerts, and availability checks.
 
-use rustok_commerce::dto::{AdjustInventoryInput, CreateProductInput, ProductTranslationInput, ProductVariantInput};
+use rustok_commerce::dto::{
+    AdjustInventoryInput, CreateProductInput, ProductTranslationInput, ProductVariantInput,
+};
 use rustok_commerce::services::{CatalogService, InventoryService};
 use rustok_commerce::CommerceError;
-use rustok_test_utils::{db::setup_test_db, mock_transactional_event_bus, helpers::unique_slug};
+use rustok_test_utils::{db::setup_test_db, helpers::unique_slug, mock_transactional_event_bus};
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
@@ -26,7 +28,10 @@ async fn create_test_product(catalog: &CatalogService, tenant_id: Uuid) -> (Uuid
             handle: Some(unique_slug("test-product")),
         }],
         variants: vec![ProductVariantInput {
-            sku: format!("SKU-{}", Uuid::new_v4().to_string().split('-').next().unwrap()),
+            sku: format!(
+                "SKU-{}",
+                Uuid::new_v4().to_string().split('-').next().unwrap()
+            ),
             title: Some("Default".to_string()),
             price: 99.99,
             compare_at_price: None,
@@ -43,7 +48,10 @@ async fn create_test_product(catalog: &CatalogService, tenant_id: Uuid) -> (Uuid
         metadata: serde_json::json!({}),
     };
 
-    let product = catalog.create_product(tenant_id, Uuid::new_v4(), input).await.unwrap();
+    let product = catalog
+        .create_product(tenant_id, Uuid::new_v4(), input)
+        .await
+        .unwrap();
     let variant_id = product.variants[0].id;
     (product.id, variant_id)
 }
@@ -79,7 +87,10 @@ async fn test_adjust_inventory_decrease() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 20).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 20)
+        .await
+        .unwrap();
 
     let input = AdjustInventoryInput {
         variant_id,
@@ -101,14 +112,20 @@ async fn test_adjust_inventory_multiple_adjustments() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 10).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 10)
+        .await
+        .unwrap();
 
     let input1 = AdjustInventoryInput {
         variant_id,
         adjustment: 5,
         reason: Some("Restock".to_string()),
     };
-    let qty1 = service.adjust_inventory(tenant_id, actor_id, input1).await.unwrap();
+    let qty1 = service
+        .adjust_inventory(tenant_id, actor_id, input1)
+        .await
+        .unwrap();
     assert_eq!(qty1, 15);
 
     let input2 = AdjustInventoryInput {
@@ -116,7 +133,10 @@ async fn test_adjust_inventory_multiple_adjustments() {
         adjustment: -3,
         reason: Some("Sold".to_string()),
     };
-    let qty2 = service.adjust_inventory(tenant_id, actor_id, input2).await.unwrap();
+    let qty2 = service
+        .adjust_inventory(tenant_id, actor_id, input2)
+        .await
+        .unwrap();
     assert_eq!(qty2, 12);
 
     let input3 = AdjustInventoryInput {
@@ -124,7 +144,10 @@ async fn test_adjust_inventory_multiple_adjustments() {
         adjustment: 8,
         reason: Some("Restock".to_string()),
     };
-    let qty3 = service.adjust_inventory(tenant_id, actor_id, input3).await.unwrap();
+    let qty3 = service
+        .adjust_inventory(tenant_id, actor_id, input3)
+        .await
+        .unwrap();
     assert_eq!(qty3, 20);
 }
 
@@ -161,7 +184,9 @@ async fn test_set_inventory_success() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    let result = service.set_inventory(tenant_id, actor_id, variant_id, 50).await;
+    let result = service
+        .set_inventory(tenant_id, actor_id, variant_id, 50)
+        .await;
 
     assert!(result.is_ok());
     let quantity = result.unwrap();
@@ -175,7 +200,9 @@ async fn test_set_inventory_zero() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    let result = service.set_inventory(tenant_id, actor_id, variant_id, 0).await;
+    let result = service
+        .set_inventory(tenant_id, actor_id, variant_id, 0)
+        .await;
 
     assert!(result.is_ok());
     let quantity = result.unwrap();
@@ -189,8 +216,13 @@ async fn test_set_inventory_overwrite() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 100).await.unwrap();
-    let result = service.set_inventory(tenant_id, actor_id, variant_id, 25).await;
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 100)
+        .await
+        .unwrap();
+    let result = service
+        .set_inventory(tenant_id, actor_id, variant_id, 25)
+        .await;
 
     assert!(result.is_ok());
     let quantity = result.unwrap();
@@ -204,7 +236,9 @@ async fn test_set_inventory_large_quantity() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    let result = service.set_inventory(tenant_id, actor_id, variant_id, 10000).await;
+    let result = service
+        .set_inventory(tenant_id, actor_id, variant_id, 10000)
+        .await;
 
     assert!(result.is_ok());
     let quantity = result.unwrap();
@@ -218,7 +252,9 @@ async fn test_set_inventory_nonexistent_variant() {
     let actor_id = Uuid::new_v4();
     let fake_variant_id = Uuid::new_v4();
 
-    let result = service.set_inventory(tenant_id, actor_id, fake_variant_id, 50).await;
+    let result = service
+        .set_inventory(tenant_id, actor_id, fake_variant_id, 50)
+        .await;
 
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -238,7 +274,10 @@ async fn test_low_stock_threshold_default() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 10).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 10)
+        .await
+        .unwrap();
 
     let input = AdjustInventoryInput {
         variant_id,
@@ -261,10 +300,13 @@ async fn test_custom_threshold() {
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
     let (event_bus, _rx) = mock_event_bus();
-    let service_with_custom_threshold = InventoryService::new(db.clone(), event_bus)
-        .with_threshold(10);
+    let service_with_custom_threshold =
+        InventoryService::new(db.clone(), event_bus).with_threshold(10);
 
-    service_with_custom_threshold.set_inventory(tenant_id, actor_id, variant_id, 12).await.unwrap();
+    service_with_custom_threshold
+        .set_inventory(tenant_id, actor_id, variant_id, 12)
+        .await
+        .unwrap();
 
     let input = AdjustInventoryInput {
         variant_id,
@@ -272,7 +314,9 @@ async fn test_custom_threshold() {
         reason: Some("Sale".to_string()),
     };
 
-    let result = service_with_custom_threshold.adjust_inventory(tenant_id, actor_id, input).await;
+    let result = service_with_custom_threshold
+        .adjust_inventory(tenant_id, actor_id, input)
+        .await;
 
     assert!(result.is_ok());
     let quantity = result.unwrap();
@@ -290,7 +334,10 @@ async fn test_check_availability_sufficient_stock() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 20).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 20)
+        .await
+        .unwrap();
 
     let result = service.check_availability(tenant_id, variant_id, 10).await;
 
@@ -306,7 +353,10 @@ async fn test_check_availability_insufficient_stock() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 5).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 5)
+        .await
+        .unwrap();
 
     let result = service.check_availability(tenant_id, variant_id, 10).await;
 
@@ -322,7 +372,10 @@ async fn test_check_availability_exact_stock() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 10).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 10)
+        .await
+        .unwrap();
 
     let result = service.check_availability(tenant_id, variant_id, 10).await;
 
@@ -338,7 +391,10 @@ async fn test_check_availability_zero_stock() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 0).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 0)
+        .await
+        .unwrap();
 
     let result = service.check_availability(tenant_id, variant_id, 1).await;
 
@@ -353,7 +409,9 @@ async fn test_check_availability_nonexistent_variant() {
     let tenant_id = Uuid::new_v4();
     let fake_variant_id = Uuid::new_v4();
 
-    let result = service.check_availability(tenant_id, fake_variant_id, 5).await;
+    let result = service
+        .check_availability(tenant_id, fake_variant_id, 5)
+        .await;
 
     assert!(result.is_err());
     match result.unwrap_err() {
@@ -373,7 +431,10 @@ async fn test_reserve_sufficient_stock() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 20).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 20)
+        .await
+        .unwrap();
 
     let result = service.reserve(tenant_id, variant_id, 10).await;
 
@@ -387,13 +448,19 @@ async fn test_reserve_insufficient_stock() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 5).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 5)
+        .await
+        .unwrap();
 
     let result = service.reserve(tenant_id, variant_id, 10).await;
 
     assert!(result.is_err());
     match result.unwrap_err() {
-        CommerceError::InsufficientInventory { requested, available } => {
+        CommerceError::InsufficientInventory {
+            requested,
+            available,
+        } => {
             assert_eq!(requested, 10);
             assert_eq!(available, 5);
         }
@@ -408,7 +475,10 @@ async fn test_reserve_exact_stock() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 10).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 10)
+        .await
+        .unwrap();
 
     let result = service.reserve(tenant_id, variant_id, 10).await;
 
@@ -422,7 +492,10 @@ async fn test_reserve_zero_quantity() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 10).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 10)
+        .await
+        .unwrap();
 
     let result = service.reserve(tenant_id, variant_id, 0).await;
 
@@ -451,9 +524,15 @@ async fn test_inventory_workflow() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 100).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 100)
+        .await
+        .unwrap();
 
-    let available = service.check_availability(tenant_id, variant_id, 10).await.unwrap();
+    let available = service
+        .check_availability(tenant_id, variant_id, 10)
+        .await
+        .unwrap();
     assert!(available);
 
     service.reserve(tenant_id, variant_id, 10).await.unwrap();
@@ -463,10 +542,16 @@ async fn test_inventory_workflow() {
         adjustment: -10,
         reason: Some("Order fulfilled".to_string()),
     };
-    let qty = service.adjust_inventory(tenant_id, actor_id, input).await.unwrap();
+    let qty = service
+        .adjust_inventory(tenant_id, actor_id, input)
+        .await
+        .unwrap();
     assert_eq!(qty, 90);
 
-    let available2 = service.check_availability(tenant_id, variant_id, 95).await.unwrap();
+    let available2 = service
+        .check_availability(tenant_id, variant_id, 95)
+        .await
+        .unwrap();
     assert!(!available2);
 }
 
@@ -477,7 +562,10 @@ async fn test_concurrent_inventory_adjustments() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 50).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 50)
+        .await
+        .unwrap();
 
     let input1 = AdjustInventoryInput {
         variant_id,
@@ -495,9 +583,18 @@ async fn test_concurrent_inventory_adjustments() {
         reason: Some("Order 3".to_string()),
     };
 
-    service.adjust_inventory(tenant_id, actor_id, input1).await.unwrap();
-    service.adjust_inventory(tenant_id, actor_id, input2).await.unwrap();
-    let final_qty = service.adjust_inventory(tenant_id, actor_id, input3).await.unwrap();
+    service
+        .adjust_inventory(tenant_id, actor_id, input1)
+        .await
+        .unwrap();
+    service
+        .adjust_inventory(tenant_id, actor_id, input2)
+        .await
+        .unwrap();
+    let final_qty = service
+        .adjust_inventory(tenant_id, actor_id, input3)
+        .await
+        .unwrap();
 
     assert_eq!(final_qty, 35);
 }
@@ -509,7 +606,10 @@ async fn test_negative_adjustment_to_zero() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 10).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 10)
+        .await
+        .unwrap();
 
     let input = AdjustInventoryInput {
         variant_id,
@@ -531,7 +631,10 @@ async fn test_large_inventory_quantities() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 1000000).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 1000000)
+        .await
+        .unwrap();
 
     let input = AdjustInventoryInput {
         variant_id,
@@ -553,7 +656,10 @@ async fn test_inventory_boundary_at_threshold() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    service.set_inventory(tenant_id, actor_id, variant_id, 6).await.unwrap();
+    service
+        .set_inventory(tenant_id, actor_id, variant_id, 6)
+        .await
+        .unwrap();
 
     let input = AdjustInventoryInput {
         variant_id,

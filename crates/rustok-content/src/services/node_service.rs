@@ -43,7 +43,7 @@ impl NodeService {
         mut input: CreateNodeInput,
     ) -> ContentResult<NodeResponse> {
         info!("Creating node");
-        
+
         // Scope Enforcement
         let resource = Self::kind_to_resource(&input.kind);
         let scope = security.get_scope(resource, Action::Create);
@@ -76,7 +76,11 @@ impl NodeService {
             ));
         }
 
-        debug!(translations_count = input.translations.len(), bodies_count = input.bodies.len(), "Starting transaction");
+        debug!(
+            translations_count = input.translations.len(),
+            bodies_count = input.bodies.len(),
+            "Starting transaction"
+        );
         let txn = self.db.begin().await?;
 
         let node_model = node::ActiveModel {
@@ -526,7 +530,11 @@ impl NodeService {
         security: SecurityContext,
         mut filter: ListNodesFilter,
     ) -> ContentResult<(Vec<NodeListItem>, u64)> {
-        debug!(page = filter.page, per_page = filter.per_page, "Listing nodes");
+        debug!(
+            page = filter.page,
+            per_page = filter.per_page,
+            "Listing nodes"
+        );
         // Scope Enforcement for List
         // We assume 'kind' is provided or we use a generic Resource::Posts if not.
         let resource = filter

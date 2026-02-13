@@ -1,7 +1,8 @@
 use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set, TransactionTrait,
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,
+    TransactionTrait,
 };
 use tracing::instrument;
 use uuid::Uuid;
@@ -34,7 +35,7 @@ impl PricingService {
         compare_at_amount: Option<Decimal>,
     ) -> CommerceResult<()> {
         let txn = self.db.begin().await?;
-        
+
         let variant = entities::product_variant::Entity::find_by_id(variant_id)
             .filter(entities::product_variant::Column::TenantId.eq(tenant_id))
             .one(&txn)
@@ -92,7 +93,8 @@ impl PricingService {
             old_amount: old_cents,
             new_amount: new_cents,
         };
-        event.validate()
+        event
+            .validate()
             .map_err(|e| CommerceError::Validation(format!("Invalid price event: {}", e)))?;
 
         self.event_bus

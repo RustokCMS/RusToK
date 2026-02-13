@@ -82,7 +82,7 @@ mod redis_circuit_breaker_tests {
         .unwrap();
 
         let breaker = cache.circuit_breaker();
-        
+
         // Initially closed
         use crate::circuit_breaker::State;
         let state = breaker.get_state();

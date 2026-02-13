@@ -139,7 +139,6 @@
 /// - Context addition: ~50ns per field
 /// - JSON serialization: ~1-2μs
 /// - Zero cost when not used (Result<T, E> is optimized)
-
 pub mod context;
 pub mod response;
 
@@ -199,7 +198,7 @@ impl From<Error> for RichError {
             Error::Validation(_) => ErrorKind::Validation,
             Error::External(_) => ErrorKind::ExternalService,
         };
-        
+
         RichError::new(kind, err.to_string())
     }
 }
@@ -207,12 +206,12 @@ impl From<Error> for RichError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_error_to_rich_error_conversion() {
         let err = Error::NotFound("User".to_string());
         let rich: RichError = err.into();
-        
+
         assert_eq!(rich.kind, ErrorKind::NotFound);
         assert_eq!(rich.status_code, 404);
     }

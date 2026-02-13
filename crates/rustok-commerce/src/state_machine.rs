@@ -56,7 +56,6 @@
 /// // Invalid: Pending -> Shipped (compile error!)
 /// // let order = order.ship(tracking); // ❌ method not available
 /// ```
-
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
@@ -122,7 +121,7 @@ pub struct Order<S> {
     pub customer_id: Uuid,
     pub total_amount: Decimal,
     pub currency: String,
-    
+
     // State-specific data
     pub state: S,
 }
@@ -147,7 +146,7 @@ impl Order<Pending> {
             amount = %total_amount,
             "Order created in Pending state"
         );
-        
+
         Self {
             id,
             tenant_id,
@@ -172,16 +171,16 @@ impl Order<Pending> {
     pub fn confirm(self) -> Result<Order<Confirmed>, OrderError> {
         // Business rule: validate inventory (stubbed)
         let inventory_reserved = true;
-        
+
         if !inventory_reserved {
             return Err(OrderError::InsufficientInventory);
         }
-        
+
         tracing::info!(
             order_id = %self.id,
             "Order: Pending → Confirmed"
         );
-        
+
         Ok(Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -194,7 +193,7 @@ impl Order<Pending> {
             },
         })
     }
-    
+
     /// Cancel order (Pending → Cancelled)
     pub fn cancel(self, reason: String) -> Order<Cancelled> {
         tracing::info!(
@@ -202,7 +201,7 @@ impl Order<Pending> {
             reason = %reason,
             "Order: Pending → Cancelled"
         );
-        
+
         Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -233,13 +232,13 @@ impl Order<Confirmed> {
         if payment_id.is_empty() {
             return Err(OrderError::PaymentFailed("Empty payment ID".to_string()));
         }
-        
+
         tracing::info!(
             order_id = %self.id,
             payment_id = %payment_id,
             "Order: Confirmed → Paid"
         );
-        
+
         Ok(Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -253,7 +252,7 @@ impl Order<Confirmed> {
             },
         })
     }
-    
+
     /// Cancel confirmed order (Confirmed → Cancelled)
     ///
     /// Releases inventory reservation.
@@ -264,9 +263,9 @@ impl Order<Confirmed> {
             inventory_released = self.state.inventory_reserved,
             "Order: Confirmed → Cancelled"
         );
-        
+
         // Release inventory here
-        
+
         Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -296,14 +295,14 @@ impl Order<Paid> {
         if tracking_number.is_empty() {
             return Err(OrderError::InvalidTrackingNumber);
         }
-        
+
         tracing::info!(
             order_id = %self.id,
             tracking_number = %tracking_number,
             carrier = %carrier,
             "Order: Paid → Shipped"
         );
-        
+
         Ok(Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -317,24 +316,20 @@ impl Order<Paid> {
             },
         })
     }
-    
+
     /// Cancel paid order (Paid → Cancelled)
     ///
     /// Requires refund processing.
-    pub fn cancel_with_refund(
-        self,
-        reason: String,
-        refund_id: String,
-    ) -> Order<Cancelled> {
+    pub fn cancel_with_refund(self, reason: String, refund_id: String) -> Order<Cancelled> {
         tracing::info!(
             order_id = %self.id,
             reason = %reason,
             refund_id = %refund_id,
             "Order: Paid → Cancelled (with refund)"
         );
-        
+
         // Process refund here
-        
+
         Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -362,7 +357,7 @@ impl Order<Shipped> {
             has_signature = signature.is_some(),
             "Order: Shipped → Delivered"
         );
-        
+
         Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -375,7 +370,7 @@ impl Order<Shipped> {
             },
         }
     }
-    
+
     /// Get tracking info
     pub fn tracking_info(&self) -> (&str, &str) {
         (&self.state.tracking_number, &self.state.carrier)
@@ -390,13 +385,13 @@ impl Order<Shipped> {
 pub enum OrderError {
     #[error("Insufficient inventory")]
     InsufficientInventory,
-    
+
     #[error("Payment failed: {0}")]
     PaymentFailed(String),
-    
+
     #[error("Invalid tracking number")]
     InvalidTrackingNumber,
-    
+
     #[error("Invalid state transition")]
     InvalidTransition,
 }
@@ -409,15 +404,15 @@ impl<S> Order<S> {
     pub fn id(&self) -> Uuid {
         self.id
     }
-    
+
     pub fn tenant_id(&self) -> Uuid {
         self.tenant_id
     }
-    
+
     pub fn customer_id(&self) -> Uuid {
         self.customer_id
     }
-    
+
     pub fn total_amount(&self) -> Decimal {
         self.total_amount
     }
@@ -430,7 +425,7 @@ impl<S> Order<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     fn create_test_order() -> Order<Pending> {
         Order::new_pending(
             Uuid::new_v4(),
@@ -440,27 +435,27 @@ mod tests {
             "USD".to_string(),
         )
     }
-    
+
     #[test]
     fn test_pending_to_confirmed() {
         let order = create_test_order();
         let order = order.confirm().unwrap();
-        
+
         assert!(order.state.inventory_reserved);
     }
-    
+
     #[test]
     fn test_confirmed_to_paid() {
-        let order = create_test_order()
-            .confirm()
+        let order = create_test_order().confirm().unwrap();
+
+        let order = order
+            .pay("pay_123".to_string(), "credit_card".to_string())
             .unwrap();
-        
-        let order = order.pay("pay_123".to_string(), "credit_card".to_string()).unwrap();
-        
+
         assert_eq!(order.state.payment_id, "pay_123");
         assert_eq!(order.state.payment_method, "credit_card");
     }
-    
+
     #[test]
     fn test_paid_to_shipped() {
         let order = create_test_order()
@@ -468,13 +463,15 @@ mod tests {
             .unwrap()
             .pay("pay_123".to_string(), "credit_card".to_string())
             .unwrap();
-        
-        let order = order.ship("TRACK123".to_string(), "FedEx".to_string()).unwrap();
-        
+
+        let order = order
+            .ship("TRACK123".to_string(), "FedEx".to_string())
+            .unwrap();
+
         assert_eq!(order.state.tracking_number, "TRACK123");
         assert_eq!(order.state.carrier, "FedEx");
     }
-    
+
     #[test]
     fn test_shipped_to_delivered() {
         let order = create_test_order()
@@ -484,21 +481,21 @@ mod tests {
             .unwrap()
             .ship("TRACK123".to_string(), "FedEx".to_string())
             .unwrap();
-        
+
         let order = order.deliver(Some("John Doe".to_string()));
-        
+
         assert_eq!(order.state.signature, Some("John Doe".to_string()));
     }
-    
+
     #[test]
     fn test_pending_to_cancelled() {
         let order = create_test_order();
         let order = order.cancel("Customer request".to_string());
-        
+
         assert_eq!(order.state.reason, "Customer request");
         assert!(!order.state.refunded);
     }
-    
+
     #[test]
     fn test_paid_to_cancelled_with_refund() {
         let order = create_test_order()
@@ -506,37 +503,32 @@ mod tests {
             .unwrap()
             .pay("pay_123".to_string(), "credit_card".to_string())
             .unwrap();
-        
-        let order = order.cancel_with_refund(
-            "Out of stock".to_string(),
-            "ref_456".to_string(),
-        );
-        
+
+        let order = order.cancel_with_refund("Out of stock".to_string(), "ref_456".to_string());
+
         assert_eq!(order.state.reason, "Out of stock");
         assert!(order.state.refunded);
     }
-    
+
     #[test]
     fn test_empty_payment_id_error() {
-        let order = create_test_order()
-            .confirm()
-            .unwrap();
-        
+        let order = create_test_order().confirm().unwrap();
+
         let result = order.pay("".to_string(), "credit_card".to_string());
-        
+
         assert!(result.is_err());
         assert!(matches!(result.unwrap_err(), OrderError::PaymentFailed(_)));
     }
-    
+
     // Compile-time safety tests (these should NOT compile)
-    
+
     // #[test]
     // fn test_invalid_pending_to_shipped() {
     //     let order = create_test_order();
     //     // ❌ Compile error: no method `ship` on `Order<Pending>`
     //     let order = order.ship("TRACK123".to_string(), "FedEx".to_string());
     // }
-    
+
     // #[test]
     // fn test_invalid_confirmed_to_delivered() {
     //     let order = create_test_order().confirm().unwrap();

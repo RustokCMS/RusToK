@@ -278,7 +278,7 @@ mod tests {
     #[test]
     fn test_backpressure_normal_state() {
         let controller = BackpressureController::new(BackpressureConfig::new(100, 0.7, 0.9));
-        
+
         // Should be in Normal state initially
         assert_eq!(controller.state(), BackpressureState::Normal);
         assert_eq!(controller.current_depth(), 0);
@@ -287,11 +287,11 @@ mod tests {
     #[test]
     fn test_backpressure_acquire_and_release() {
         let controller = BackpressureController::new(BackpressureConfig::new(100, 0.7, 0.9));
-        
+
         // Acquire should succeed in normal state
         assert!(controller.try_acquire().is_ok());
         assert_eq!(controller.current_depth(), 1);
-        
+
         // Release should decrease depth
         controller.release();
         assert_eq!(controller.current_depth(), 0);
@@ -300,15 +300,15 @@ mod tests {
     #[test]
     fn test_backpressure_warning_state() {
         let controller = BackpressureController::new(BackpressureConfig::new(100, 0.7, 0.9));
-        
+
         // Fill to warning threshold (70 events)
         for _ in 0..70 {
             assert!(controller.try_acquire().is_ok());
         }
-        
+
         assert_eq!(controller.state(), BackpressureState::Warning);
         assert_eq!(controller.current_depth(), 70);
-        
+
         // Should still accept events in warning state
         assert!(controller.try_acquire().is_ok());
     }
@@ -316,14 +316,14 @@ mod tests {
     #[test]
     fn test_backpressure_critical_state() {
         let controller = BackpressureController::new(BackpressureConfig::new(100, 0.7, 0.9));
-        
+
         // Fill to critical threshold (90 events)
         for _ in 0..90 {
             assert!(controller.try_acquire().is_ok());
         }
-        
+
         assert_eq!(controller.state(), BackpressureState::Critical);
-        
+
         // Should reject events in critical state
         let result = controller.try_acquire();
         assert!(result.is_err());
@@ -336,12 +336,12 @@ mod tests {
     #[test]
     fn test_backpressure_metrics() {
         let controller = BackpressureController::new(BackpressureConfig::new(100, 0.7, 0.9));
-        
+
         // Accept some events
         for _ in 0..50 {
             let _ = controller.try_acquire();
         }
-        
+
         let metrics = controller.metrics();
         assert_eq!(metrics.current_depth, 50);
         assert_eq!(metrics.max_depth, 100);
@@ -353,17 +353,17 @@ mod tests {
     #[test]
     fn test_backpressure_rejection_metrics() {
         let controller = BackpressureController::new(BackpressureConfig::new(100, 0.7, 0.9));
-        
+
         // Fill to critical
         for _ in 0..90 {
             let _ = controller.try_acquire();
         }
-        
+
         // Try to add more (should reject)
         for _ in 0..10 {
             let _ = controller.try_acquire();
         }
-        
+
         let metrics = controller.metrics();
         assert_eq!(metrics.events_accepted, 90);
         assert_eq!(metrics.events_rejected, 10);
@@ -373,12 +373,12 @@ mod tests {
     #[test]
     fn test_backpressure_state_transitions() {
         let controller = BackpressureController::new(BackpressureConfig::new(100, 0.7, 0.9));
-        
+
         // Normal state
         assert_eq!(controller.state(), BackpressureState::Normal);
         assert!(!controller.state().is_degraded());
         assert!(!controller.state().is_critical());
-        
+
         // Transition to Warning
         for _ in 0..70 {
             let _ = controller.try_acquire();
@@ -386,7 +386,7 @@ mod tests {
         assert_eq!(controller.state(), BackpressureState::Warning);
         assert!(controller.state().is_degraded());
         assert!(!controller.state().is_critical());
-        
+
         // Transition to Critical
         for _ in 0..20 {
             let _ = controller.try_acquire();
@@ -394,13 +394,13 @@ mod tests {
         assert_eq!(controller.state(), BackpressureState::Critical);
         assert!(controller.state().is_degraded());
         assert!(controller.state().is_critical());
-        
+
         // Transition back to Warning
         for _ in 0..5 {
             controller.release();
         }
         assert_eq!(controller.state(), BackpressureState::Warning);
-        
+
         // Transition back to Normal
         for _ in 0..20 {
             controller.release();
@@ -416,9 +416,9 @@ mod tests {
         let controller = Arc::new(BackpressureController::new(BackpressureConfig::new(
             1000, 0.7, 0.9,
         )));
-        
+
         let mut handles = vec![];
-        
+
         // Spawn multiple threads trying to acquire
         for _ in 0..10 {
             let ctrl = Arc::clone(&controller);
@@ -428,11 +428,11 @@ mod tests {
                 }
             }));
         }
-        
+
         for handle in handles {
             handle.join().unwrap();
         }
-        
+
         let metrics = controller.metrics();
         // All 500 events should be accepted (below critical threshold)
         assert_eq!(metrics.events_accepted, 500);

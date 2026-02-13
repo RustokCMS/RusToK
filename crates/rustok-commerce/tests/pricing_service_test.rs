@@ -4,10 +4,12 @@
 
 use rust_decimal::Decimal;
 use rust_decimal_macros::dec;
-use rustok_commerce::dto::{CreateProductInput, PriceInput, ProductTranslationInput, ProductVariantInput};
+use rustok_commerce::dto::{
+    CreateProductInput, PriceInput, ProductTranslationInput, ProductVariantInput,
+};
 use rustok_commerce::services::{CatalogService, PricingService};
 use rustok_commerce::CommerceError;
-use rustok_test_utils::{db::setup_test_db, mock_transactional_event_bus, helpers::unique_slug};
+use rustok_test_utils::{db::setup_test_db, helpers::unique_slug, mock_transactional_event_bus};
 use sea_orm::DatabaseConnection;
 use uuid::Uuid;
 
@@ -28,7 +30,10 @@ async fn create_test_product(catalog: &CatalogService, tenant_id: Uuid) -> (Uuid
             handle: Some(unique_slug("test-product")),
         }],
         variants: vec![ProductVariantInput {
-            sku: format!("SKU-{}", Uuid::new_v4().to_string().split('-').next().unwrap()),
+            sku: format!(
+                "SKU-{}",
+                Uuid::new_v4().to_string().split('-').next().unwrap()
+            ),
             title: Some("Default".to_string()),
             price: 99.99,
             compare_at_price: None,
@@ -45,7 +50,10 @@ async fn create_test_product(catalog: &CatalogService, tenant_id: Uuid) -> (Uuid
         metadata: serde_json::json!({}),
     };
 
-    let product = catalog.create_product(tenant_id, Uuid::new_v4(), input).await.unwrap();
+    let product = catalog
+        .create_product(tenant_id, Uuid::new_v4(), input)
+        .await
+        .unwrap();
     let variant_id = product.variants[0].id;
     (product.id, variant_id)
 }
@@ -208,7 +216,14 @@ async fn test_set_price_nonexistent_variant() {
     let fake_variant_id = Uuid::new_v4();
 
     let result = service
-        .set_price(tenant_id, actor_id, fake_variant_id, "USD", dec!(99.99), None)
+        .set_price(
+            tenant_id,
+            actor_id,
+            fake_variant_id,
+            "USD",
+            dec!(99.99),
+            None,
+        )
         .await;
 
     assert!(result.is_err());
@@ -247,7 +262,9 @@ async fn test_set_prices_bulk() {
         },
     ];
 
-    let result = service.set_prices(tenant_id, actor_id, variant_id, prices).await;
+    let result = service
+        .set_prices(tenant_id, actor_id, variant_id, prices)
+        .await;
 
     assert!(result.is_ok());
 
@@ -267,7 +284,9 @@ async fn test_set_prices_empty_list() {
     let actor_id = Uuid::new_v4();
     let (_product_id, variant_id) = create_test_product(&catalog, tenant_id).await;
 
-    let result = service.set_prices(tenant_id, actor_id, variant_id, vec![]).await;
+    let result = service
+        .set_prices(tenant_id, actor_id, variant_id, vec![])
+        .await;
 
     assert!(result.is_ok());
 }

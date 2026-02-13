@@ -1,6 +1,7 @@
 use chrono::Utc;
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set, TransactionTrait,
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,
+    TransactionTrait,
 };
 use tracing::instrument;
 use uuid::Uuid;
@@ -40,7 +41,7 @@ impl InventoryService {
         input: AdjustInventoryInput,
     ) -> CommerceResult<i32> {
         let txn = self.db.begin().await?;
-        
+
         let variant = entities::product_variant::Entity::find_by_id(input.variant_id)
             .filter(entities::product_variant::Column::TenantId.eq(tenant_id))
             .one(&txn)
@@ -70,7 +71,8 @@ impl InventoryService {
             old_quantity,
             new_quantity,
         };
-        event.validate()
+        event
+            .validate()
             .map_err(|e| CommerceError::Validation(format!("Invalid inventory event: {}", e)))?;
 
         self.event_bus
@@ -85,9 +87,9 @@ impl InventoryService {
                 remaining: new_quantity,
                 threshold: self.low_stock_threshold,
             };
-            low_event
-                .validate()
-                .map_err(|e| CommerceError::Validation(format!("Invalid low inventory event: {}", e)))?;
+            low_event.validate().map_err(|e| {
+                CommerceError::Validation(format!("Invalid low inventory event: {}", e))
+            })?;
 
             self.event_bus
                 .publish_in_tx(&txn, tenant_id, Some(actor_id), low_event)
@@ -107,7 +109,7 @@ impl InventoryService {
         quantity: i32,
     ) -> CommerceResult<i32> {
         let txn = self.db.begin().await?;
-        
+
         let variant = entities::product_variant::Entity::find_by_id(variant_id)
             .filter(entities::product_variant::Column::TenantId.eq(tenant_id))
             .one(&txn)
@@ -129,7 +131,8 @@ impl InventoryService {
             old_quantity,
             new_quantity: quantity,
         };
-        event.validate()
+        event
+            .validate()
             .map_err(|e| CommerceError::Validation(format!("Invalid inventory event: {}", e)))?;
 
         self.event_bus
