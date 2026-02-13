@@ -39,7 +39,6 @@
 /// // Invalid: Draft -> Archived (compile error!)
 /// // let node = node.archive(); // ❌ method not available on Draft
 /// ```
-
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -84,7 +83,7 @@ pub struct ContentNode<S> {
     pub parent_id: Option<Uuid>,
     pub kind: String,
     pub category_id: Option<Uuid>,
-    
+
     // State-specific data
     pub state: S,
 }
@@ -95,14 +94,9 @@ pub struct ContentNode<S> {
 
 impl ContentNode<Draft> {
     /// Create a new content node in draft state
-    pub fn new_draft(
-        id: Uuid,
-        tenant_id: Uuid,
-        author_id: Option<Uuid>,
-        kind: String,
-    ) -> Self {
+    pub fn new_draft(id: Uuid, tenant_id: Uuid, author_id: Option<Uuid>, kind: String) -> Self {
         let now = Utc::now();
-        
+
         Self {
             id,
             tenant_id,
@@ -128,13 +122,13 @@ impl ContentNode<Draft> {
     /// This is the only valid transition from Draft state.
     pub fn publish(self) -> ContentNode<Published> {
         let published_at = Utc::now();
-        
+
         tracing::info!(
             node_id = %self.id,
             tenant_id = %self.tenant_id,
             "Content node: Draft → Published"
         );
-        
+
         ContentNode {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -148,7 +142,7 @@ impl ContentNode<Draft> {
             },
         }
     }
-    
+
     /// Update draft metadata
     pub fn update(mut self) -> Self {
         self.state.updated_at = Utc::now();
@@ -164,14 +158,14 @@ impl ContentNode<Published> {
     /// Archive published content (Published → Archived)
     pub fn archive(self, reason: String) -> ContentNode<Archived> {
         let archived_at = Utc::now();
-        
+
         tracing::info!(
             node_id = %self.id,
             tenant_id = %self.tenant_id,
             reason = %reason,
             "Content node: Published → Archived"
         );
-        
+
         ContentNode {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -185,7 +179,7 @@ impl ContentNode<Published> {
             },
         }
     }
-    
+
     /// Update published content
     pub fn update(mut self) -> Self {
         self.state.updated_at = Utc::now();
@@ -203,13 +197,13 @@ impl ContentNode<Archived> {
     /// Allows restoring archived content for editing.
     pub fn restore_to_draft(self) -> ContentNode<Draft> {
         let now = Utc::now();
-        
+
         tracing::info!(
             node_id = %self.id,
             tenant_id = %self.tenant_id,
             "Content node: Archived → Draft"
         );
-        
+
         ContentNode {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -234,18 +228,18 @@ impl<S> ContentNode<S> {
     pub fn id(&self) -> Uuid {
         self.id
     }
-    
+
     /// Get tenant ID
     pub fn tenant_id(&self) -> Uuid {
         self.tenant_id
     }
-    
+
     /// Set parent
     pub fn set_parent(mut self, parent_id: Uuid) -> Self {
         self.parent_id = Some(parent_id);
         self
     }
-    
+
     /// Set category
     pub fn set_category(mut self, category_id: Uuid) -> Self {
         self.category_id = Some(category_id);
@@ -287,26 +281,21 @@ impl ToContentStatus for ContentNode<Archived> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_new_draft() {
         let id = Uuid::new_v4();
         let tenant_id = Uuid::new_v4();
         let author_id = Some(Uuid::new_v4());
-        
-        let node = ContentNode::new_draft(
-            id,
-            tenant_id,
-            author_id,
-            "article".to_string(),
-        );
-        
+
+        let node = ContentNode::new_draft(id, tenant_id, author_id, "article".to_string());
+
         assert_eq!(node.id, id);
         assert_eq!(node.tenant_id, tenant_id);
         assert_eq!(node.author_id, author_id);
         assert_eq!(node.kind, "article");
     }
-    
+
     #[test]
     fn test_draft_to_published() {
         let node = ContentNode::new_draft(
@@ -315,13 +304,13 @@ mod tests {
             Some(Uuid::new_v4()),
             "article".to_string(),
         );
-        
+
         let node = node.publish();
-        
+
         assert!(node.state.published_at <= Utc::now());
         assert_eq!(node.to_status(), ContentStatus::Published);
     }
-    
+
     #[test]
     fn test_published_to_archived() {
         let node = ContentNode::new_draft(
@@ -329,15 +318,16 @@ mod tests {
             Uuid::new_v4(),
             Some(Uuid::new_v4()),
             "article".to_string(),
-        ).publish();
-        
+        )
+        .publish();
+
         let reason = "Content outdated".to_string();
         let node = node.archive(reason.clone());
-        
+
         assert_eq!(node.state.reason, reason);
         assert_eq!(node.to_status(), ContentStatus::Archived);
     }
-    
+
     #[test]
     fn test_archived_to_draft() {
         let node = ContentNode::new_draft(
@@ -349,10 +339,10 @@ mod tests {
         .publish()
         .archive("Test".to_string())
         .restore_to_draft();
-        
+
         assert_eq!(node.to_status(), ContentStatus::Draft);
     }
-    
+
     #[test]
     fn test_update_timestamps() {
         let node = ContentNode::new_draft(
@@ -361,24 +351,24 @@ mod tests {
             Some(Uuid::new_v4()),
             "article".to_string(),
         );
-        
+
         let created_at = node.state.created_at;
         std::thread::sleep(std::time::Duration::from_millis(10));
-        
+
         let node = node.update();
-        
+
         assert!(node.state.updated_at > created_at);
     }
-    
+
     // Compile-time safety tests (these should NOT compile if uncommented)
-    
+
     // #[test]
     // fn test_invalid_draft_to_archived() {
     //     let node = ContentNode::new_draft(/* ... */);
     //     // ❌ Compile error: no method `archive` on `ContentNode<Draft>`
     //     let node = node.archive("test".to_string());
     // }
-    
+
     // #[test]
     // fn test_invalid_archived_to_published() {
     //     let node = /* ... archived node ... */;
