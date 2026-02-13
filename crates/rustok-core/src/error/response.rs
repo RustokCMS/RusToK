@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use super::context::{ErrorKind, RichError};
+use super::context::RichError;
 
 /// Standardized error response for APIs
 #[derive(Debug, Clone, Serialize, Deserialize)]

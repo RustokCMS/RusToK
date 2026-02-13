@@ -1,10 +1,9 @@
-use std::sync::Arc;
 use std::time::Duration;
 
 use async_trait::async_trait;
 use moka::future::Cache;
 
-use crate::circuit_breaker::{CircuitBreaker, CircuitBreakerConfig, CircuitBreakerError};
+use crate::resilience::{CircuitBreaker, CircuitBreakerConfig, CircuitBreakerError};
 use crate::context::CacheBackend;
 use crate::Result;
 

@@ -54,9 +54,10 @@ impl SpanAttributes {
 /// let _guard = span.enter();
 /// // Your code here
 /// ```
-pub fn create_span(_span_name: &str, attrs: SpanAttributes) -> Span {
+pub fn create_span(span_name: &str, attrs: SpanAttributes) -> Span {
     let span = tracing::info_span!(
-        _span_name,
+        "rustok_operation",
+        span.name = span_name,
         module = %attrs.module,
         operation = %attrs.operation,
         tenant_id = tracing::field::Empty,

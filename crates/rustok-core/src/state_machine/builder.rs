@@ -1,7 +1,7 @@
 /// Builder pattern for state machines
 ///
 /// Provides a fluent API for constructing state machines with validation.
-use super::{State, TransitionGuard};
+use super::TransitionGuard;
 use std::marker::PhantomData;
 
 /// State machine builder

@@ -1,69 +1,40 @@
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-use rustok_core::registry::ModuleRegistry;
-
-#[derive(Clone)]
-pub struct McpState {
-    pub registry: ModuleRegistry,
-}
-
-#[derive(Debug, Serialize, JsonSchema)]
+/// Information about a RusToK module
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ModuleInfo {
+    /// Unique slug identifier for the module
     pub slug: String,
+    /// Human-readable name of the module
     pub name: String,
+    /// Description of the module's functionality
     pub description: String,
+    /// Version of the module
     pub version: String,
+    /// List of module dependencies
     pub dependencies: Vec<String>,
 }
 
-#[derive(Debug, Serialize, JsonSchema)]
+/// Response containing a list of modules
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ModuleListResponse {
+    /// List of available modules
     pub modules: Vec<ModuleInfo>,
 }
 
-#[rmcp::tool]
-pub async fn list_modules(state: &'static McpState) -> ModuleListResponse {
-    let modules = state
-        .registry
-        .list()
-        .into_iter()
-        .map(|module| ModuleInfo {
-            slug: module.slug().to_string(),
-            name: module.name().to_string(),
-            description: module.description().to_string(),
-            version: module.version().to_string(),
-            dependencies: module
-                .dependencies()
-                .iter()
-                .map(|dep| dep.to_string())
-                .collect(),
-        })
-        .collect();
-
-    ModuleListResponse { modules }
-}
-
-#[derive(Debug, Serialize, JsonSchema)]
-pub struct ModuleLookupResponse {
-    pub slug: String,
-    pub exists: bool,
-}
-
-#[derive(Debug, Serialize, JsonSchema)]
+/// Request to check if a module exists
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ModuleLookupRequest {
+    /// The slug of the module to look up
     pub slug: String,
 }
 
-#[rmcp::tool]
-pub async fn module_exists(
-    state: &'static McpState,
-    input: ModuleLookupRequest,
-) -> ModuleLookupResponse {
-    let exists = state.registry.contains(&input.slug);
-
-    ModuleLookupResponse {
-        slug: input.slug,
-        exists,
-    }
+/// Response indicating whether a module exists
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct ModuleLookupResponse {
+    /// The slug that was queried
+    pub slug: String,
+    /// Whether the module exists
+    pub exists: bool,
 }

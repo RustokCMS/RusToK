@@ -127,6 +127,19 @@ pub struct BackpressureController {
     critical_count: Arc<AtomicU64>,
 }
 
+impl std::fmt::Debug for BackpressureController {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BackpressureController")
+            .field("config", &self.config)
+            .field("current_depth", &self.current_depth.load(Ordering::Relaxed))
+            .field("events_accepted", &self.events_accepted.load(Ordering::Relaxed))
+            .field("events_rejected", &self.events_rejected.load(Ordering::Relaxed))
+            .field("warning_count", &self.warning_count.load(Ordering::Relaxed))
+            .field("critical_count", &self.critical_count.load(Ordering::Relaxed))
+            .finish()
+    }
+}
+
 impl BackpressureController {
     /// Creates a new backpressure controller with the given configuration
     pub fn new(config: BackpressureConfig) -> Self {
