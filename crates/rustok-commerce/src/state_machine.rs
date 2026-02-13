@@ -362,7 +362,7 @@ impl Order<Shipped> {
             has_signature = signature.is_some(),
             "Order: Shipped → Delivered"
         );
-        
+
         Order {
             id: self.id,
             tenant_id: self.tenant_id,
@@ -375,7 +375,7 @@ impl Order<Shipped> {
             },
         }
     }
-    
+
     /// Get tracking info
     pub fn tracking_info(&self) -> (&str, &str) {
         (&self.state.tracking_number, &self.state.carrier)
@@ -390,13 +390,13 @@ impl Order<Shipped> {
 pub enum OrderError {
     #[error("Insufficient inventory")]
     InsufficientInventory,
-    
+
     #[error("Payment failed: {0}")]
     PaymentFailed(String),
-    
+
     #[error("Invalid tracking number")]
     InvalidTrackingNumber,
-    
+
     #[error("Invalid state transition")]
     InvalidTransition,
 }
@@ -409,15 +409,15 @@ impl<S> Order<S> {
     pub fn id(&self) -> Uuid {
         self.id
     }
-    
+
     pub fn tenant_id(&self) -> Uuid {
         self.tenant_id
     }
-    
+
     pub fn customer_id(&self) -> Uuid {
         self.customer_id
     }
-    
+
     pub fn total_amount(&self) -> Decimal {
         self.total_amount
     }
