@@ -75,7 +75,9 @@ pub enum TenantValidationError {
     TooLong,
 
     /// Identifier contains invalid characters
-    #[error("Identifier contains invalid characters (only lowercase alphanumeric and hyphens allowed)")]
+    #[error(
+        "Identifier contains invalid characters (only lowercase alphanumeric and hyphens allowed)"
+    )]
     InvalidCharacters,
 
     /// Identifier is a reserved keyword
