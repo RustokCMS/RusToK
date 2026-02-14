@@ -60,7 +60,7 @@ impl InputValidator {
         let xss_patterns = vec![
             Regex::new(r"(?i)<script[^>]*>.*?</script>").unwrap(),
             Regex::new(r"(?i)javascript:").unwrap(),
-            Regex::new(r"(?i)on\w+\s*=\s*[\"']?[^\"']*[\"']?").unwrap(),
+            Regex::new(r#"(?i)on\w+\s*=\s*["']?[^"']*["']?"#).unwrap(),
             Regex::new(r"(?i)<\s*iframe").unwrap(),
             Regex::new(r"(?i)<\s*object").unwrap(),
             Regex::new(r"(?i)<\s*embed").unwrap(),
